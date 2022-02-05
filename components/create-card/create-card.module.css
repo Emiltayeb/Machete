@@ -1,0 +1,26 @@
+.create_form {
+  margin-block-start: var(--size-3);
+  background: var(--gray-2);
+  padding: var(--size-fluid-4);
+  position: relative;
+}
+
+.marker {
+  --markerSize: 25px;
+  background: var(--green-5);
+  color: white;
+  width: var(--markerSize);
+  height: var(--markerSize);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  cursor: pointer;
+  top: 5px;
+  transition: background 0.5s ease;
+  user-select: none;
+}
+.marker:hover {
+  background: white;
+  color: var(--green-5);
+}

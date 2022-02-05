@@ -1,17 +1,11 @@
 import type { NextPage } from 'next';
+import React from 'react';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { materialLight } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import reactStringReplacer from 'react-string-replace';
+import TrainingCard from '../components/training-card';
+import CreateCard from '../components/create-card';
 
-const codeString = `function(a:number){return user+ 2}`;
-
-const card = reactStringReplacer(codeString, 'user', (match, i) => (
-  <div className={styles.user_input}>
-    <input type='text' />
-  </div>
-));
+// user code
 
 const Home: NextPage = () => {
   return (
@@ -24,21 +18,10 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1>LearnEz POC</h1>
-
-        <div className={styles.card}>
-          {card.map((el, i) => {
-            if (typeof el === 'string')
-              return (
-                <SyntaxHighlighter
-                  key={i}
-                  customStyle={{ margin: 0 }}
-                  language='typescript'>
-                  {el}
-                </SyntaxHighlighter>
-              );
-            return el;
-          })}
-        </div>
+        <h3>Training card</h3>
+        <TrainingCard />
+        <h3>Create card</h3>
+        <CreateCard />
       </main>
 
       <footer className='footer'>

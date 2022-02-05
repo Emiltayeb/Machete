@@ -1,5 +1,4 @@
 .container {
-  --light-code-background: #f5f2f0;
   padding: 0 2rem;
 }
 
@@ -7,8 +6,18 @@
   height: 90vh;
 }
 
-.card {
-  display: flex;
+.container h1 {
+  margin-block-end: var(--size-8);
+}
+.card input {
+  border: 2px solid white;
+  outline: none;
+  color: white;
+  background-color: var(--blue-9);
+  max-width: 20%;
+}
+.card input::placeholder {
+  color: white;
 }
 
 .user_input {
