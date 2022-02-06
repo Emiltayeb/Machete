@@ -22,6 +22,7 @@ const CreateCard = () => {
   const cardFormRef = React.useRef<HTMLDivElement | null>(null);
   const textSelectedRef = React.useRef<string | null>('');
   const [cursorOffset, setCursorOffset] = React.useState(0);
+  const [cardHtml, setCardHtml] = React.useState('emil tayeb');
   const [showMarker, setShowMarker] = React.useState(false);
 
   // selection change
@@ -30,7 +31,7 @@ const CreateCard = () => {
     const selection = document.getSelection()!;
     if (!selection) return;
     // select only the div with editor id
-    if (selection!.anchorNode?.parentElement?.id != 'editor') return;
+    // if (selection!.anchorNode?.parentElement?.id != 'editor') return;
     const textSelection = selection!.toString();
     const rangeStart = selection?.getRangeAt(0);
     const cursorDirection = getSelectionDirection(selection);
@@ -51,7 +52,15 @@ const CreateCard = () => {
     e.stopPropagation();
     e.preventDefault();
     // use react-string replacer and replace the current html with span warper as selection
-    textSelectedRef.current = null;
+    if (!textSelectedRef.current) return;
+
+    const newHTML = reactStringReplace(
+      cardHtml,
+      textSelectedRef.current,
+      () => <span className={styles.marked_text}>replaced</span>
+    );
+    if (!cardHtml) return;
+    setCardHtml(newHTML);
     setShowMarker(false);
   };
 
@@ -60,7 +69,7 @@ const CreateCard = () => {
     document.addEventListener('selectionchange', onSelectionChanged);
     // clear selection when out of focus
     cardFormRef.current.addEventListener('focusout', function () {
-      setShowMarker(false);
+      // setShowMarker(false);
     });
     return () => {
       document.removeEventListener('selectionchange', onSelectionChanged);
@@ -76,7 +85,9 @@ const CreateCard = () => {
         role='textbox'
         ref={cardFormRef}
         className={styles.create_form}
-        suppressContentEditableWarning></div>
+        suppressContentEditableWarning>
+        {cardHtml}
+      </div>
 
       {showMarker && (
         <button

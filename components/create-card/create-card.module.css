@@ -24,3 +24,8 @@
   background: white;
   color: var(--green-5);
 }
+
+.marked_text {
+  background: var(--blue-8);
+  color: white;
+}
