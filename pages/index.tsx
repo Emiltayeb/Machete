@@ -3,7 +3,7 @@ import React from 'react';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import TrainingCard from '../components/training-card';
-import CreateCard from '../components/create-card';
+import Editor from "../components/editor"
 
 // user code
 
@@ -17,11 +17,8 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1>LearnEz POC</h1>
-        <h3>Training card</h3>
-        <TrainingCard />
         <h3>Create card</h3>
-        <CreateCard />
+        <Editor mode='editing' />
       </main>
 
       <footer className='footer'>

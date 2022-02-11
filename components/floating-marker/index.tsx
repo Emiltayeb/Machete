@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
 
-export interface IFloatingMenu {
+export interface MarkerProps {
   markerState: {
     directions: DOMRect;
     offset: number;
@@ -11,7 +11,7 @@ export interface IFloatingMenu {
   onMarkerClick: any;
 }
 
-const StyledFloatingMenu = styled.div<IFloatingMenu | any>`
+const StyledFloatingMenu = styled.div<MarkerProps | any>`
   position: absolute;
   top: ${({ position }) =>
     position ? position.bottom + window.pageYOffset + 4 : -10000}px;
@@ -37,10 +37,7 @@ const StyledFloatingMenu = styled.div<IFloatingMenu | any>`
     }
   }
 `;
-export const FloatingMenu: React.FC<IFloatingMenu> = ({
-  markerState,
-  onMarkerClick,
-}) => {
+const Marker: React.FC<MarkerProps> = ({ markerState, onMarkerClick }) => {
   return ReactDOM.createPortal(
     <StyledFloatingMenu
       data-editor-marker='true'
@@ -54,3 +51,5 @@ export const FloatingMenu: React.FC<IFloatingMenu> = ({
     document.body
   );
 };
+
+export default Marker;
