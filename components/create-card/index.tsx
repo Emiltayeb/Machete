@@ -1,10 +1,43 @@
-import type { NextPage } from 'next';
 import React from 'react';
-import { renderToString } from 'react-dom/server';
-import reactStringReplace from 'react-string-replace';
 import styles from './create-card.module.css';
+import {
+  createEditor,
+  BaseEditor,
+  Transforms,
+  Text,
+  Range,
+  Editor,
+} from 'slate';
+import { Editable, ReactEditor, Slate, useSlate, withReact } from 'slate-react';
+import { FloatingMenu } from '../floating-marker';
+import { DOMRange } from 'slate-react/dist/utils/dom';
 
-const getSelectionDirection = function (selection: any) {
+type CustomElement = { type: any; children: any };
+type CustomText = { text: any };
+declare module 'slate' {
+  interface CustomTypes {
+    Editor: BaseEditor & ReactEditor;
+    Element: CustomElement;
+    Text: CustomText;
+  }
+}
+
+// custom elements
+const Leaf = (props: any) => {
+  return (
+    <span {...props.attributes} data-selected={props.leaf.selected}>
+      {props.children}
+    </span>
+  );
+};
+
+const DefaultElement = (props: any) => {
+  return <span {...props.attributes}>{props.children}</span>;
+};
+
+// Helpers
+
+const getOffset = function (selection: any) {
   let position = selection.anchorNode.compareDocumentPosition(
       selection.focusNode
     ),
@@ -16,89 +49,190 @@ const getSelectionDirection = function (selection: any) {
   )
     backward = true;
 
-  return backward;
+  const offset = !backward
+    ? selection.focusOffset - selection.anchorOffset
+    : selection.anchorOffset - selection.focusOffset;
+  return offset;
 };
+
+// Main
 const CreateCard = () => {
-  const cardFormRef = React.useRef<HTMLDivElement | null>(null);
-  const textSelectedRef = React.useRef<string | null>('');
-  const [cursorOffset, setCursorOffset] = React.useState(0);
-  const [cardHtml, setCardHtml] = React.useState('emil tayeb');
-  const [showMarker, setShowMarker] = React.useState(false);
+  const [editor] = React.useState(() => withReact(createEditor()));
+  const [markerState, setMarkerState] = React.useState<{
+    directions: DOMRect;
+    offset: number;
+    functionality?: 'add' | 'remove';
+    node?: any;
+  } | null>(null);
+  const [currentWordRange, setCurrentWordRange] = React.useState<
+    (Range & { word: string | undefined }) | null
+  >(null);
+  const rangeRef = React.useRef<null | DOMRange>(null);
+
+  const [value, setValue] = React.useState([
+    {
+      type: 'paragraph',
+      children: [{ text: 'A line of text in a paragraph.' }],
+    },
+  ]);
+
+  // removing the marker when we click outside of the slat eeditor
+  React.useEffect(() => {
+    rangeRef.current = document.createRange();
+    document.body.addEventListener(
+      'click',
+      (e) => {
+        if (!e.target) return;
+        const node = e.target as HTMLSpanElement;
+        const el = node.closest('div');
+        if (!el) return;
+        if (
+          el.dataset.slateEditor === 'true' ||
+          el.dataset.editorMarker === 'true'
+        )
+          return;
+        setMarkerState(null);
+      },
+      true
+    );
+
+    return;
+  }, []);
+
+  const handleInsertWord = (index?: number) => {
+    if (!currentWordRange) return;
+    Transforms.insertNodes(
+      editor,
+      { type: 'rememberThis', children: [{ text: currentWordRange.word }] },
+      {
+        at: currentWordRange,
+        voids: true,
+      }
+    );
+    setMarkerState(null);
+  };
 
   // selection change
-  const onSelectionChanged = (e: Event) => {
-    if (!document) return;
-    const selection = document.getSelection()!;
-    if (!selection) return;
-    // select only the div with editor id
-    // if (selection!.anchorNode?.parentElement?.id != 'editor') return;
-    const textSelection = selection!.toString();
-    const rangeStart = selection?.getRangeAt(0);
-    const cursorDirection = getSelectionDirection(selection);
-    setCursorOffset(
-      cursorDirection
-        ? rangeStart.startOffset
-        : (rangeStart?.endOffset as number)
-    );
-
-    textSelectedRef.current = textSelection;
-    setShowMarker(textSelection.length > 0);
-  };
-
-  // marker click
-  const onMarkerClick = function (
-    e: React.MouseEvent<HTMLSpanElement, MouseEvent>
-  ) {
-    e.stopPropagation();
+  const onSelectionChanged = (e: React.MouseEvent<any>) => {
     e.preventDefault();
-    // use react-string replacer and replace the current html with span warper as selection
-    if (!textSelectedRef.current) return;
 
-    const newHTML = reactStringReplace(
-      cardHtml,
-      textSelectedRef.current,
-      () => <span className={styles.marked_text}>replaced</span>
-    );
-    if (!cardHtml) return;
-    setCardHtml(newHTML);
-    setShowMarker(false);
+    // setting cursor position to open marker
+    const sel = window.getSelection();
+    const textSelected = sel?.toString();
+
+    const parent = sel?.anchorNode?.parentElement?.closest(`[data-selected]`);
+
+    if (!sel || sel.rangeCount === 0 || textSelected?.length < 2) {
+      setMarkerState(null);
+      return;
+    }
+
+    if (parent?.textContent === textSelected) {
+      // the user selected the exact same text. offer do delete?
+      console.log('delete?');
+    }
+
+    const offset = getOffset(sel);
+    const direction = sel.getRangeAt(0).getBoundingClientRect();
+    const range = sel.getRangeAt(0);
+
+    // if the user selection includes selected word - we soulhd merge it
+    if (
+      Array.from(range.cloneContents().childNodes).some((child) => {
+        if (child instanceof HTMLElement) {
+          return child.getAttribute('data-selected') === 'true';
+        }
+      })
+    ) {
+      console.log('included!');
+    }
+    if (!editor.selection?.anchor || !editor.selection.focus) return;
+    setCurrentWordRange({
+      anchor: {
+        path: editor.selection.anchor.path,
+        offset: sel.anchorOffset,
+      },
+      focus: {
+        path: editor.selection.focus.path,
+        offset: sel.focusOffset,
+      },
+      word: textSelected,
+    });
+
+    setMarkerState({ directions: direction, offset, functionality: 'add' });
   };
 
-  React.useEffect(() => {
-    if (!cardFormRef.current) return;
-    document.addEventListener('selectionchange', onSelectionChanged);
-    // clear selection when out of focus
-    cardFormRef.current.addEventListener('focusout', function () {
-      // setShowMarker(false);
+  //marker click
+  const onMarkerClick = function (e: React.MouseEvent<any>) {
+    e.nativeEvent.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    if (markerState?.functionality === 'add') {
+      handleInsertWord();
+    } else if (markerState?.functionality === 'remove') {
+      Transforms.removeNodes(editor);
+      Transforms.insertText(editor, markerState.node.textContent);
+      // Transforms.unwrapNodes(editor, { at: currentWordRange });
+    }
+    setMarkerState(null);
+  };
+
+  // remove selection
+  const handelRemoveSelection = function (
+    e: React.MouseEvent<HTMLSpanElement>
+  ) {
+    const node = e.target as HTMLElement;
+    setMarkerState({
+      directions: node.getBoundingClientRect(),
+      offset: 0,
+      functionality: 'remove',
+      node,
     });
-    return () => {
-      document.removeEventListener('selectionchange', onSelectionChanged);
-    };
-  }, [cardFormRef]);
+
+    rangeRef.current?.selectNode(node.lastChild);
+  };
+  const renderElement = React.useCallback((props) => {
+    switch (props.element.type) {
+      case 'rememberThis':
+        return (
+          <span
+            {...props.attributes}
+            onClick={handelRemoveSelection}
+            data-selected='true'
+            className={styles.marked_text}>
+            {props.children}
+          </span>
+        );
+
+      case 'training':
+        return <input type='text' name='' id='' {...props.attributes} />;
+      default:
+        return <DefaultElement {...props} />;
+    }
+  }, []);
+
+  const renderLeaf = React.useCallback((props) => {
+    console.log('rendering leaf..', props);
+    if (props.leaf.text.length === 0) return <></>;
+    return <Leaf {...props} />;
+  }, []);
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div
-        contentEditable
-        spellCheck={false}
-        id='editor'
-        role='textbox'
-        ref={cardFormRef}
-        className={styles.create_form}
-        suppressContentEditableWarning>
-        {cardHtml}
-      </div>
-
-      {showMarker && (
-        <button
-          onClick={onMarkerClick}
-          type='button'
-          style={{ left: cursorOffset * 10 - -10 }}
-          className={styles.marker}>
-          +
-        </button>
+    <>
+      <Slate
+        editor={editor}
+        value={value}
+        onChange={(newValue) => setValue(newValue as any)}>
+        <Editable
+          id='SLATE_EDITOR'
+          className={styles.editor}
+          onSelect={onSelectionChanged}
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}></Editable>
+      </Slate>
+      {markerState && (
+        <FloatingMenu onMarkerClick={onMarkerClick} markerState={markerState} />
       )}
-    </div>
+    </>
   );
 };
 
