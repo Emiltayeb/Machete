@@ -175,11 +175,7 @@ export const onMarkerClick = function (
 
     try {
       const path = ReactEditor.findPath(editor, found);
-      const findSeconds = ReactEditor.findPath(
-        editor,
-        markerState.node.textContent
-      );
-      console.log(findSeconds);
+
       Transforms.select(editor, path);
       editor.removeMark(Marks.MARKED_TEXT);
     } catch (error) {
