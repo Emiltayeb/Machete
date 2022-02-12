@@ -29,3 +29,15 @@ body {
   align-items: center;
   flex-grow: 1;
 }
+
+[data-slate-editor]{
+    background: var(--gray-2);
+  padding: var(--size-fluid-4);
+  position: relative;
+}
+
+mark.slate-highlight{
+    background-color: var(--blue-8);
+  color: white;
+  user-select: none;
+}
