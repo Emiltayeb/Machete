@@ -84,7 +84,6 @@ export const handleInsertWord = (
   editor: Editor,
   setMarkerState: any
 ) => {
-  console.log('handleInsertWord');
   if (!currentWordRange) return;
   Transforms.insertNodes(
     editor,
@@ -107,22 +106,22 @@ export const onSelectionChanged = (
   editor: Editor,
   setCurrentWordRange: React.Dispatch<React.SetStateAction<CurrentWordRange>>
 ) => {
-  console.log('onSelectionChanged');
   // setting cursor position to open marker
   const sel = window.getSelection();
   const textSelected = sel?.toString();
 
-  if (!sel || sel.rangeCount === 0 || !textSelected?.length) {
+  if (
+    !sel ||
+    sel.rangeCount === 0 ||
+    !textSelected ||
+    !textSelected.replace(/ /g, '')?.length
+  ) {
     setMarkerState(null);
     return;
   }
   const offset = getOffset(sel);
   const range = sel.getRangeAt(0);
   const direction = range.getBoundingClientRect();
-  // if the user selection includes selected word - we should merge it
-  if (isUserSelectionIncludeOtherSelection(range)) {
-    console.log('your selection includes another!');
-  }
 
   setMarkerState({
     directions: direction,
