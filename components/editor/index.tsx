@@ -1,28 +1,13 @@
 import React, { useCallback } from 'react';
-import classes from './editor.module.css';
-import {
-  BaseEditor,
-  createEditor,
-  Editor,
-  Node,
-  Transforms,
-  Descendant,
-} from 'slate';
-import {
-  Editable,
-  ReactEditor,
-  Slate,
-  useSelected,
-  withReact,
-} from 'slate-react';
+import classes from './editor.module.scss';
+import { BaseEditor, createEditor, Transforms, Descendant } from 'slate';
+import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import { DOMRange } from 'slate-react/dist/utils/dom';
 import Marker from '../floating-marker';
 import * as Types from './types';
 import * as Utils from './utils';
 import * as CustomComponents from './custom-components';
 import { withHistory } from 'slate-history';
-import { setegid } from 'process';
-import { Placeholder } from '@udecode/plate';
 
 interface EditorProps {
   mode: 'training' | 'editing';
@@ -58,7 +43,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
 
     // loading the value from whatever you want on initial load..
     setEditorValue(
-      JSON.parse(localStorage?.getItem('editorValue')) ||
+      JSON.parse(localStorage?.getItem('editorValue') as string) ||
         Utils.initialEditorValue
     );
   }, []);
@@ -69,7 +54,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
     setAllowTrain(
       editorRef.current?.querySelectorAll('[data-selected]').length > 0
     );
-    const { type, children } = editorValue?.[0];
+    const { type, children } = editorValue?.[0] as any;
 
     if (!children || children[0]?.text.length === 0) {
       localStorage.setItem(
@@ -86,7 +71,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
       Transforms.insertNodes(editor, [
         {
           type: 'p',
-          children: [{ text: editor.history.undos[0][0].text }],
+          children: [{ text: editor.history.undos[0][0]?.text }],
         },
       ]);
     }
@@ -112,7 +97,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
         return (
           <CustomComponents.RememberText
             {...props}
-            onClick={(e) =>
+            onClick={(e: any) =>
               Utils.handelRemoveSelection(e, setMarkerState, rangeRef)
             }
           />
@@ -177,7 +162,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
       </div>
     </div>
   ) : (
-    'loading..'
+    <p>Loading..</p>
   );
 };
 

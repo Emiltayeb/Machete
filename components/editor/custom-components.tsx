@@ -1,6 +1,6 @@
 import React from 'react';
-import { Transforms } from 'slate';
-import classes from './editor.module.css';
+import clsx from 'clsx';
+import classes from './editor.module.scss';
 export const Leaf = (props: any) => {
   return (
     <span {...props.attributes} data-selected={props.leaf.selected}>
@@ -30,16 +30,14 @@ export const TrainingInput = (props: any) => {
   };
 
   return (
-    <span {...props.attributes} onKeyPress={handelSubmit}>
+    <span
+      {...props.attributes}
+      onKeyPress={handelSubmit}
+      className={classes.training_card}>
       <span
         style={{ userSelect: 'none' }}
-        className={
-          answerStatus.answered
-            ? answerStatus.status
-              ? classes.correct_answer
-              : classes.incorrectAnswer
-            : ''
-        }
+        data-answered={answerStatus.answered}
+        data-correct={answerStatus.status}
         contentEditable={false}>
         {answerStatus.answered ? (
           <span>{props.leaf.text}</span>

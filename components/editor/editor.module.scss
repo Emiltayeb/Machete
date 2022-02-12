@@ -1,0 +1,69 @@
+.editor {
+  margin-block-start: var(--size-3);
+  background: var(--gray-2);
+  padding: var(--size-fluid-4);
+  position: relative;
+  font-size: var(--font-size-3);
+}
+
+.marked_text {
+  background: var(--blue-6);
+  color: white;
+  user-select: none;
+}
+
+.actions {
+  max-width: var(--size-fluid-10);
+  margin: 0 auto;
+  margin-block-start: var(--size-3);
+  display: flex;
+  gap: var(--shadow-3);
+  justify-content: space-around;
+}
+
+.actions {
+  button {
+    color: white;
+    padding-inline: var(--size-4);
+    transition: all 0.3s ease-in-out;
+    box-shadow: var(--shadow-3);
+    background-color: var(--blue-3);
+  }
+  button:hover {
+    background-color: white;
+    color: var(--blue-3);
+  }
+  button.active {
+    background-color: var(--blue-5);
+  }
+  button:disabled {
+    background-color: var(--gray-4);
+  }
+}
+
+.placeHolder {
+  color: var(--gray-4);
+}
+.train_input {
+  background-color: var(--blue-3);
+  color: white;
+  height: var(--size-4);
+  margin: var(--size-1);
+
+  &::placeholder {
+    color: white;
+  }
+}
+
+.training_card {
+  // if we answered the question
+  [data-answered='true'] {
+    &[data-correct='true'] {
+      background-color: var(--green-5);
+    }
+
+    &[data-correct='false'] {
+      background-color: var(--red-5);
+    }
+  }
+}
