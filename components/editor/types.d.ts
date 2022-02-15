@@ -7,4 +7,7 @@ export type MarkerState = {
   node?: any;
 } | null;
 
-export type CurrentWordRange = (Range & { word: string | undefined }) | null;
+export type CurrentWordRange = {
+  range: Range;
+  word: string | undefined;
+} | null;

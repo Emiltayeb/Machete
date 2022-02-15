@@ -1,6 +1,12 @@
 import React, { useCallback } from 'react';
 import classes from './editor.module.scss';
-import { BaseEditor, createEditor, Transforms, Descendant } from 'slate';
+import {
+  BaseEditor,
+  createEditor,
+  Transforms,
+  Descendant,
+  Editor,
+} from 'slate';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import { DOMRange } from 'slate-react/dist/utils/dom';
 import Marker from '../floating-marker';
@@ -17,8 +23,10 @@ declare module 'slate' {
     Editor: BaseEditor & ReactEditor;
     Element: Types.CustomElement;
     Text: Types.CustomText;
+    Descendant: Descendant & { type: string };
   }
 }
+console.clear();
 const SlateEditor: React.FC<EditorProps> = () => {
   const [editor] = React.useState(() => withHistory(withReact(createEditor())));
   const [markerState, setMarkerState] = React.useState<Types.MarkerState>(null);
@@ -30,6 +38,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
   const [editorValue, setEditorValue] = React.useState<null | Descendant[]>(
     null
   );
+
   const [mode, setMode] = React.useState<Utils.EditorMode>(
     Utils.EditorMode.ADD
   );
@@ -40,40 +49,40 @@ const SlateEditor: React.FC<EditorProps> = () => {
     document.body.addEventListener('click', (e) =>
       Utils.handelMarkerBlur(e, setMarkerState)
     );
-
     // loading the value from whatever you want on initial load..
-    setEditorValue(
-      JSON.parse(localStorage?.getItem('editorValue') as string) ||
-        Utils.initialEditorValue
-    );
+    try {
+      const dbStorage = JSON.parse(
+        localStorage?.getItem('editorValue') as string
+      );
+      if (!dbStorage) throw Error;
+      setEditorValue(dbStorage);
+    } catch (error) {
+      setEditorValue(Utils.placeHolerElement);
+    }
   }, []);
 
-  // save editor value to db, determin if we can be in training mode and set relevant placeholder logic
   React.useEffect(() => {
-    if (!editorValue || !editorRef.current) return;
+    if (!editorValue?.[0] || !editorRef.current) return;
+
+    // current element
+    const { children } = editorValue?.[0] as any;
+
+    // determine if we can be in training mod
     setAllowTrain(
       editorRef.current?.querySelectorAll('[data-selected]').length > 0
     );
-    const { type, children } = editorValue?.[0] as any;
+
+    if (children?.[0].text?.length === 0) {
+      //  console.log('you cant save..');
+    }
 
     if (!children || children[0]?.text.length === 0) {
+      // save editor value to db
       localStorage.setItem(
         'editorValue',
-        JSON.stringify(Utils.initialEditorValue)
+        JSON.stringify(Utils.placeHolerElement)
       );
-
       return;
-    }
-    // no changes were yet made
-    if (editor.history.undos.length === 0) return;
-    if (type === 'placeHolder') {
-      Transforms.removeNodes(editor);
-      Transforms.insertNodes(editor, [
-        {
-          type: 'p',
-          children: [{ text: editor.history.undos[0][0]?.text }],
-        },
-      ]);
     }
 
     localStorage.setItem('editorValue', JSON.stringify(editorValue));
@@ -113,20 +122,49 @@ const SlateEditor: React.FC<EditorProps> = () => {
       <Slate
         editor={editor}
         value={editorValue}
-        onChange={(newValue) => setEditorValue(newValue as any)}>
+        onChange={(newValue) => {
+          const children = editor.children[0];
+          if (children?.type === 'placeHolder') {
+            Transforms.select(editor, {
+              anchor: Editor.start(editor, []),
+              focus: Editor.end(editor, []),
+            });
+            Transforms.delete(editor);
+            Transforms.setNodes(editor, { type: 'p' });
+          }
+          setEditorValue(newValue as any);
+        }}>
         <Editable
           readOnly={mode === Utils.EditorMode.TRAIN}
           id='SLATE_EDITOR'
           className={classes.editor}
-          onSelect={(e) => {
-            if (mode === Utils.EditorMode.ADD) {
-              Utils.onSelectionChanged(
-                e,
-                setMarkerState,
-                editor,
-                setCurrentWordRange
-              );
+          onKeyDown={(event) => {
+            switch (event.key) {
+              case 'a':
+                event.ctrlKey &&
+                  Transforms.select(editor, {
+                    anchor: Editor.start(editor, []),
+                    focus: Editor.end(editor, []),
+                  });
+                break;
+              case 'Escape':
+                setMarkerState(null);
+                Transforms.select(editor, {
+                  anchor: Editor.end(editor, []),
+                  focus: Editor.end(editor, []),
+                });
+                break;
+              default:
+                break;
             }
+          }}
+          onSelect={(e) => {
+            Utils.onSelectionChanged(
+              e,
+              setMarkerState,
+              editor,
+              setCurrentWordRange
+            );
           }}
           renderElement={renderElement}
           renderLeaf={renderLeaf}></Editable>

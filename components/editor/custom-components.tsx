@@ -71,10 +71,12 @@ export const RememberText = (props: any) => {
 export const PlaceHolder = (props: any) => {
   return (
     <span {...props.attributes}>
-      <span className={classes.placeHolder}>{props.children}</span>
+      <span className={classes.placeHolder} style={{ pointerEvents: 'none' }}>
+        {props.children}
+      </span>
     </span>
   );
 };
 export const DefaultElement = (props: any) => {
-  return <span {...props.attributes}>{props.children}</span>;
+  return <p {...props.attributes}>{props.children}</p>;
 };

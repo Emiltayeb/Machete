@@ -1,8 +1,15 @@
-import { BaseEditor, Path, Editor as SlateEditor, Transforms } from 'slate';
+import {
+  BaseEditor,
+  Path,
+  Editor as SlateEditor,
+  Transforms,
+  Editor,
+} from 'slate';
 import { ReactEditor } from 'slate-react';
 import { CurrentWordRange } from './types';
 
 type Editor = BaseEditor & ReactEditor;
+
 export enum Marks {
   DATA_SELECTED = '[data-selected]',
   IDENTIFIER = 'identifier',
@@ -21,6 +28,16 @@ export enum ComponentMode {
   USER_WANT_TO_REMEMBER,
   TRAINING,
 }
+export const createNode = function (text: string, type?: string) {
+  return [
+    {
+      type: type || 'p',
+      children: [{ text }],
+    },
+  ];
+};
+
+export const placeHolerElement = createNode('A place holder', 'placeHolder');
 
 const findCurrentChild = (editor: any, text: string, specialIdent?: any) => {
   if (!text) return;
@@ -39,6 +56,7 @@ const findCurrentChild = (editor: any, text: string, specialIdent?: any) => {
   });
   return found;
 };
+
 export const getOffset = function (selection: any) {
   let position = selection.anchorNode.compareDocumentPosition(
       selection.focusNode
@@ -53,20 +71,14 @@ export const getOffset = function (selection: any) {
   return offset;
 };
 
-export const initialEditorValue = [
-  {
-    type: 'placeHolder',
-    children: [{ text: 'A palceholder' }],
-  },
-];
-
 //  checks if user new selection is intersectio with  another
-const isUserSelectionIncludeOtherSelection = (range: Range) =>
-  Array.from(range.cloneContents().childNodes).some((child) => {
+const isUserSelectionIncludeOtherSelection = (range: Range) => {
+  return Array.from(range.cloneContents().childNodes).some((child) => {
     if (child instanceof HTMLElement) {
-      return child.getAttribute('data-selected') === 'true';
+      return child.firstChild.getAttribute('data-selected') === 'true';
     }
   });
+};
 
 // removing the marker when we click outside of the slat editor
 export const handelMarkerBlur = function (e: any, setMarkerState: any) {
@@ -109,7 +121,6 @@ export const onSelectionChanged = (
   // setting cursor position to open marker
   const sel = window.getSelection();
   const textSelected = sel?.toString();
-
   if (
     !sel ||
     sel.rangeCount === 0 ||
@@ -119,6 +130,7 @@ export const onSelectionChanged = (
     setMarkerState(null);
     return;
   }
+
   const offset = getOffset(sel);
   const range = sel.getRangeAt(0);
   const direction = range.getBoundingClientRect();
@@ -129,7 +141,7 @@ export const onSelectionChanged = (
     functionality: MarkerFunctionality.ADD,
   });
 
-  setCurrentWordRange({ ...range, word: textSelected });
+  setCurrentWordRange({ range, word: textSelected });
 };
 
 // remove selection
@@ -162,6 +174,22 @@ export const onMarkerClick = function (
   if (markerState?.functionality === MarkerFunctionality.ADD) {
     editor.addMark(Marks.MARKED_TEXT, true);
     editor.addMark(Marks.IDENTIFIER, e.pageX);
+
+    // insert empty node at the start and the ent
+    const found = findCurrentChild(editor, currentWordRange?.word, e.pageX);
+
+    setTimeout(() => {
+      const currPath = ReactEditor.findPath(editor, found);
+      try {
+        const prevPath = Path.previous(currPath);
+        const nextPath = Path.next(currPath);
+        console.log({ currPath, nextPath, prevPath });
+        Transforms.insertFragment(editor, createNode('', 'p'), {
+          at: prevPath,
+        });
+      } catch (error) {}
+    }, 0);
+    // Transforms.select(editor, path);
   } else if (markerState?.functionality === MarkerFunctionality.Remove) {
     // find the current element clicked form the editor
     const found = findCurrentChild(
@@ -174,7 +202,6 @@ export const onMarkerClick = function (
 
     try {
       const path = ReactEditor.findPath(editor, found);
-
       Transforms.select(editor, path);
       editor.removeMark(Marks.MARKED_TEXT);
     } catch (error) {
