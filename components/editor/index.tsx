@@ -14,6 +14,7 @@ import {
   Descendant,
   Editor,
   Text,
+  Element,
 } from 'slate';
 
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
@@ -76,19 +77,10 @@ const SlateEditor: React.FC<EditorProps> = () => {
 
   React.useEffect(() => {
     if (!editorValue?.[0] || !editorRef.current) return;
-
-    // current element
-    const { children } = editorValue?.[0] as any;
-
     // determine if we can be in training mod
     setAllowTrain(
       editorRef.current?.querySelectorAll('[data-selected]').length > 0
     );
-
-    if (children?.[0].text?.length === 0) {
-      //  console.log('you cant save..');
-    }
-
     if (Utils.getEditorText(editor.children).length === 0) {
       // save editor value to db
       localStorage.setItem(
@@ -97,11 +89,8 @@ const SlateEditor: React.FC<EditorProps> = () => {
       );
       return;
     }
-
     const detectCodeTimerId = setTimeout(autoDetectEditorLang, 200);
-
     localStorage.setItem('editorValue', JSON.stringify(editorValue));
-
     return () => {
       clearTimeout(detectCodeTimerId);
     };
@@ -184,6 +173,10 @@ const SlateEditor: React.FC<EditorProps> = () => {
     const editorText = Utils.getEditorText(editor.children).trim();
 
     let newLang = detectLang(editorText) as string;
+    console.log(
+      `🚀 ~ file: index.tsx ~ line 176 ~ autoDetectEditorLang ~ newLang`,
+      newLang
+    );
 
     if (/([a-zA-z1-9]:)|(type.\w)|(interface).\w/gim.test(editorText)) {
       newLang = 'typescript';
@@ -200,6 +193,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
         editor={editor}
         value={editorValue}
         onChange={(newValue) => {
+          setEditorValue(newValue as any);
           const children = editor.children[0] as any;
           if (children?.type === 'placeHolder') {
             Transforms.select(editor, {
@@ -209,9 +203,18 @@ const SlateEditor: React.FC<EditorProps> = () => {
             Transforms.delete(editor);
             Transforms.setNodes(editor, { type: 'p' });
           }
-          setEditorValue(newValue as any);
         }}>
         <Editable
+          onPaste={(event) => {
+            event.preventDefault();
+            const text = event.clipboardData.getData('text');
+            try {
+              editor.insertText(text);
+            } catch (error) {
+              Transforms.delete(editor);
+              Transforms.insertText(editor, text);
+            }
+          }}
           decorate={decorate}
           readOnly={mode === Utils.EditorMode.TRAIN}
           id='SLATE_EDITOR'
@@ -231,6 +234,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
                   anchor: Editor.end(editor, []),
                   focus: Editor.end(editor, []),
                 });
+
                 break;
               default:
                 break;

@@ -3,7 +3,9 @@
   background: var(--gray-2);
   padding: var(--size-fluid-4);
   position: relative;
+  // white-space: initial !important;
   font-size: var(--font-size-3);
+  overflow-x: auto;
 }
 
 .marked_text {
@@ -44,16 +46,22 @@
 .placeHolder {
   color: var(--gray-4);
 }
-.train_input {
-  background-color: var(--blue-3);
-  color: white;
-  height: var(--size-4);
-  margin: var(--size-1);
-  min-width: 30px;
-  outline: none;
+.train_input_container {
+  position: relative;
 
-  &::placeholder {
-    color: white;
+  .train_input {
+    background-color: var(--blue-3);
+    box-sizing: content-box;
+    min-width: 38px;
+    width: fit-content;
+    height: var(--size-4);
+    margin: var(--size-1);
+    outline: none;
+    appearance: none;
+    border: none;
+    &::placeholder {
+      color: white;
+    }
   }
 }
 

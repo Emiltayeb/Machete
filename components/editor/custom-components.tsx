@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import classes from './editor.module.scss';
 import { css } from '@emotion/css';
 import { EditorTextType } from './utils';
+import { Editor } from 'slate';
 const CodeCss = (props: any) =>
   `
     
@@ -77,7 +78,6 @@ const CodeCss = (props: any) =>
         }
     `.trim();
 export const Leaf = (props: any) => {
-  console.log(props.leaf);
   return (
     <span
       {...props.attributes}
@@ -102,7 +102,12 @@ export const TrainingInput = (props: any) => {
   }, []);
 
   const handelSubmit = function (e: React.KeyboardEvent<HTMLSpanElement>) {
+    if (e.shiftKey && e.key === 'Enter') {
+      console.log('line break');
+      return;
+    }
     if (e.key !== 'Enter') return;
+    console.log(Editor);
     const correctText = props.leaf.text.trim();
     setAnswerStatus({ status: inputState === correctText, answered: true });
   };
@@ -113,6 +118,7 @@ export const TrainingInput = (props: any) => {
       onKeyPress={handelSubmit}
       className={classes.training_card}>
       <span
+        className={classes.train_input_container}
         style={{ userSelect: 'none' }}
         data-answered={answerStatus.answered}
         data-correct={answerStatus.status}
@@ -124,8 +130,10 @@ export const TrainingInput = (props: any) => {
             placeholder='...'
             type='text'
             value={inputState}
+            style={{
+              width: `${inputState.length}ch`,
+            }}
             onChange={(e) => setInputState(e.target.value)}
-            style={{ width: `${(38 + inputState?.length) * 1.3}px` }}
             className={classes.train_input}
           />
         )}

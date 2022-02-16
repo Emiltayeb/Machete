@@ -4,8 +4,9 @@ import {
   Editor as SlateEditor,
   Transforms,
   Node,
+  Text,
 } from 'slate';
-import { ReactEditor, Slate } from 'slate-react';
+import { ReactEditor } from 'slate-react';
 import { CurrentWordRange } from './types';
 
 type Editor = BaseEditor & ReactEditor;
@@ -60,7 +61,6 @@ export const createNode = function (text: string, type?: string) {
 export const placeHolerElement = createNode('A place holder', 'placeHolder');
 
 const findCurrentChild = (editor: any, text: string, specialIdent?: any) => {
-  debugger;
   if (!text) return;
   let found;
 
@@ -175,6 +175,7 @@ export const handelRemoveSelection = function (
 
   rangeRef.current?.selectNode(node.lastChild);
 };
+
 //marker click
 export const onMarkerClick = function (
   e: React.MouseEvent<HTMLSpanElement>,
@@ -186,10 +187,23 @@ export const onMarkerClick = function (
   e.nativeEvent.stopPropagation();
   e.nativeEvent.stopImmediatePropagation();
 
+  console.log('onMarkerClick');
   if (markerState?.functionality === MarkerFunctionality.ADD) {
     editor.addMark(Marks.MARKED_TEXT, true);
     editor.addMark(Marks.IDENTIFIER, e.pageX);
-    // // Transforms.select(editor, path);
+
+    let path = editor.selection as any;
+    const selection = window.getSelection?.().toString().replace(/\n|\r/g, ' ');
+    try {
+      Transforms.insertText(editor, selection);
+    } catch (error) {
+      Transforms.insertText(editor, selection, {
+        at: editor?.selection.anchor.path,
+      });
+      path = editor?.selection.anchor.path;
+    }
+
+    // // Transfconst node = Node.get(editor, path)orms.select(editor, path);
   } else if (markerState?.functionality === MarkerFunctionality.Remove) {
     // find the current element clicked form the editor
     const found = findCurrentChild(
