@@ -5,6 +5,7 @@ export type MarkerState = {
   offset: number;
   functionality?: 'add' | 'remove';
   node?: any;
+  isText: any;
 } | null;
 
 export type CurrentWordRange = {

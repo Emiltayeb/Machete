@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
+import { MARKER_ID } from '../editor/utils';
 
 export interface MarkerProps {
   markerState: {
@@ -44,7 +45,7 @@ const Marker: React.FC<MarkerProps> = ({ markerState, onMarkerClick }) => {
       position={markerState.directions}
       state={markerState.functionality}
       onClick={onMarkerClick}>
-      <button type='button'>
+      <button type='button' id={MARKER_ID}>
         {markerState.functionality === 'add' ? '+' : '-'}
       </button>
     </StyledFloatingMenu>,

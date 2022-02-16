@@ -1,4 +1,11 @@
-import React, { useCallback } from 'react';
+import React from 'react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+
 import classes from './editor.module.scss';
 import {
   BaseEditor,
@@ -6,7 +13,9 @@ import {
   Transforms,
   Descendant,
   Editor,
+  Text,
 } from 'slate';
+
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import { DOMRange } from 'slate-react/dist/utils/dom';
 import Marker from '../floating-marker';
@@ -14,6 +23,7 @@ import * as Types from './types';
 import * as Utils from './utils';
 import * as CustomComponents from './custom-components';
 import { withHistory } from 'slate-history';
+const detectLang = require('lang-detector');
 
 interface EditorProps {
   mode: 'training' | 'editing';
@@ -26,7 +36,9 @@ declare module 'slate' {
     Descendant: Descendant & { type: string };
   }
 }
+
 console.clear();
+
 const SlateEditor: React.FC<EditorProps> = () => {
   const [editor] = React.useState(() => withHistory(withReact(createEditor())));
   const [markerState, setMarkerState] = React.useState<Types.MarkerState>(null);
@@ -34,7 +46,11 @@ const SlateEditor: React.FC<EditorProps> = () => {
     React.useState<Types.CurrentWordRange>(null);
   const editorRef = React.useRef<null | HTMLDivElement>(null);
   const rangeRef = React.useRef<null | DOMRange>(null);
+  const markerVisibleREf = React.useRef<boolean>(false);
   const [allowTrain, setAllowTrain] = React.useState(false);
+  const [editorCodeLang, setLanguage] = React.useState(
+    Utils.CodeLanguages.HTML
+  );
   const [editorValue, setEditorValue] = React.useState<null | Descendant[]>(
     null
   );
@@ -45,10 +61,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
 
   React.useEffect(() => {
     rangeRef.current = document.createRange();
-    // removing the marker when we click outside of the slat editor
-    document.body.addEventListener('click', (e) =>
-      Utils.handelMarkerBlur(e, setMarkerState)
-    );
+
     // loading the value from whatever you want on initial load..
     try {
       const dbStorage = JSON.parse(
@@ -76,7 +89,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
       //  console.log('you cant save..');
     }
 
-    if (!children || children[0]?.text.length === 0) {
+    if (Utils.getEditorText(editor.children).length === 0) {
       // save editor value to db
       localStorage.setItem(
         'editorValue',
@@ -85,17 +98,31 @@ const SlateEditor: React.FC<EditorProps> = () => {
       return;
     }
 
+    const detectCodeTimerId = setTimeout(autoDetectEditorLang, 200);
+
     localStorage.setItem('editorValue', JSON.stringify(editorValue));
+
+    return () => {
+      clearTimeout(detectCodeTimerId);
+    };
   }, [editorValue]);
 
-  const renderElement = React.useCallback((props) => {
-    switch (props.element.type) {
-      case 'placeHolder':
-        return <CustomComponents.PlaceHolder {...props} />;
-      default:
-        return <CustomComponents.DefaultElement {...props} />;
-    }
-  }, []);
+  const renderElement = React.useCallback(
+    (props) => {
+      switch (props.element.type) {
+        case 'placeHolder':
+          return <CustomComponents.PlaceHolder {...props} />;
+        default:
+          return (
+            <CustomComponents.DefaultElement
+              {...props}
+              editorTextType={Utils.EditorTextType.CODE}
+            />
+          );
+      }
+    },
+    [mode]
+  );
 
   const renderLeaf = React.useCallback(
     (props) => {
@@ -112,18 +139,68 @@ const SlateEditor: React.FC<EditorProps> = () => {
           />
         );
       }
-      return <CustomComponents.Leaf {...props} />;
+      return (
+        <CustomComponents.Leaf
+          {...props}
+          editorTextType={Utils.EditorTextType.CODE}
+        />
+      );
     },
     [mode]
   );
+  // decorate function depends on the language selected
+  const decorate = React.useCallback(
+    ([node, path]) => {
+      const ranges: any = [];
 
+      if ((!Text.isText(node) as any) || node[Utils.Marks.MARKED_TEXT]) {
+        return ranges;
+      }
+
+      const tokens = Prism.tokenize(node.text, Prism.languages[editorCodeLang]);
+      let start = 0;
+
+      for (const token of tokens) {
+        const length = getLength(token);
+        const end = start + length;
+
+        if (typeof token !== 'string') {
+          ranges.push({
+            [token.type]: true,
+            anchor: { path, offset: start },
+            focus: { path, offset: end },
+          });
+        }
+
+        start = end;
+      }
+
+      return ranges;
+    },
+    [editorCodeLang]
+  );
+
+  const autoDetectEditorLang = function () {
+    const editorText = Utils.getEditorText(editor.children).trim();
+
+    let newLang = detectLang(editorText) as string;
+
+    if (/([a-zA-z1-9]:)|(type.\w)|(interface).\w/gim.test(editorText)) {
+      newLang = 'typescript';
+    }
+    if (!Utils.CodeLanguages[newLang.toLocaleUpperCase()]) {
+      newLang = 'plaintext';
+    }
+
+    setLanguage(newLang.toLocaleLowerCase() as Utils.CodeLanguages);
+  };
   return editorValue ? (
     <div ref={editorRef}>
       <Slate
         editor={editor}
         value={editorValue}
         onChange={(newValue) => {
-          const children = editor.children[0];
+          const children = editor.children[0] as any;
           if (children?.type === 'placeHolder') {
             Transforms.select(editor, {
               anchor: Editor.start(editor, []),
@@ -135,6 +212,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
           setEditorValue(newValue as any);
         }}>
         <Editable
+          decorate={decorate}
           readOnly={mode === Utils.EditorMode.TRAIN}
           id='SLATE_EDITOR'
           className={classes.editor}
@@ -159,12 +237,14 @@ const SlateEditor: React.FC<EditorProps> = () => {
             }
           }}
           onSelect={(e) => {
-            Utils.onSelectionChanged(
-              e,
-              setMarkerState,
-              editor,
-              setCurrentWordRange
-            );
+            mode === Utils.EditorMode.ADD &&
+              Utils.onSelectionChanged(
+                e,
+                setMarkerState,
+                editor,
+                setCurrentWordRange,
+                markerVisibleREf
+              );
           }}
           renderElement={renderElement}
           renderLeaf={renderLeaf}></Editable>
@@ -172,15 +252,17 @@ const SlateEditor: React.FC<EditorProps> = () => {
 
       {markerState && (
         <Marker
-          onMarkerClick={(e: any) =>
+          onMarkerClick={(e: React.MouseEvent<HTMLDivElement>) => {
+            e.stopPropagation();
             Utils.onMarkerClick(
               e,
               editor,
               currentWordRange,
               setMarkerState,
               markerState
-            )
-          }
+            );
+            setCurrentWordRange(null);
+          }}
           markerState={markerState}
         />
       )}
@@ -205,3 +287,15 @@ const SlateEditor: React.FC<EditorProps> = () => {
 };
 
 export default SlateEditor;
+
+const getLength = (token: any) => {
+  if (typeof token === 'string') {
+    return token.length;
+  } else if (typeof token.content === 'string') {
+    return token.content.length;
+  } else {
+    return token.content.reduce((l: any, t: any) => l + getLength(t), 0);
+  }
+};
+
+Prism.languages.typeScript = Prism.languages.extend('typescript', {});

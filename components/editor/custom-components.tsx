@@ -1,9 +1,90 @@
 import React from 'react';
 import clsx from 'clsx';
 import classes from './editor.module.scss';
+import { css } from '@emotion/css';
+import { EditorTextType } from './utils';
+const CodeCss = (props: any) =>
+  `
+    
+      ${
+        props.leaf.property
+          ? css`
+              color: var(--green-6);
+            `
+          : ''
+      } 
+        ${
+          props.leaf.builtin
+            ? css`
+                color: var(--green-6);
+              `
+            : ''
+        }
+        ${
+          props.leaf.operator || props.leaf.url
+            ? css`
+                color: #9a6e3a;
+              `
+            : ''
+        }
+        ${
+          props.leaf.keyword
+            ? css`
+                color: #07a;
+              `
+            : ''
+        }
+        ${
+          props.leaf.variable || props.leaf.regex
+            ? css`
+                color: #e90;
+              `
+            : ''
+        }
+        ${
+          props.leaf.number ||
+          props.leaf.boolean ||
+          props.leaf.tag ||
+          props.leaf.constant ||
+          props.leaf.symbol ||
+          props.leaf['attr-name'] ||
+          props.leaf.selector
+            ? css`
+                color: #905;
+              `
+            : ''
+        }
+        ${
+          props.leaf.punctuation
+            ? css`
+                color: #999;
+              `
+            : ''
+        }
+        ${
+          props.leaf.string || props.leaf.char
+            ? css`
+                color: #690;
+              `
+            : ''
+        }
+        ${
+          props.leaf.function || props.leaf['class-name']
+            ? css`
+                color: #dd4a68;
+              `
+            : ''
+        }
+    `.trim();
 export const Leaf = (props: any) => {
+  console.log(props.leaf);
   return (
-    <span {...props.attributes} data-selected={props.leaf.selected}>
+    <span
+      {...props.attributes}
+      data-selected={props.leaf.selected}
+      className={
+        props.editorTextType === EditorTextType.CODE ? CodeCss(props) : ''
+      }>
       {props.children}
     </span>
   );
@@ -14,19 +95,16 @@ export const TrainingInput = (props: any) => {
     answered: false,
     status: false,
   });
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const [inputState, setInputState] = React.useState<string>('');
   React.useEffect(() => {
     // add on enter event
-    return () => {
-      console.log('un mount');
-    };
+    return () => {};
   }, []);
 
   const handelSubmit = function (e: React.KeyboardEvent<HTMLSpanElement>) {
     if (e.key !== 'Enter') return;
-    const userText = inputRef.current?.value;
     const correctText = props.leaf.text.trim();
-    setAnswerStatus({ status: userText === correctText, answered: true });
+    setAnswerStatus({ status: inputState === correctText, answered: true });
   };
 
   return (
@@ -45,8 +123,9 @@ export const TrainingInput = (props: any) => {
           <input
             placeholder='...'
             type='text'
-            ref={inputRef}
-            style={{ maxWidth: `${props.leaf.text.length * 3.5 + 25}px` }}
+            value={inputState}
+            onChange={(e) => setInputState(e.target.value)}
+            style={{ width: `${(38 + inputState?.length) * 1.3}px` }}
             className={classes.train_input}
           />
         )}

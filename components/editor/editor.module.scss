@@ -49,6 +49,8 @@
   color: white;
   height: var(--size-4);
   margin: var(--size-1);
+  min-width: 30px;
+  outline: none;
 
   &::placeholder {
     color: white;

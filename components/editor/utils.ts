@@ -3,13 +3,14 @@ import {
   Path,
   Editor as SlateEditor,
   Transforms,
-  Editor,
+  Node,
 } from 'slate';
-import { ReactEditor } from 'slate-react';
+import { ReactEditor, Slate } from 'slate-react';
 import { CurrentWordRange } from './types';
 
 type Editor = BaseEditor & ReactEditor;
 
+export const MARKER_ID = 'editor_marker_button';
 export enum Marks {
   DATA_SELECTED = '[data-selected]',
   IDENTIFIER = 'identifier',
@@ -18,6 +19,20 @@ export enum Marks {
 export enum EditorMode {
   TRAIN,
   ADD,
+}
+export enum EditorTextType {
+  TEXT,
+  CODE,
+}
+
+export enum CodeLanguages {
+  HTML = 'html',
+  JAVASCRIPT = 'javascript',
+  TYPESCRIPT = 'typescript',
+  CSS = 'css',
+  PLAIN_TEXT = 'plaintext',
+  C = 'c',
+  JAVA = 'java',
 }
 
 enum MarkerFunctionality {
@@ -28,6 +43,11 @@ export enum ComponentMode {
   USER_WANT_TO_REMEMBER,
   TRAINING,
 }
+
+export const getEditorText = (nodes: any) => {
+  return nodes.map((n: any) => Node.string(n)).join('\n');
+};
+
 export const createNode = function (text: string, type?: string) {
   return [
     {
@@ -40,20 +60,23 @@ export const createNode = function (text: string, type?: string) {
 export const placeHolerElement = createNode('A place holder', 'placeHolder');
 
 const findCurrentChild = (editor: any, text: string, specialIdent?: any) => {
+  debugger;
   if (!text) return;
   let found;
-  editor.children.forEach((child: any) => {
-    child.children.forEach((chi: any) => {
-      if (chi[Marks.MARKED_TEXT]) {
-        if (chi.text === text) {
-          found = chi;
+
+  if (Array.isArray(editor.children))
+    editor.children.forEach((child: any) => {
+      child.children.forEach((chi: any) => {
+        if (chi[Marks.MARKED_TEXT]) {
+          if (chi.text === text) {
+            found = chi;
+          }
+          if (specialIdent && chi.identifier.toString() === specialIdent) {
+            found = chi;
+          }
         }
-        if (specialIdent && chi.identifier.toString() === specialIdent) {
-          found = chi;
-        }
-      }
+      });
     });
-  });
   return found;
 };
 
@@ -69,15 +92,6 @@ export const getOffset = function (selection: any) {
     ? selection.focusOffset - selection.anchorOffset
     : selection.anchorOffset - selection.focusOffset;
   return offset;
-};
-
-//  checks if user new selection is intersectio with  another
-const isUserSelectionIncludeOtherSelection = (range: Range) => {
-  return Array.from(range.cloneContents().childNodes).some((child) => {
-    if (child instanceof HTMLElement) {
-      return child.firstChild.getAttribute('data-selected') === 'true';
-    }
-  });
 };
 
 // removing the marker when we click outside of the slat editor
@@ -116,7 +130,8 @@ export const onSelectionChanged = (
   e: React.SyntheticEvent<HTMLDivElement, Event>,
   setMarkerState: any,
   editor: Editor,
-  setCurrentWordRange: React.Dispatch<React.SetStateAction<CurrentWordRange>>
+  setCurrentWordRange: React.Dispatch<React.SetStateAction<CurrentWordRange>>,
+  markerVisibleREf: any
 ) => {
   // setting cursor position to open marker
   const sel = window.getSelection();
@@ -140,7 +155,7 @@ export const onSelectionChanged = (
     offset,
     functionality: MarkerFunctionality.ADD,
   });
-
+  markerVisibleREf.current = true;
   setCurrentWordRange({ range, word: textSelected });
 };
 
@@ -174,22 +189,7 @@ export const onMarkerClick = function (
   if (markerState?.functionality === MarkerFunctionality.ADD) {
     editor.addMark(Marks.MARKED_TEXT, true);
     editor.addMark(Marks.IDENTIFIER, e.pageX);
-
-    // insert empty node at the start and the ent
-    const found = findCurrentChild(editor, currentWordRange?.word, e.pageX);
-
-    setTimeout(() => {
-      const currPath = ReactEditor.findPath(editor, found);
-      try {
-        const prevPath = Path.previous(currPath);
-        const nextPath = Path.next(currPath);
-        console.log({ currPath, nextPath, prevPath });
-        Transforms.insertFragment(editor, createNode('', 'p'), {
-          at: prevPath,
-        });
-      } catch (error) {}
-    }, 0);
-    // Transforms.select(editor, path);
+    // // Transforms.select(editor, path);
   } else if (markerState?.functionality === MarkerFunctionality.Remove) {
     // find the current element clicked form the editor
     const found = findCurrentChild(
