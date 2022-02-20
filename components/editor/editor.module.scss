@@ -1,5 +1,6 @@
 .editor {
   margin-block-start: var(--size-3);
+
   background: var(--gray-2);
   padding: var(--size-fluid-4);
   position: relative;
@@ -31,37 +32,40 @@
     box-shadow: var(--shadow-3);
     background-color: var(--blue-3);
   }
+
   button:hover {
     background-color: white;
     color: var(--blue-3);
   }
   button.active {
-    background-color: var(--blue-5);
+    opacity: 1;
   }
   button:disabled {
-    background-color: var(--gray-4);
+    opacity: 0.2;
+  }
+
+  .save_button {
+    background-color: var(--green-5);
+    color: white;
   }
 }
 
 .placeHolder {
   color: var(--gray-4);
 }
-.train_input_container {
-  position: relative;
 
-  .train_input {
-    background-color: var(--blue-3);
-    box-sizing: content-box;
-    min-width: 38px;
-    width: fit-content;
-    height: var(--size-4);
-    margin: var(--size-1);
-    outline: none;
-    appearance: none;
-    border: none;
-    &::placeholder {
-      color: white;
-    }
+.train_input {
+  background-color: var(--blue-3);
+  box-sizing: content-box;
+  min-width: 38px;
+  width: fit-content;
+  height: var(--size-3);
+  margin: var(--size-1);
+  outline: none;
+  appearance: none;
+  border: none;
+  &::placeholder {
+    color: white;
   }
 }
 

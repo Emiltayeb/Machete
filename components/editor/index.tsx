@@ -24,10 +24,13 @@ import * as Types from './types';
 import * as Utils from './utils';
 import * as CustomComponents from './custom-components';
 import { withHistory } from 'slate-history';
+import clsx from 'clsx';
 const detectLang = require('lang-detector');
 
 interface EditorProps {
   mode: 'training' | 'editing';
+  onSaveCard: ({ text, id }: { text: string; id: number }) => void;
+  card: { text: string; id: number };
 }
 declare module 'slate' {
   interface CustomTypes {
@@ -40,7 +43,7 @@ declare module 'slate' {
 
 console.clear();
 
-const SlateEditor: React.FC<EditorProps> = () => {
+const SlateEditor: React.FC<EditorProps> = (props) => {
   const [editor] = React.useState(() => withHistory(withReact(createEditor())));
   const [markerState, setMarkerState] = React.useState<Types.MarkerState>(null);
   const [currentWordRange, setCurrentWordRange] =
@@ -52,8 +55,8 @@ const SlateEditor: React.FC<EditorProps> = () => {
   const [editorCodeLang, setLanguage] = React.useState(
     Utils.CodeLanguages.HTML
   );
-  const [editorValue, setEditorValue] = React.useState<null | Descendant[]>(
-    null
+  const [editorValue, setEditorValue] = React.useState(
+    JSON.parse(props.card?.text) ?? Utils.placeHolerElement
   );
 
   const [mode, setMode] = React.useState<Utils.EditorMode>(
@@ -62,17 +65,6 @@ const SlateEditor: React.FC<EditorProps> = () => {
 
   React.useEffect(() => {
     rangeRef.current = document.createRange();
-
-    // loading the value from whatever you want on initial load..
-    try {
-      const dbStorage = JSON.parse(
-        localStorage?.getItem('editorValue') as string
-      );
-      if (!dbStorage) throw Error;
-      setEditorValue(dbStorage);
-    } catch (error) {
-      setEditorValue(Utils.placeHolerElement);
-    }
   }, []);
 
   React.useEffect(() => {
@@ -81,16 +73,16 @@ const SlateEditor: React.FC<EditorProps> = () => {
     setAllowTrain(
       editorRef.current?.querySelectorAll('[data-selected]').length > 0
     );
-    if (Utils.getEditorText(editor.children).length === 0) {
-      // save editor value to db
-      localStorage.setItem(
-        'editorValue',
-        JSON.stringify(Utils.placeHolerElement)
-      );
-      return;
-    }
+    // if (Utils.getEditorText(editor.children).length === 0) {
+    //   // save editor value to db
+    //   localStorage.setItem(
+    //     'editorValue',
+    //     JSON.stringify(Utils.placeHolerElement)
+    //   );
+    //   return;
+    // }
     const detectCodeTimerId = setTimeout(autoDetectEditorLang, 200);
-    localStorage.setItem('editorValue', JSON.stringify(editorValue));
+    // localStorage.setItem('editorValue', JSON.stringify(editorValue));
     return () => {
       clearTimeout(detectCodeTimerId);
     };
@@ -171,12 +163,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
 
   const autoDetectEditorLang = function () {
     const editorText = Utils.getEditorText(editor.children).trim();
-
     let newLang = detectLang(editorText) as string;
-    console.log(
-      `🚀 ~ file: index.tsx ~ line 176 ~ autoDetectEditorLang ~ newLang`,
-      newLang
-    );
 
     if (/([a-zA-z1-9]:)|(type.\w)|(interface).\w/gim.test(editorText)) {
       newLang = 'typescript';
@@ -187,7 +174,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
 
     setLanguage(newLang.toLocaleLowerCase() as Utils.CodeLanguages);
   };
-  return editorValue ? (
+  return (
     <div ref={editorRef}>
       <Slate
         editor={editor}
@@ -205,6 +192,11 @@ const SlateEditor: React.FC<EditorProps> = () => {
           }
         }}>
         <Editable
+          onMouseDown={() => {
+            if (markerState !== null) {
+              setMarkerState(null);
+            }
+          }}
           onPaste={(event) => {
             event.preventDefault();
             const text = event.clipboardData.getData('text');
@@ -265,6 +257,7 @@ const SlateEditor: React.FC<EditorProps> = () => {
               setMarkerState,
               markerState
             );
+
             setCurrentWordRange(null);
           }}
           markerState={markerState}
@@ -283,10 +276,19 @@ const SlateEditor: React.FC<EditorProps> = () => {
           onClick={() => setMode(Utils.EditorMode.ADD)}>
           Edit
         </button>
+
+        <button
+          className={clsx(classes.active, classes.save_button)}
+          onClick={() =>
+            props.onSaveCard({
+              text: JSON.stringify(editorValue),
+              id: props.card?.id ?? 0,
+            })
+          }>
+          Save +
+        </button>
       </div>
     </div>
-  ) : (
-    <p>Loading..</p>
   );
 };
 

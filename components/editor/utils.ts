@@ -187,7 +187,6 @@ export const onMarkerClick = function (
   e.nativeEvent.stopPropagation();
   e.nativeEvent.stopImmediatePropagation();
 
-  console.log('onMarkerClick');
   if (markerState?.functionality === MarkerFunctionality.ADD) {
     editor.addMark(Marks.MARKED_TEXT, true);
     editor.addMark(Marks.IDENTIFIER, e.pageX);

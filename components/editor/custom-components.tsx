@@ -1,5 +1,4 @@
 import React from 'react';
-import clsx from 'clsx';
 import classes from './editor.module.scss';
 import { css } from '@emotion/css';
 import { EditorTextType } from './utils';
@@ -117,26 +116,21 @@ export const TrainingInput = (props: any) => {
       {...props.attributes}
       onKeyPress={handelSubmit}
       className={classes.training_card}>
-      <span
-        className={classes.train_input_container}
-        style={{ userSelect: 'none' }}
-        data-answered={answerStatus.answered}
-        data-correct={answerStatus.status}
-        contentEditable={false}>
-        {answerStatus.answered ? (
-          <span>{props.leaf.text}</span>
-        ) : (
-          <input
-            placeholder='...'
-            type='text'
-            value={inputState}
-            style={{
-              width: `${inputState.length}ch`,
-            }}
-            onChange={(e) => setInputState(e.target.value)}
-            className={classes.train_input}
-          />
-        )}
+      <span style={{ userSelect: 'none' }} contentEditable={false}>
+        <input
+          data-answered={answerStatus.answered}
+          data-correct={answerStatus.status}
+          placeholder='...'
+          type='text'
+          value={inputState}
+          style={{
+            width: `${inputState.length}ch`,
+          }}
+          onChange={(e) =>
+            !answerStatus.answered && setInputState(e.target.value)
+          }
+          className={classes.train_input}
+        />
       </span>
     </span>
   );
