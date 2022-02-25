@@ -14,26 +14,16 @@ import {
   Descendant,
   Editor,
   Text,
-  Element,
 } from 'slate';
 
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { DOMRange } from 'slate-react/dist/utils/dom';
-import Marker from '../floating-marker';
 import * as Types from './types';
-import * as Utils from './utils';
+import * as Utils from './editor-utils';
 import * as CustomComponents from './custom-components';
 import { withHistory } from 'slate-history';
-import clsx from 'clsx';
 import { HoveringToolbar } from './hovering-toolbar';
-import { transcode } from 'buffer';
-const detectLang = require('lang-detector');
-
-interface EditorProps {
-  mode: 'training' | 'editing';
-  onSaveCard: ({ text, id }: { text: string; id: number }) => void;
-  card: { text: string; id: number };
-}
+import { decorator } from "./editor.configs"
+import * as Events from './editor-events';
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor;
@@ -43,109 +33,67 @@ declare module 'slate' {
   }
 }
 
-console.clear();
-
-const SlateEditor: React.FC<EditorProps> = (props) => {
+const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editor] = React.useState(() => withHistory(withReact(createEditor())));
-  const [markerState, setMarkerState] = React.useState<Types.MarkerState>(null);
-  const [currentWordRange, setCurrentWordRange] =
-    React.useState<Types.CurrentWordRange>(null);
   const editorRef = React.useRef<null | HTMLDivElement>(null);
-  const rangeRef = React.useRef<null | DOMRange>(null);
-  const markerVisibleREf = React.useRef<boolean>(false);
   const [allowTrain, setAllowTrain] = React.useState(false);
-  const [editorCodeLang, setLanguage] = React.useState(
-    Utils.CodeLanguages.HTML
-  );
-  const [editorValue, setEditorValue] = React.useState(initialValue);
-
+  const [editorCodeLang, setLanguage] = React.useState<Utils.CodeLanguages | null>(Utils.CodeLanguages.HTML);
+  const [editorValue, setEditorValue] = React.useState(JSON.parse(props.card?.text) || CustomComponents.initialValue);
   const [mode, setMode] = React.useState<Utils.EditorMode>(
     Utils.EditorMode.ADD
   );
 
-  React.useEffect(() => {
-    rangeRef.current = document.createRange();
-  }, []);
 
+  // Each time we change code lang
   React.useEffect(() => {
     if (!editorValue?.[0] || !editorRef.current) return;
-    // determine if we can be in training mod
+    // determine if we can be in training mode
     setAllowTrain(
       editorRef.current?.querySelectorAll('[data-selected]').length > 0
     );
-    const detectCodeTimerId = setTimeout(autoDetectEditorLang, 600);
+    const detectCodeTimerId = setTimeout(() => Events.handelCreatCodeBlock(editor, setLanguage), 600);
     return () => {
       clearTimeout(detectCodeTimerId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorValue]);
 
+  // When we change the code lang.
+  //TODO: Per Code BLOCK!
   React.useEffect(() => {
-    Transforms.insertNodes(editor, [
-      {
-        type: 'code',
-        children: [{ text: ' ' }],
-      },
-    ]);
+    if (!editorCodeLang) return
+    // Transforms.insertNodes(editor, [
+    //   {
+    //     type: 'code',
+    //     children: [{ text: '' }],
+    //   },
+    // ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorCodeLang]);
+
+
+  // TODO: Per Code BLOCK!
   // decorate function depends on the language selected
   const decorate = React.useCallback(
-    ([node, path]) => {
-      const ranges: any = [];
-      if (!Text.isText(node) as any) {
-        return ranges;
-      }
-
-      const tokens = Prism.tokenize(node.text, Prism.languages[editorCodeLang]);
-      let start = 0;
-
-      for (const token of tokens) {
-        const length = getLength(token);
-        const end = start + length;
-
-        if (typeof token !== 'string') {
-          ranges.push({
-            [token.type]: true,
-            anchor: { path, offset: start },
-            focus: { path, offset: end },
-          });
-        }
-
-        start = end;
-      }
-
-      return ranges;
-    },
+    ([node, path]) => decorator([node, path], editorCodeLang),
     [editorCodeLang]
   );
+
+  // TODO: Move to custom comp
   // Define a rendering function based on the element passed to `props`. We use
   // `useCallback` here to memoize the function for subsequent renders.
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
         return (
-          <pre {...props.attributes}>
-            <code>{props.children}</code>
-          </pre>
+          <CustomComponents.CodeElement {...props} />
         );
-        break;
       default:
-        return <p {...props.attributes}>{props.children}</p>;
+        return <CustomComponents.DefaultElement {...props} />;
     }
   }, []);
-  const autoDetectEditorLang = function () {
-    const block = Editor.above(editor, {
-      match: (n) => Editor.isBlock(editor, n),
-    });
 
-    if (block) {
-      const [blockNode, path] = block;
-      const codeRegex = blockNode?.children?.[0]?.text.match(/`{3}([a-z]*)/);
-      if (codeRegex?.[1]) {
-        editor.deleteBackward('word');
-        setLanguage(codeRegex?.[1] as Utils.CodeLanguages);
-      }
-    }
-  };
+
 
   return (
     <div ref={editorRef}>
@@ -162,44 +110,17 @@ const SlateEditor: React.FC<EditorProps> = (props) => {
           id='SLATE_EDITOR'
           className={classes.editor}
           renderElement={renderElement}
-          onKeyDown={(event) => {
-            const { key, shiftKey } = event;
-            if (shiftKey && key === 'Enter') {
-              Transforms.insertNodes(editor, [
-                {
-                  type: 'block',
-                  children: [{ text: ' ' }],
-                },
-              ]);
-            }
-          }}
+          onKeyDown={(event) => Events.handelKeyDown(event, editor)}
           renderLeaf={(props) => <CustomComponents.Leaf {...props} />}
         />
       </Slate>
-    </div>
+      {/* TODO::  should be a EditorActionsButton components.*/}
+      <button onClick={() => props.onSaveCard(JSON.stringify(editor.children), props.card.id)}> Save</button>
+    </div >
   );
 };
 
 export default SlateEditor;
 
-const getLength = (token: any) => {
-  if (typeof token === 'string') {
-    return token.length;
-  } else if (typeof token.content === 'string') {
-    return token.content.length;
-  } else {
-    return token.content.reduce((l: any, t: any) => l + getLength(t), 0);
-  }
-};
 
 Prism.languages.typeScript = Prism.languages.extend('typescript', {});
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text: 'This example shows how you can make a hovering menu appear above your content, which you can use to make text ',
-      },
-    ],
-  },
-];

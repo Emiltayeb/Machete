@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
-import { MARKER_ID } from '../editor/utils';
 
 export interface MarkerProps {
   markerState: {
@@ -22,7 +21,7 @@ const StyledFloatingMenu = styled.div<MarkerProps | any>`
 
   & button {
     background: ${({ state }) =>
-      state === 'add' ? `var(--green-5)` : `var(--red-5)`};
+    state === 'add' ? `var(--green-5)` : `var(--red-5)`};
     color: white;
     width: 25px;
     height: 25px;
@@ -38,6 +37,9 @@ const StyledFloatingMenu = styled.div<MarkerProps | any>`
     }
   }
 `;
+
+// TODO: this will be the remove marker?
+
 const Marker: React.FC<MarkerProps> = ({ markerState, onMarkerClick }) => {
   return ReactDOM.createPortal(
     <StyledFloatingMenu
@@ -45,7 +47,7 @@ const Marker: React.FC<MarkerProps> = ({ markerState, onMarkerClick }) => {
       position={markerState.directions}
       state={markerState.functionality}
       onClick={onMarkerClick}>
-      <button type='button' id={MARKER_ID}>
+      <button type='button'>
         {markerState.functionality === 'add' ? '+' : '-'}
       </button>
     </StyledFloatingMenu>,

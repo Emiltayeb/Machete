@@ -7,7 +7,7 @@ import {
   Text,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { CurrentWordRange } from './types';
+
 
 type Editor = BaseEditor & ReactEditor;
 
@@ -42,13 +42,12 @@ export const toggleFormat = (
 ) => {
   const [match] = SlateEditor.nodes(editor, {
     match: (node) => {
-      if (!Text.isText(node)) return;
+      if (!Text.isText(node)) return false;
       return true;
     },
   }) as any;
-
-  console.log(editor.selection);
   const { text, ...restFormats } = match[0];
+
 
   Transforms.insertNodes(
     editor,
@@ -56,31 +55,9 @@ export const toggleFormat = (
       {
         ...restFormats,
         [format]: !isActive,
-        text: window.getSelection()?.toString(),
+        text: window.getSelection()?.toString().trim(),
       },
     ],
     { match: Text.isText, hanging: true, voids: true }
   );
-
-  // insert node at the end of current selection
-
-  // console.log(editor.selection);
-  // Transforms.insertNodes(
-  //   editor,
-  //   [
-  //     {
-  //       type: 'span',
-  //       text: '',
-  //       bold: false,
-  //     },
-  //   ],
-  //   {
-  //     at: {
-  //       focus: editor.selection?.focus,
-  //       anchor: editor.selection?.anchor,
-  //       offset: editor.selection?.focus.offset,
-  //       path: editor.selection?.focus,
-  //     },
-  //   }
-  // );
 };

@@ -1,14 +1,7 @@
 export type CustomElement = { type: any; children: any };
 export type CustomText = { text: any };
-export type MarkerState = {
-  directions: DOMRect;
-  offset: number;
-  functionality?: 'add' | 'remove';
-  node?: any;
-  isText: any;
-} | null;
-
-export type CurrentWordRange = {
-  range: Range;
-  word: string | undefined;
-} | null;
+export interface EditorProps {
+  mode: 'training' | 'editing';
+  onSaveCard: (data: any, id?: string) => void;
+  card: { text: string; id?: string };
+}
