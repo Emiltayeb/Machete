@@ -1,90 +1,107 @@
 import React from 'react';
 import classes from './editor.module.scss';
 import { css } from '@emotion/css';
-import { EditorTextType } from './utils';
+
 import { Editor } from 'slate';
-const CodeCss = (props: any) =>
+
+const CodeCss = (leaf: any) =>
   `
     
       ${
-        props.leaf.property
+        leaf.property
           ? css`
               color: var(--green-6);
             `
           : ''
       } 
         ${
-          props.leaf.builtin
+          leaf.builtin
             ? css`
                 color: var(--green-6);
               `
             : ''
         }
         ${
-          props.leaf.operator || props.leaf.url
+          leaf.operator || leaf.url
             ? css`
                 color: #9a6e3a;
               `
             : ''
         }
         ${
-          props.leaf.keyword
+          leaf.keyword
             ? css`
                 color: #07a;
               `
             : ''
         }
         ${
-          props.leaf.variable || props.leaf.regex
+          leaf.variable || leaf.regex
             ? css`
                 color: #e90;
               `
             : ''
         }
         ${
-          props.leaf.number ||
-          props.leaf.boolean ||
-          props.leaf.tag ||
-          props.leaf.constant ||
-          props.leaf.symbol ||
-          props.leaf['attr-name'] ||
-          props.leaf.selector
+          leaf.number ||
+          leaf.boolean ||
+          leaf.tag ||
+          leaf.constant ||
+          leaf.symbol ||
+          leaf['attr-name'] ||
+          leaf.selector
             ? css`
                 color: #905;
               `
             : ''
         }
         ${
-          props.leaf.punctuation
+          leaf.punctuation
             ? css`
                 color: #999;
               `
             : ''
         }
         ${
-          props.leaf.string || props.leaf.char
+          leaf.string || leaf.char
             ? css`
                 color: #690;
               `
             : ''
         }
         ${
-          props.leaf.function || props.leaf['class-name']
+          leaf.function || leaf['class-name']
             ? css`
                 color: #dd4a68;
               `
             : ''
         }
     `.trim();
-export const Leaf = (props: any) => {
+
+export const Leaf = ({ attributes, children, leaf }: any) => {
+  console.log(leaf, attributes);
+  if (leaf.bold) {
+    children = <strong>{children}</strong>;
+  }
+
+  if (leaf.italic) {
+    children = <em>{children}</em>;
+  }
+
+  if (leaf.underlined) {
+    children = <u>{children}</u>;
+  }
+
+  if (leaf.marker) {
+    children = <span className={classes.marker}>{children}</span>;
+  }
+
+  if (leaf.rememberText) {
+    children = <span className={classes.rememberText}>{children}</span>;
+  }
   return (
-    <span
-      {...props.attributes}
-      data-selected={props.leaf.selected}
-      className={
-        props.editorTextType === EditorTextType.CODE ? CodeCss(props) : ''
-      }>
-      {props.children}
+    <span {...attributes} className={CodeCss(leaf)}>
+      {children}
     </span>
   );
 };
@@ -134,30 +151,4 @@ export const TrainingInput = (props: any) => {
       </span>
     </span>
   );
-};
-
-export const RememberText = (props: any) => {
-  return (
-    <span
-      {...props.attributes}
-      data-identifier={props.leaf.identifier}
-      onClick={props.onClick}
-      data-selected='true'
-      className={classes.marked_text}>
-      {props.children}
-    </span>
-  );
-};
-
-export const PlaceHolder = (props: any) => {
-  return (
-    <span {...props.attributes}>
-      <span className={classes.placeHolder} style={{ pointerEvents: 'none' }}>
-        {props.children}
-      </span>
-    </span>
-  );
-};
-export const DefaultElement = (props: any) => {
-  return <p {...props.attributes}>{props.children}</p>;
 };

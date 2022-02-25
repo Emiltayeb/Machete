@@ -1,12 +1,15 @@
 .editor {
   margin-block-start: var(--size-3);
-
   background: var(--gray-2);
   padding: var(--size-fluid-4);
   position: relative;
-  // white-space: initial !important;
   font-size: var(--font-size-3);
-  overflow-x: auto;
+  overflow-x: hidden;
+
+  pre {
+    max-inline-size: unset;
+    background-color: hsl(0, 0%, 96.5%);
+  }
 }
 
 .marked_text {
@@ -79,5 +82,44 @@
     &[data-correct='false'] {
       background-color: var(--red-5);
     }
+  }
+}
+
+.marker {
+  background: var(--yellow-4);
+  color: black;
+}
+
+.rememberText {
+  background: var(--blue-6) !important;
+  color: white;
+}
+//  new menu
+
+.Menu {
+  padding: 8px 7px 6px;
+  position: absolute;
+  z-index: 1;
+  top: -10000px;
+  left: -10000px;
+  margin-top: -6px;
+  opacity: 0;
+  background-color: #222;
+  border-radius: 4px;
+  transition: opacity 0.75s;
+}
+.tool_bar_menu {
+  display: flex;
+  gap: var(--size-3);
+}
+.format_button {
+  cursor: pointer;
+  color: var(--gray-5);
+  &:hover {
+    color: white;
+  }
+  &.active {
+    color: white;
+    font-weight: bold;
   }
 }
