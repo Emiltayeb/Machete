@@ -1,38 +1,42 @@
 import type { NextPage } from 'next';
 import React from 'react';
 import Head from 'next/head';
-import Editor from '../components/editor';
-import useGetData from '../utils/useGetData';
+import Editor from '../../components/editor';
+import useGetData from '../../utils/useGetData';
 import { doc, updateDoc, where } from 'firebase/firestore';
 import { useUser } from 'reactfire';
 import { v4 } from "uuid";
+import { CardType, SaveCardArgs } from '../../components/editor/types';
 // user code
 
-const Home: NextPage = () => {
+const Home = () => {
   const { data: user } = useUser();
+  const [currentCard, setCurrentCard] = React.useState<CardType | null>(null);
 
-  const { ref, db, resultData, dataStatus } = useGetData({
+  const { db, resultData, dataStatus } = useGetData({
     dataBaseName: 'users',
     options: [where('email', '==', user?.email ?? '')],
   });
 
 
   // TODO: Move to a different function!
-  const onCardSave = async function (cardData: any, currentCardId?: string) {
+  const onCardSave = async function ({ codeLanguages, id, jsonText }: SaveCardArgs) {
     if (!user) return;
 
     let cardId;
     try {
-      const isFirstCard = resultData[0].cards?.length === 0;
-      const updateDocREf = doc(db, 'users', resultData[0].NO_ID_FIELD);
+      const isNewCard = !id;
+      console.log(isNewCard, resultData)
+      const updateDocREf = doc(db, 'users', resultData.NO_ID_FIELD);
 
-      if (isFirstCard) { cardId = v4() }
+      if (isNewCard) { cardId = v4() }
 
-      const updatedData = isFirstCard
-        ? [{ text: cardData, id: cardId }]
-        : resultData[0].cards.map((card: any) => {
-          if (card.id === currentCardId) {
-            card.text = cardData;
+      const updatedData = isNewCard
+        ? [...resultData?.cards, { text: jsonText, id: cardId, codeLanguages }]
+        : resultData.cards.map((card: any) => {
+          if (card.id === id) {
+            card.text = jsonText;
+            card.codeLanguages = codeLanguages
           }
           return card;
         });
@@ -41,6 +45,9 @@ const Home: NextPage = () => {
       await updateDoc(updateDocREf, {
         cards: updatedData,
       });
+
+      // now the card is in the db. put it in the db
+      setCurrentCard({ codeLanguages, id: cardId, text: jsonText })
     } catch (error) {
       console.log(error);
     }
@@ -62,7 +69,7 @@ const Home: NextPage = () => {
       <Editor
         mode='editing'
         // TODO: until you figure out all card temp return first
-        card={resultData?.[0]?.cards?.[0]}
+        card={currentCard}
         onSaveCard={onCardSave}
       />
     </>

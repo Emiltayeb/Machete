@@ -1,4 +1,5 @@
-import { Editor, Transforms } from "slate";
+import { Editor, Transforms, Node, Text } from "slate";
+import { ReactEditor } from "slate-react";
 import * as Utils from "./editor-utils";
 
 let isAllChildrenSelected = false;
@@ -18,14 +19,24 @@ export const handelKeyDown = function (event: React.KeyboardEvent<HTMLDivElement
 			}
 			break
 		case "Enter":
-			if (shiftKey) {
-				Transforms.insertNodes(editor, [
-					{
-						type: 'block',
-						children: [{ text: ' ' }],
-					},
-				]);
+
+			// find current  node
+			const [match] = Utils.findCurrentNodeAtSelection(editor)
+			// find the parent (code block?)
+			const [node] = Editor.parent(editor, match[1]) as any
+
+
+			if (node.type === 'code') {
+				event.preventDefault()
+				if (shiftKey) {
+					// TODO: Insert Soft-Break!
+					editor.insertText("\n")
+					break;
+				}
+				Transforms.insertNodes(editor, { type: "block", children: [{ text: "" }] })
+
 			}
+
 			break;
 		case "a":
 			if (metaKey || ctrlKey) {
@@ -38,25 +49,17 @@ export const handelKeyDown = function (event: React.KeyboardEvent<HTMLDivElement
 }
 
 export const handelCreatCodeBlock = function (editor: Editor, setLanguage: any) {
-	const block = Editor.above(editor, {
-		match: (n) => Editor.isBlock(editor, n),
-	});
 
-	if (block) {
-		const [blockNode, path] = block;
-		const codeRegex = blockNode?.children?.[0]?.text.match(/`{3}([a-z]*)/);
-		const lang = codeRegex?.[1].toLocaleUpperCase() as any
+	const [currentNode] = Utils.findCurrentNodeAtSelection(editor)
+	if (!currentNode) return
 
-		if (lang) {
-			editor.deleteBackward('word');
-			Transforms.insertNodes(editor, [
-				{
-					type: 'code',
-					children: [{ text: '' }],
-				},
-			]);
-			console.log(path)
-			setLanguage(Utils.CodeLanguages?.[lang] || Utils.CodeLanguages.PLAIN_TEXT as Utils.CodeLanguages);
-		}
+	const codeRegex = currentNode[0].text?.match(/`{3}([a-z]*)/);
+	const lang = codeRegex?.[1].toLocaleUpperCase() as any
+
+	if (lang) {
+		editor.deleteBackward('word');
+		Transforms.insertFragment(editor, [{ type: "code", children: [{ text: "" }] }])
+		setLanguage((prev) => [...prev, Utils.CodeLanguages?.[lang] || Utils.CodeLanguages.PLAIN_TEXT as Utils.CodeLanguages]);
 	}
+
 };

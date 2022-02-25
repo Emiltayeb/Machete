@@ -2,11 +2,13 @@ import React from 'react';
 import classes from './editor.module.scss';
 import { css } from '@emotion/css';
 import { Descendant, Editor } from 'slate';
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/default-highlight';
+import { prependOnceListener } from 'process';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
   {
-    type: 'paragraph',
+    type: 'placeholder',
     children: [
       {
         text: 'Write something once. remember it forever.',
@@ -86,7 +88,7 @@ const CodeCss = (leaf: any) =>
 // Elements - basically a block
 export const CodeElement = (props: any) => {
   return <pre {...props.attributes}>
-    <code>{props.children}</code>
+    {props.children}
   </pre>
 }
 
@@ -96,6 +98,7 @@ export const DefaultElement = (props: any) => {
 
 // leaf - is text node
 export const Leaf = ({ attributes, children, leaf }: any) => {
+
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
@@ -115,6 +118,9 @@ export const Leaf = ({ attributes, children, leaf }: any) => {
   if (leaf.rememberText) {
     children = <span className={classes.rememberText}>{children}</span>;
   }
+
+
+
   return (
     <span {...attributes} className={CodeCss(leaf)}>
       {children}

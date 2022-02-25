@@ -5,15 +5,12 @@ import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
-
+// import softBreak from "slate-soft-break";
 import classes from './editor.module.scss';
 import {
   BaseEditor,
   createEditor,
-  Transforms,
-  Descendant,
-  Editor,
-  Text,
+  Descendant
 } from 'slate';
 
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
@@ -24,6 +21,8 @@ import { withHistory } from 'slate-history';
 import { HoveringToolbar } from './hovering-toolbar';
 import { decorator } from "./editor.configs"
 import * as Events from './editor-events';
+
+
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor;
@@ -33,15 +32,17 @@ declare module 'slate' {
   }
 }
 
+
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editor] = React.useState(() => withHistory(withReact(createEditor())));
   const editorRef = React.useRef<null | HTMLDivElement>(null);
   const [allowTrain, setAllowTrain] = React.useState(false);
-  const [editorCodeLang, setLanguage] = React.useState<Utils.CodeLanguages | null>(Utils.CodeLanguages.HTML);
-  const [editorValue, setEditorValue] = React.useState(JSON.parse(props.card?.text) || CustomComponents.initialValue);
+  const [editorCodeLang, setLanguage] = React.useState<Utils.CodeLanguages[] | null>(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
+  const [editorValue, setEditorValue] = React.useState(props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue);
   const [mode, setMode] = React.useState<Utils.EditorMode>(
     Utils.EditorMode.ADD
   );
+
 
 
   // Each time we change code lang
@@ -58,30 +59,22 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorValue]);
 
-  // When we change the code lang.
-  //TODO: Per Code BLOCK!
-  React.useEffect(() => {
-    if (!editorCodeLang) return
-    // Transforms.insertNodes(editor, [
-    //   {
-    //     type: 'code',
-    //     children: [{ text: '' }],
-    //   },
-    // ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editorCodeLang]);
 
-
-  // TODO: Per Code BLOCK!
-  // decorate function depends on the language selected
+  // for every lang we have in the editor - paint it.
   const decorate = React.useCallback(
-    ([node, path]) => decorator([node, path], editorCodeLang),
+    ([node, path]) => {
+      if (!editorCodeLang) return
+      let finalDecorator: any = [];
+      editorCodeLang?.forEach(lang => {
+        const dec = decorator([node, path], lang, editor)
+        finalDecorator.push(...dec)
+      })
+      return finalDecorator
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [editorCodeLang]
   );
 
-  // TODO: Move to custom comp
-  // Define a rendering function based on the element passed to `props`. We use
-  // `useCallback` here to memoize the function for subsequent renders.
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
@@ -92,8 +85,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         return <CustomComponents.DefaultElement {...props} />;
     }
   }, []);
-
-
 
   return (
     <div ref={editorRef}>
@@ -115,7 +106,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         />
       </Slate>
       {/* TODO::  should be a EditorActionsButton components.*/}
-      <button onClick={() => props.onSaveCard(JSON.stringify(editor.children), props.card.id)}> Save</button>
+      <button onClick={() => props.onSaveCard({ jsonText: JSON.stringify(editor.children), codeLanguages: editorCodeLang, id: props?.card?.id })}> Save</button>
     </div >
   );
 };

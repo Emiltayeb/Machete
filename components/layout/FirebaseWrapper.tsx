@@ -1,8 +1,7 @@
 import { getAuth } from 'firebase/auth'; // Firebase v9+
 import { getDatabase } from 'firebase/database'; // Firebase v9+
 import {
-  initializeFirestore,
-  enableIndexedDbPersistence,
+  initializeFirestore
 } from 'firebase/firestore';
 import {
   FirestoreProvider,

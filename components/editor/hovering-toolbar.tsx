@@ -3,7 +3,7 @@ import React, { PropsWithChildren, Ref } from 'react';
 import { useRef } from 'react';
 import { Editor, Text, Range } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
-import { Portal } from '../portal';
+import { Portal } from '../layout/Portal';
 import { toggleFormat } from './editor-utils';
 import classes from './editor.module.scss';
 

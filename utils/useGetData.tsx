@@ -17,7 +17,7 @@ const useGetData = ({
   const { status: dataStatus, data: resultData } =
     useFirestoreCollectionData(queryRef);
 
-  return { dataStatus, resultData, ref: collections, db: firestore };
+  return { dataStatus, resultData: resultData?.[0], ref: collections, db: firestore };
 };
 
 export default useGetData;

@@ -1,4 +1,4 @@
-import { Text } from "slate";
+import { Editor, Text } from "slate";
 import Prism from 'prismjs';
 
 
@@ -12,16 +12,23 @@ const getLength = (token: any) => {
 	}
 };
 
-export const decorator = ([node, path]: any, editorCodeLang: any) => {
+export const decorator = ([node, path]: any, editorCodeLang: any, editor: Editor) => {
 	const ranges: any = [];
 
-	console.log(node.type)
+
 	// TODO: the loop should repaint from the last block!
-	if (!Text.isText(node) as any || !editorCodeLang || node.type === "code") {
+	if (!Text.isText(node) as any || !editorCodeLang) {
 		return ranges;
+	}
+	const [parent] = Editor.parent(editor, path) as any
+
+
+	if (parent.type !== 'code') {
+		return ranges
 	}
 
 	const tokens = Prism.tokenize(node.text, Prism.languages[editorCodeLang]);
+
 	let start = 0;
 
 	for (const token of tokens) {
@@ -38,6 +45,5 @@ export const decorator = ([node, path]: any, editorCodeLang: any) => {
 
 		start = end;
 	}
-
 	return ranges;
 }

@@ -9,6 +9,10 @@
   pre {
     max-inline-size: unset;
     background-color: hsl(0, 0%, 96.5%);
+    padding: var(--size-3);
+    margin-block: vaR(--size-1);
+    white-space: inherit;
+
   }
 }
 

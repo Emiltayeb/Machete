@@ -10,3 +10,11 @@
   display: flex;
   gap: var(--size-3);
 }
+
+.cards{
+  display: flex;
+  justify-content: space-around;
+  margin-block-start: var(--size-4);
+  gap: var(--size-1);
+  flex-wrap: wrap;
+}
