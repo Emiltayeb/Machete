@@ -3,17 +3,28 @@ import classes from './login.module.scss';
 import {
   createUserWithEmailAndPassword,
   getAuth,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { useUser } from 'reactfire';
 import { useRouter } from 'next/router';
 import { addDoc } from 'firebase/firestore';
 import useGetData from '../../utils/useGetData';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
 enum FormMode {
   LOGIN,
   SIGN_UP,
 }
+
+const uiConfig = {
+  signInFlow: 'popup',
+  signInOptions: [GoogleAuthProvider.PROVIDER_ID],
+  callbacks: {
+    signInSuccessWithAuthResult: () => false,
+  },
+};
+
 const Login = () => {
   const auth = getAuth();
   const router = useRouter();
@@ -22,9 +33,10 @@ const Login = () => {
   const password = React.useRef<HTMLInputElement>(null);
   const name = React.useRef<HTMLInputElement>(null);
   const [formMode, setFormMode] = React.useState<FormMode>(FormMode.LOGIN);
-  const { status, data: user } = useUser();
+  const { data: user } = useUser();
   const [error, setError] = React.useState('');
 
+  // when ever user changes - push to home
   React.useEffect(() => {
     if (!user) return;
     router.push('/');
@@ -54,10 +66,10 @@ const Login = () => {
         await signInWithEmailAndPassword(auth, emailVal, passVal);
       }
     } catch (error: any) {
-      console.log(error);
       setError(error.message);
     }
   };
+
   return (
     <>
       <h1>{formMode === FormMode.LOGIN ? 'Login' : 'Sign Up'}</h1>
@@ -100,7 +112,7 @@ const Login = () => {
             </>
           )}
         </div>
-
+        <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} />
         {error.length > 0 && <p className={classes.error}>{error}</p>}
       </form>
     </>

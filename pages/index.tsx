@@ -7,45 +7,31 @@ import useGetData from '../utils/useGetData';
 import { where } from 'firebase/firestore';
 import Card from '../components/layout/Card';
 import { CardType } from '../components/editor/types';
-// Configure FirebaseUI.
-const uiConfig = {
-  signInFlow: 'popup',
-  signInOptions: [],
-  callbacks: {
-    signInSuccessWithAuthResult: () => false,
-  },
-};
-
-
 
 export default function Login() {
   const router = useRouter();
   const auth = useAuth();
-  const { status, data: user } = useUser();
-  const { db, resultData, dataStatus } = useGetData({
+  const { data: user } = useUser();
+  const { resultData } = useGetData({
     dataBaseName: 'users',
     options: [where('email', '==', user?.email ?? '')],
   });
 
-
   React.useEffect(() => {
-    if (user || (status === "success" && !user)) return;
+    if (user) return;
     router.replace('/auth');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-
   const onCardClick = function (id?: string) {
-    if (!id) return
-    router.push(`editor/${id}`)
-  }
-
+    if (!id) return;
+    router.push(`editor/${id}`);
+  };
 
   if (!user) {
-    return <>Loading..</>
+    return <>Loading..</>;
   }
 
-  console.log(resultData)
   if (user) {
     return (
       <div className={classes.Root}>
@@ -58,9 +44,11 @@ export default function Login() {
         </div>
 
         <div className={classes.cards}>
-          {resultData?.cards?.map((card: CardType) => <Card onClick={() => onCardClick(card?.id)} key={card.id}>
-            {card.text}
-          </Card>)}
+          {resultData?.cards?.map((card: CardType) => (
+            <Card onClick={() => onCardClick(card?.id)} key={card.id}>
+              {card.text}
+            </Card>
+          ))}
         </div>
       </div>
     );

@@ -2,7 +2,7 @@
   "name": "Machete",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 8000",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

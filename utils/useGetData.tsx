@@ -1,5 +1,5 @@
-import { collection, query } from 'firebase/firestore';
 import React from 'react';
+import { collection, query } from 'firebase/firestore';
 import { useFirestore, useFirestoreCollectionData } from 'reactfire';
 
 const useGetData = ({
@@ -17,7 +17,12 @@ const useGetData = ({
   const { status: dataStatus, data: resultData } =
     useFirestoreCollectionData(queryRef);
 
-  return { dataStatus, resultData: resultData?.[0], ref: collections, db: firestore };
+  return {
+    dataStatus,
+    resultData: resultData?.[0],
+    ref: collections,
+    db: firestore,
+  };
 };
 
 export default useGetData;

@@ -1,10 +1,9 @@
-
 // Your web app's Firebase configuration
 export const firebaseConfig = {
-  apiKey: "AIzaSyCLnk5ijtWakpeZxMM8W9f_PVUgnbCNZbM",
-  authDomain: "machete-daf13.firebaseapp.com",
-  projectId: "machete-daf13",
-  storageBucket: "machete-daf13.appspot.com",
-  messagingSenderId: "548862690372",
-  appId: "1:548862690372:web:cb1549900267e134082811"
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_APP_ID,
+  appId: process.env.NEXT_PUBLIC_SENDER_ID,
 };
