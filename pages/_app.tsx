@@ -1,11 +1,14 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import Container from '../components/layout/Container';
-import Footer from '../components/layout/Footer';
+// 1. import `ChakraProvider` component
+import { Box, ChakraProvider, Progress } from '@chakra-ui/react';
+import Footer from '../components/layout/footer/Footer';
 import { firebaseConfig } from '../services/firebase-config';
 import { FirebaseAppProvider } from 'reactfire';
 import FirebaseWrapper from '../components/layout/FirebaseWrapper';
 import Head from 'next/head';
+import Navigation from '../components/layout/navigation/Navigation';
+import { RecoilRoot } from 'recoil';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -14,10 +17,16 @@ function MyApp({ Component, pageProps }: AppProps) {
         <Head>
           <title>Machete</title>
         </Head>
-        <Container>
-          <Component {...pageProps} />
-        </Container>
-        <Footer />
+        <RecoilRoot>
+          <ChakraProvider>
+            <Navigation />
+
+            <Box height={'90vh'}>
+              <Component {...pageProps} />
+            </Box>
+            <Footer />
+          </ChakraProvider>
+        </RecoilRoot>
       </FirebaseWrapper>
     </FirebaseAppProvider>
   );

@@ -1,7 +1,9 @@
 .editor {
   margin-block-start: var(--size-3);
   background: var(--gray-2);
-  padding: var(--size-fluid-4);
+  padding: var(--size-3);
+  min-height: 200px !important;
+
   position: relative;
   font-size: var(--font-size-3);
   overflow-x: hidden;
@@ -12,7 +14,6 @@
     padding: var(--size-3);
     margin-block: vaR(--size-1);
     white-space: inherit;
-
   }
 }
 
@@ -62,12 +63,11 @@
 }
 
 .train_input {
-  background-color: var(--blue-3);
   box-sizing: content-box;
   min-width: 38px;
   width: fit-content;
-  height: var(--size-3);
-  margin: var(--size-1);
+  height: 100%;
+
   outline: none;
   appearance: none;
   border: none;

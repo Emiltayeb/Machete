@@ -1,0 +1,15 @@
+.Root {
+  border-bottom: 1px solid transparent;
+}
+
+.logo {
+  font-weight: bold;
+}
+
+.darkModeToggle {
+  opacity: 0.5;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+  }
+}

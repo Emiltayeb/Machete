@@ -25,7 +25,10 @@ export const Menu = React.forwardRef(
 );
 const matchedNodes = {} as any;
 
-export const HoveringToolbar = (props: any) => {
+export const HoveringToolbar = (props: {
+  shouldHide: boolean;
+  setShouldHide: any;
+}) => {
   const ref = useRef<HTMLDivElement | null>();
   const currNodeRef = useRef<any>();
   const editor = useSlate();
@@ -54,23 +57,29 @@ export const HoveringToolbar = (props: any) => {
       !ReactEditor?.isFocused(editor) ||
       !selectedText?.length ||
       Range?.isCollapsed?.(selection) ||
+      window.getSelection()?.toString().length === 0 ||
+      props.shouldHide ||
       Editor.string(editor, selection) === ''
     ) {
       el.removeAttribute('style');
+      props.setShouldHide(false);
       return;
     }
     const domSelection = window.getSelection();
     const domRange = domSelection?.getRangeAt(0);
     const rect = domRange?.getBoundingClientRect();
-    if (!rect) return;
+    if (!rect) {
+      return;
+    }
     el.style.opacity = '1';
     el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
-    el.style.left = `${rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2
-      }px`;
+    el.style.left = `${
+      rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2
+    }px`;
   });
 
+  // Check if we need to apply format
   const compareFormat = function (format: string) {
-    // get the current path from selection
     if (!editor.selection) return;
     const { anchor, focus } = editor.selection;
     if (!anchor.path || !focus.path) return;

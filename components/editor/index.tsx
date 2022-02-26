@@ -7,11 +7,7 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
 // import softBreak from "slate-soft-break";
 import classes from './editor.module.scss';
-import {
-  BaseEditor,
-  createEditor,
-  Descendant
-} from 'slate';
+import { BaseEditor, createEditor, Descendant } from 'slate';
 
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import * as Types from './types';
@@ -19,9 +15,9 @@ import * as Utils from './editor-utils';
 import * as CustomComponents from './custom-components';
 import { withHistory } from 'slate-history';
 import { HoveringToolbar } from './hovering-toolbar';
-import { decorator } from "./editor.configs"
+import { decorator } from './editor.configs';
 import * as Events from './editor-events';
-
+import { Box, Button, HStack } from '@chakra-ui/react';
 
 declare module 'slate' {
   interface CustomTypes {
@@ -32,44 +28,47 @@ declare module 'slate' {
   }
 }
 
-
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editor] = React.useState(() => withHistory(withReact(createEditor())));
-  const editorRef = React.useRef<null | HTMLDivElement>(null);
-  const [allowTrain, setAllowTrain] = React.useState(false);
-  const [editorCodeLang, setLanguage] = React.useState<Utils.CodeLanguages[] | null>(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
-  const [editorValue, setEditorValue] = React.useState(props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue);
+  const [editorCodeLang, setLanguage] = React.useState<
+    Utils.CodeLanguages[] | null
+  >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
+  const [editorValue, setEditorValue] = React.useState(
+    props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
+  );
+
+  const editorRef = React.useRef<HTMLDivElement | null>(null);
+  const [hideToolbar, setHideToolbar] = React.useState(false);
   const [mode, setMode] = React.useState<Utils.EditorMode>(
     Utils.EditorMode.ADD
   );
 
-
+  // inital load
 
   // Each time we change code lang
   React.useEffect(() => {
-    if (!editorValue?.[0] || !editorRef.current) return;
+    if (!editorValue?.[0]) return;
     // determine if we can be in training mode
-    setAllowTrain(
-      editorRef.current?.querySelectorAll('[data-selected]').length > 0
+    const detectCodeTimerId = setTimeout(
+      () => Events.handelCreatCodeBlock(editor, setLanguage),
+      600
     );
-    const detectCodeTimerId = setTimeout(() => Events.handelCreatCodeBlock(editor, setLanguage), 600);
     return () => {
       clearTimeout(detectCodeTimerId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorValue]);
 
-
   // for every lang we have in the editor - paint it.
   const decorate = React.useCallback(
     ([node, path]) => {
-      if (!editorCodeLang) return
+      if (!editorCodeLang) return;
       let finalDecorator: any = [];
-      editorCodeLang?.forEach(lang => {
-        const dec = decorator([node, path], lang, editor)
-        finalDecorator.push(...dec)
-      })
-      return finalDecorator
+      editorCodeLang?.forEach((lang) => {
+        const dec = decorator([node, path], lang, editor);
+        finalDecorator.push(...dec);
+      });
+      return finalDecorator;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [editorCodeLang]
@@ -78,40 +77,74 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
-        return (
-          <CustomComponents.CodeElement {...props} />
-        );
+        return <CustomComponents.CodeElement {...props} />;
       default:
         return <CustomComponents.DefaultElement {...props} />;
     }
   }, []);
 
   return (
-    <div ref={editorRef}>
+    <Box ref={editorRef}>
       <Slate
         editor={editor}
         value={editorValue}
         onChange={(newValue) => {
           setEditorValue(newValue as any);
         }}>
-        <HoveringToolbar />
+        <HoveringToolbar
+          shouldHide={hideToolbar}
+          setShouldHide={setHideToolbar}
+        />
         <Editable
+          autoFocus
+          readOnly={mode === Utils.EditorMode.TRAIN}
+          style={{ color: 'black' }}
+          onBlur={() => setHideToolbar(true)}
           placeholder='Enter some text'
           decorate={decorate}
           id='SLATE_EDITOR'
           className={classes.editor}
           renderElement={renderElement}
           onKeyDown={(event) => Events.handelKeyDown(event, editor)}
-          renderLeaf={(props) => <CustomComponents.Leaf {...props} />}
+          renderLeaf={(props) => (
+            <CustomComponents.Leaf {...props} editorMode={mode} />
+          )}
         />
       </Slate>
       {/* TODO::  should be a EditorActionsButton components.*/}
-      <button onClick={() => props.onSaveCard({ jsonText: JSON.stringify(editor.children), codeLanguages: editorCodeLang, id: props?.card?.id })}> Save</button>
-    </div >
+      <HStack marginBlockStart={3}>
+        <Button
+          bgColor='green.300'
+          color={'white'}
+          onClick={() =>
+            props.onSaveCard({
+              text: JSON.stringify(editor.children),
+              codeLanguages: editorCodeLang,
+              id: props?.card?.id,
+              category: '',
+              title: 'Title',
+              exec: 'exec',
+            })
+          }>
+          Save
+        </Button>
+        <Button
+          bgColor='linkedin.300'
+          color={'white'}
+          onClick={() =>
+            setMode(
+              mode === Utils.EditorMode.TRAIN
+                ? Utils.EditorMode.ADD
+                : Utils.EditorMode.TRAIN
+            )
+          }>
+          {mode === Utils.EditorMode.TRAIN ? 'Edit' : 'Train'}
+        </Button>
+      </HStack>
+    </Box>
   );
 };
 
 export default SlateEditor;
-
 
 Prism.languages.typeScript = Prism.languages.extend('typescript', {});

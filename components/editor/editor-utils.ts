@@ -4,10 +4,9 @@ import {
   Editor as SlateEditor,
   Transforms,
   Node,
-  Text
+  Text,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
-
 
 type Editor = BaseEditor & ReactEditor;
 
@@ -47,15 +46,13 @@ export const toggleFormat = (
     },
   }) as any;
   const { text, ...restFormats } = match[0];
-
-  console.log(window.getSelection()?.toString().split("\n").join(""));
   Transforms.insertNodes(
     editor,
     [
       {
         ...restFormats,
         [format]: !isActive,
-        text: window.getSelection()?.toString()?.trim()?.replace("\n", ""),
+        text: window.getSelection()?.toString()?.trim()?.replace('\n', ''),
       },
     ],
     { match: Text.isText }
@@ -69,4 +66,4 @@ export const findCurrentNodeAtSelection = function (editor: Editor) {
       return true;
     },
   }) as any;
-}
+};
