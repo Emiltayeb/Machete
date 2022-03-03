@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { Editor, Text, Range } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
 import { Portal } from '../layout/Portal';
-import { toggleFormat } from './editor-utils';
+import { CustomFormats, toggleFormat } from './editor-utils';
 import classes from './editor.module.scss';
 
 interface BaseProps {
@@ -52,10 +52,11 @@ export const HoveringToolbar = (props: {
     }) as any;
 
     currNodeRef.current = match?.[0];
+
+    // if the current node type is remember me - display the remove marker.
     if (
       !selection ||
       !ReactEditor?.isFocused(editor) ||
-      !selectedText?.length ||
       Range?.isCollapsed?.(selection) ||
       window.getSelection()?.toString().length === 0 ||
       props.shouldHide ||
@@ -79,7 +80,7 @@ export const HoveringToolbar = (props: {
   });
 
   // Check if we need to apply format
-  const compareFormat = function (format: string) {
+  const compareFormat = function (format: CustomFormats) {
     if (!editor.selection) return;
     const { anchor, focus } = editor.selection;
     if (!anchor.path || !focus.path) return;
@@ -121,25 +122,23 @@ export const HoveringToolbar = (props: {
   return (
     <Portal>
       <Menu ref={ref} className={classes.Menu}>
-        {/* TODO:: Creat enums for markers.*/}
-        {/* TODO:: create icons from galit*/}
         <FormatButton
-          isFormatActive={compareFormat('bold')}
+          isFormatActive={compareFormat(CustomFormats.BOLD)}
           format='bold'
           icon='B'
         />
-        {!currNodeRef.current?.['rememberText'] === true && (
+        {!currNodeRef.current?.[CustomFormats.REMEMBER_TEXT] && (
           <FormatButton
             currNode={currNodeRef.current}
-            isFormatActive={compareFormat('marker')}
-            format='marker'
+            isFormatActive={compareFormat(CustomFormats.MARKER)}
+            format={CustomFormats.MARKER}
             icon='H'
           />
         )}
-        {!currNodeRef.current?.['marker'] && (
+        {!currNodeRef.current?.[CustomFormats.MARKER] && (
           <FormatButton
-            isFormatActive={compareFormat('rememberText')}
-            format='rememberText'
+            isFormatActive={compareFormat(CustomFormats.REMEMBER_TEXT)}
+            format={CustomFormats.REMEMBER_TEXT}
             icon='R'
           />
         )}

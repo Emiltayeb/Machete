@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth, useUser } from 'reactfire';
+import { useUser } from 'reactfire';
 import { useRouter } from 'next/router';
 import useGetData from '../utils/useGetData';
 import { where } from 'firebase/firestore';
@@ -9,6 +9,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   Flex,
   Heading,
   HStack,
@@ -18,34 +19,14 @@ import {
 } from '@chakra-ui/react';
 import { useSetRecoilState } from 'recoil';
 import { isLoadingState } from '../store';
+import useGetLoadingStatus from '../utils/useGetLoadingStatus';
 
 export default function Login() {
   const router = useRouter();
-  const { data: user, status } = useUser();
-  const { resultData: userCards } = useGetData({
-    dataBaseName: 'users',
-    options: [where('email', '==', user?.email ?? '')],
-  });
+  const { user, userDataFromDb } = useGetLoadingStatus();
+
   const textColor = useColorModeValue('black', 'white');
-
-  const setLoading = useSetRecoilState(isLoadingState);
-
-  const isLoadingUser = status === 'loading' || typeof user === 'undefined';
-
-  React.useEffect(() => {
-    if (isLoadingUser) {
-      setLoading(true);
-      return;
-    }
-    if (user) {
-      setLoading(false);
-      return;
-    }
-    if (!user) {
-      router.replace('/auth');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  const cardBgColor = useColorModeValue('gray.300', 'gray.700');
 
   const onCardClick = function (id?: string) {
     if (!id) return;
@@ -56,15 +37,17 @@ export default function Login() {
     return (
       <Container maxW={'container.xl'}>
         <VStack alignItems={'flex-start'} spacing={3}>
-          <Heading color={textColor} marginBlockStart={5}>
+          <Heading
+            color={textColor}
+            marginBlockStart={5}
+            fontSize={{ base: 'xl', sm: '2xl', md: '3xl' }}>
             Welcome {user.displayName || user.email}
           </Heading>
-          <Text>
+          <Text fontSize={{ base: 'small', sm: 'xl' }}>
             Here you can view your cards or you can{' '}
             <Button
               size={'sm'}
-              bg='green.400'
-              color={'white'}
+              colorScheme='whatsapp'
               onClick={() => router.push('/editor/new')}>
               {' '}
               Creat Card
@@ -72,10 +55,21 @@ export default function Login() {
           </Text>
         </VStack>
 
-        <Box p={10} bg={'gray.100'} marginBlockStart={7}>
+        <Divider maxW={'container.md'} marginBlockStart={3} />
+
+        <Box
+          p={{ base: 2, sm: 5, md: 10 }}
+          bg={cardBgColor}
+          marginBlockStart={7}
+          rounded='2xl'>
           <Flex wrap={'wrap'} justifyContent='space-between' gap={5}>
-            {userCards?.cards?.map((card: CardType) => (
-              <Box flex='1' bg={'white'} borderRadius='lg' p={6} key={card.id}>
+            {userDataFromDb?.cards?.map((card: CardType) => (
+              <Box
+                flex='1'
+                bg={'white'}
+                borderRadius='lg'
+                p={{ base: 2, sm: 6 }}
+                key={card.id}>
                 <Flex
                   flexDirection={'column'}
                   height='full'
@@ -83,14 +77,11 @@ export default function Login() {
                   alignItems='flex-start'
                   justifyContent='space-between'>
                   <VStack alignItems={'flex-start'} spacing={1}>
-                    <HStack w={'full'} justifyContent='space-between'>
-                      <Heading color={'black'} fontSize={'md'}>
-                        {card.title}
-                      </Heading>
-                      <Badge px={4} colorScheme={'facebook'}>
-                        {card.category}
-                      </Badge>
-                    </HStack>
+                    <Badge colorScheme={'facebook'}>{card.category}</Badge>
+                    <Heading color={'black'} fontSize={'md'}>
+                      {card.title}
+                    </Heading>
+
                     <Text color={'black'} fontSize={{ base: 'sm', sm: 'sm' }}>
                       {card.exec}
                     </Text>

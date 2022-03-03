@@ -31,15 +31,12 @@ const Navigation = () => {
   const loadingState = useRecoilValue(isLoadingState);
   const router = useRouter();
 
-  console.log({ loadingState });
   return (
     <>
       <Box
         as='nav'
         className={classes.Root}
-        borderBottomColor={borderBottomColor}
-        // style={{ border: colorMode === 'dark' ? 'none' : '' }}
-      >
+        borderBottomColor={borderBottomColor}>
         <Container maxW={'container.xl'}>
           <Flex
             justifyContent={{ base: 'center', sm: 'space-between' }}
@@ -52,11 +49,16 @@ const Navigation = () => {
               </Link>
             </NextLink>
             <List>
-              <Flex gap={4} alignItems='center'>
-                <ListItem>
-                  <Link color={textColor}>About</Link>
-                </ListItem>
-
+              <Flex
+                gap={4}
+                alignItems='center'
+                wrap='wrap'
+                justifyContent={{ base: 'center', md: 'initial' }}>
+                {user && (
+                  <ListItem>
+                    <Button colorScheme={'whatsapp'}>Create Card</Button>
+                  </ListItem>
+                )}
                 <ListItem>
                   <Button
                     color={textColor}

@@ -28,7 +28,6 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
-  AlertTitle,
   CloseButton,
   useColorModeValue,
 } from '@chakra-ui/react';
@@ -75,9 +74,10 @@ const Login = () => {
 
   const onSubmit = async function (e: React.FormEvent<HTMLDivElement>) {
     e.preventDefault();
-    const emailVal = email.current.value as string;
-    const passVal = password.current.value as string;
-    const nameVal = name.current?.value as string;
+    if (!email.current || !password.current) return;
+    const emailVal = email?.current.value;
+    const passVal = password?.current.value;
+    const nameVal = name.current?.value;
 
     try {
       setIsSubmitting(true);
@@ -120,7 +120,7 @@ const Login = () => {
         <FormLabel fontSize={{ base: 'small', md: 'md' }}>Password</FormLabel>
         <Input
           ref={password}
-          minLength='6'
+          minLength={6}
           fontSize={{ base: 'small', md: 'md' }}
           id='password'
           type='password'

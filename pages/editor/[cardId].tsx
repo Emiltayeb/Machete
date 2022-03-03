@@ -8,11 +8,11 @@ import Editor from '../../components/editor';
 import { CardType } from '../../components/editor/types';
 import { isLoadingState } from '../../store';
 import useGetData from '../../utils/useGetData';
+import useGetLoadingStatus from '../../utils/useGetLoadingStatus';
 
 const UserCard = function () {
   const params = useRouter().query;
-  const { data: user } = useUser();
-  const setLoading = useSetRecoilState(isLoadingState);
+  const { user, isLoading } = useGetLoadingStatus();
   const { resultData, dataStatus } = useGetData({
     dataBaseName: 'users',
     options: [where('email', '==', user?.email || '')],
@@ -22,25 +22,12 @@ const UserCard = function () {
     (card: CardType) => card.id === params.cardId
   );
 
-  React.useEffect(() => {
-    if (dataStatus === 'loading') {
-      setLoading(true);
-      return;
-    }
-    setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataStatus]);
-
-  if (dataStatus === 'loading') {
+  if (isLoading || dataStatus === 'loading') {
     return <></>;
   }
   return (
     <Container maxW={'container.lg'}>
-      <Editor
-        mode='editing'
-        card={card}
-        onSaveCard={(card) => console.log(card)}
-      />
+      <Editor mode='editing' card={card} />
     </Container>
   );
 };

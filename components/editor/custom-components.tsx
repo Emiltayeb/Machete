@@ -1,21 +1,26 @@
 import React from 'react';
 import classes from './editor.module.scss';
 import { css } from '@emotion/css';
-import { Descendant, Editor } from 'slate';
-import { EditorMode } from './editor-utils';
+import { Descendant, Editor, Transforms, Text } from 'slate';
+import { EditorMode, selectCurrentNode } from './editor-utils';
 import { Input } from '@chakra-ui/react';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
   {
-    type: 'placeholder',
+    type: 'block',
     children: [{ text: '' }],
   },
 ];
 
 const CodeCss = (leaf: any) =>
-  `
-    
+  `${
+    leaf.comment
+      ? css`
+          color: slategray;
+        `
+      : ''
+  }
       ${
         leaf.property
           ? css`
@@ -98,32 +103,41 @@ export const DefaultElement = (props: any) => {
 
 // leaf - is text node
 export const Leaf = (props: any) => {
-  console.log(props);
-  let { attributes, children, leaf, editorMode } = props;
+  let { attributes, children, leaf, editorMode, editor } = props;
 
   if (leaf.bold) {
-    children = <strong>{children}</strong>;
-  }
-
-  if (leaf.italic) {
-    children = <em>{children}</em>;
-  }
-
-  if (leaf.underlined) {
-    children = <u>{children}</u>;
+    children = (
+      <strong
+        data-slate-custom-leaf='true'
+        onClick={() => selectCurrentNode(editor)}>
+        {children}
+      </strong>
+    );
   }
 
   if (leaf.marker) {
-    children = <span className={classes.marker}>{children}</span>;
+    children = (
+      <span
+        data-slate-custom-leaf='true'
+        className={classes.marker}
+        onClick={() => selectCurrentNode(editor)}>
+        {children}
+      </span>
+    );
   }
 
   if (leaf.rememberText) {
-    console.log('remember text ');
     children =
       editorMode === EditorMode.TRAIN ? (
         <TrainingInput {...props} />
       ) : (
-        <span className={classes.rememberText}>{children}</span>
+        <span
+          data-slate-custom-leaf='true'
+          data-remember-text='true'
+          className={classes.rememberText}
+          onClick={() => selectCurrentNode(editor)}>
+          {children}
+        </span>
       );
   }
 
@@ -171,7 +185,8 @@ export const TrainingInput = (props: any) => {
           type='text'
           value={inputState}
           style={{
-            width: `${inputState.length + 3}ch`,
+            width: `${inputState.length + 2}ch`,
+            height: 'auto',
           }}
           onChange={(e) =>
             !answerStatus.answered && setInputState(e.target.value)

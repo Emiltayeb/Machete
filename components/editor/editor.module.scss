@@ -1,19 +1,24 @@
 .editor {
   margin-block-start: var(--size-3);
-  background: var(--gray-2);
+  background: var(--gray-1);
   padding: var(--size-3);
   min-height: 200px !important;
-
+  caret-color: var(--blue-5);
   position: relative;
   font-size: var(--font-size-3);
   overflow-x: hidden;
+  cursor: auto;
 
+  [data-slate-custom-leaf='true'] {
+    cursor: pointer;
+  }
   pre {
     max-inline-size: unset;
-    background-color: hsl(0, 0%, 96.5%);
+    background: rgb(255, 255, 255);
     padding: var(--size-3);
     margin-block: vaR(--size-1);
     white-space: inherit;
+    font-size: 75%;
   }
 }
 
@@ -66,7 +71,6 @@
   box-sizing: content-box;
   min-width: 38px;
   width: fit-content;
-  height: 100%;
 
   outline: none;
   appearance: none;
@@ -125,5 +129,13 @@
   &.active {
     color: white;
     font-weight: bold;
+  }
+}
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }

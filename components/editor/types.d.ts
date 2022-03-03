@@ -12,6 +12,5 @@ export type CardType = {
 };
 export interface EditorProps {
   mode: 'training' | 'editing';
-  onSaveCard: (card: CardType) => void;
   card?: CardType | null;
 }
