@@ -15,32 +15,29 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import useGetLoadingStatus from '../../utils/useGetLoadingStatus';
+import PrivateRoute from '../../components/PrivateRoute';
 // user code
 
-const Home = () => {
-  const { user } = useGetLoadingStatus();
+const Home = (props: any) => {
   const textColor = useColorModeValue('black', 'white');
 
-  if (user) {
-    return (
-      <Container maxW={'container.lg'} p={4}>
-        <Head>
-          <title>Machete - Create card</title>
-          <meta name='description' content='A learning tool for everyone.' />
-          <link rel='icon' href='/favicon.ico' />
-        </Head>
+  return (
+    <Container maxW={'container.lg'} p={4}>
+      <Head>
+        <title>Machete - Create card</title>
+        <meta name='description' content='A learning tool for everyone.' />
+        <link rel='icon' href='/favicon.ico' />
+      </Head>
 
-        <VStack alignItems={'stretch'} spacing={3}>
-          <VStack alignItems={'flex-start'} spacing={1}>
-            <Heading color={textColor}>Create card</Heading>
-            <Text>Here you can creat a memory card and save it.</Text>
-          </VStack>
-          <Editor mode='editing' />
+      <VStack alignItems={'stretch'} spacing={3}>
+        <VStack alignItems={'flex-start'} spacing={1}>
+          <Heading color={textColor}>Create card</Heading>
+          <Text>Here you can creat a memory card and save it.</Text>
         </VStack>
-      </Container>
-    );
-  }
-  return <></>;
+        <Editor mode='editing' />
+      </VStack>
+    </Container>
+  );
 };
 
-export default Home;
+export default PrivateRoute(Home);

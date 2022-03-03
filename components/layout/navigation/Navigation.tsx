@@ -77,8 +77,6 @@ const Navigation = () => {
           </Flex>
         </Container>
       </Box>
-
-      {loadingState && <Progress size='xs' isIndeterminate />}
     </>
   );
 };

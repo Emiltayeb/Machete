@@ -49,7 +49,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     Utils.EditorMode.ADD
   );
-
   const [allowTrain, setAllowTRain] = React.useState(false);
 
   const { data: user } = useUser();
