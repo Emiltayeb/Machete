@@ -1,95 +1,154 @@
 import React from 'react';
-import clsx from 'clsx';
 import classes from './editor.module.scss';
 import { css } from '@emotion/css';
-import { EditorTextType } from './utils';
-import { Editor } from 'slate';
-const CodeCss = (props: any) =>
-  `
-    
+import { Descendant, Editor, Transforms, Text } from 'slate';
+import { EditorMode, selectCurrentNode } from './editor-utils';
+import { Input } from '@chakra-ui/react';
+
+// initial editor values (new user - no cards)
+export const initialValue: Descendant[] = [
+  {
+    type: 'block',
+    children: [{ text: '' }],
+  },
+];
+
+const CodeCss = (leaf: any) =>
+  `${
+    leaf.comment
+      ? css`
+          color: slategray;
+        `
+      : ''
+  }
       ${
-        props.leaf.property
+        leaf.property
           ? css`
               color: var(--green-6);
             `
           : ''
       } 
         ${
-          props.leaf.builtin
+          leaf.builtin
             ? css`
                 color: var(--green-6);
               `
             : ''
         }
         ${
-          props.leaf.operator || props.leaf.url
+          leaf.operator || leaf.url
             ? css`
                 color: #9a6e3a;
               `
             : ''
         }
         ${
-          props.leaf.keyword
+          leaf.keyword
             ? css`
                 color: #07a;
               `
             : ''
         }
         ${
-          props.leaf.variable || props.leaf.regex
+          leaf.variable || leaf.regex
             ? css`
                 color: #e90;
               `
             : ''
         }
         ${
-          props.leaf.number ||
-          props.leaf.boolean ||
-          props.leaf.tag ||
-          props.leaf.constant ||
-          props.leaf.symbol ||
-          props.leaf['attr-name'] ||
-          props.leaf.selector
+          leaf.number ||
+          leaf.boolean ||
+          leaf.tag ||
+          leaf.constant ||
+          leaf.symbol ||
+          leaf['attr-name'] ||
+          leaf.selector
             ? css`
                 color: #905;
               `
             : ''
         }
         ${
-          props.leaf.punctuation
+          leaf.punctuation
             ? css`
                 color: #999;
               `
             : ''
         }
         ${
-          props.leaf.string || props.leaf.char
+          leaf.string || leaf.char
             ? css`
                 color: #690;
               `
             : ''
         }
         ${
-          props.leaf.function || props.leaf['class-name']
+          leaf.function || leaf['class-name']
             ? css`
                 color: #dd4a68;
               `
             : ''
         }
     `.trim();
+
+// Elements - basically a block
+export const CodeElement = (props: any) => {
+  return <pre {...props.attributes}>{props.children}</pre>;
+};
+
+export const DefaultElement = (props: any) => {
+  return <p {...props.attributes}>{props.children}</p>;
+};
+
+// leaf - is text node
 export const Leaf = (props: any) => {
+  let { attributes, children, leaf, editorMode, editor } = props;
+
+  if (leaf.bold) {
+    children = (
+      <strong
+        data-slate-custom-leaf='true'
+        onClick={() => selectCurrentNode(editor)}>
+        {children}
+      </strong>
+    );
+  }
+
+  if (leaf.marker) {
+    children = (
+      <span
+        data-slate-custom-leaf='true'
+        className={classes.marker}
+        onClick={() => selectCurrentNode(editor)}>
+        {children}
+      </span>
+    );
+  }
+
+  if (leaf.rememberText) {
+    children =
+      editorMode === EditorMode.TRAIN ? (
+        <TrainingInput {...props} />
+      ) : (
+        <span
+          data-slate-custom-leaf='true'
+          data-remember-text='true'
+          className={classes.rememberText}
+          onClick={() => selectCurrentNode(editor)}>
+          {children}
+        </span>
+      );
+  }
+
   return (
-    <span
-      {...props.attributes}
-      data-selected={props.leaf.selected}
-      className={
-        props.editorTextType === EditorTextType.CODE ? CodeCss(props) : ''
-      }>
-      {props.children}
+    <span {...attributes} className={CodeCss(leaf)}>
+      {children}
     </span>
   );
 };
 
+// Handel the training input.
 export const TrainingInput = (props: any) => {
   const [answerStatus, setAnswerStatus] = React.useState({
     answered: false,
@@ -103,11 +162,9 @@ export const TrainingInput = (props: any) => {
 
   const handelSubmit = function (e: React.KeyboardEvent<HTMLSpanElement>) {
     if (e.shiftKey && e.key === 'Enter') {
-      console.log('line break');
       return;
     }
     if (e.key !== 'Enter') return;
-    console.log(Editor);
     const correctText = props.leaf.text.trim();
     setAnswerStatus({ status: inputState === correctText, answered: true });
   };
@@ -117,53 +174,26 @@ export const TrainingInput = (props: any) => {
       {...props.attributes}
       onKeyPress={handelSubmit}
       className={classes.training_card}>
-      <span
-        className={classes.train_input_container}
-        style={{ userSelect: 'none' }}
-        data-answered={answerStatus.answered}
-        data-correct={answerStatus.status}
-        contentEditable={false}>
-        {answerStatus.answered ? (
-          <span>{props.leaf.text}</span>
-        ) : (
-          <input
-            placeholder='...'
-            type='text'
-            value={inputState}
-            style={{
-              width: `${inputState.length}ch`,
-            }}
-            onChange={(e) => setInputState(e.target.value)}
-            className={classes.train_input}
-          />
-        )}
+      <span style={{ userSelect: 'none' }} contentEditable={false}>
+        <Input
+          bg={'linkedin.400'}
+          autoFocus
+          pl={3}
+          data-answered={answerStatus.answered}
+          data-correct={answerStatus.status}
+          placeholder='...'
+          type='text'
+          value={inputState}
+          style={{
+            width: `${inputState.length + 2}ch`,
+            height: 'auto',
+          }}
+          onChange={(e) =>
+            !answerStatus.answered && setInputState(e.target.value)
+          }
+          className={classes.train_input}
+        />
       </span>
     </span>
   );
-};
-
-export const RememberText = (props: any) => {
-  return (
-    <span
-      {...props.attributes}
-      data-identifier={props.leaf.identifier}
-      onClick={props.onClick}
-      data-selected='true'
-      className={classes.marked_text}>
-      {props.children}
-    </span>
-  );
-};
-
-export const PlaceHolder = (props: any) => {
-  return (
-    <span {...props.attributes}>
-      <span className={classes.placeHolder} style={{ pointerEvents: 'none' }}>
-        {props.children}
-      </span>
-    </span>
-  );
-};
-export const DefaultElement = (props: any) => {
-  return <p {...props.attributes}>{props.children}</p>;
 };

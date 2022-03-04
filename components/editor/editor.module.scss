@@ -1,11 +1,25 @@
 .editor {
   margin-block-start: var(--size-3);
-  background: var(--gray-2);
-  padding: var(--size-fluid-4);
+  background: var(--gray-1);
+  padding: var(--size-3);
+  min-height: 200px !important;
+  caret-color: var(--blue-5);
   position: relative;
-  // white-space: initial !important;
   font-size: var(--font-size-3);
-  overflow-x: auto;
+  overflow-x: hidden;
+  cursor: auto;
+
+  [data-slate-custom-leaf='true'] {
+    cursor: pointer;
+  }
+  pre {
+    max-inline-size: unset;
+    background: rgb(255, 255, 255);
+    padding: var(--size-3);
+    margin-block: vaR(--size-1);
+    white-space: inherit;
+    font-size: 75%;
+  }
 }
 
 .marked_text {
@@ -31,37 +45,38 @@
     box-shadow: var(--shadow-3);
     background-color: var(--blue-3);
   }
+
   button:hover {
     background-color: white;
     color: var(--blue-3);
   }
   button.active {
-    background-color: var(--blue-5);
+    opacity: 1;
   }
   button:disabled {
-    background-color: var(--gray-4);
+    opacity: 0.2;
+  }
+
+  .save_button {
+    background-color: var(--green-5);
+    color: white;
   }
 }
 
 .placeHolder {
   color: var(--gray-4);
 }
-.train_input_container {
-  position: relative;
 
-  .train_input {
-    background-color: var(--blue-3);
-    box-sizing: content-box;
-    min-width: 38px;
-    width: fit-content;
-    height: var(--size-4);
-    margin: var(--size-1);
-    outline: none;
-    appearance: none;
-    border: none;
-    &::placeholder {
-      color: white;
-    }
+.train_input {
+  box-sizing: content-box;
+  min-width: 38px;
+  width: fit-content;
+
+  outline: none;
+  appearance: none;
+  border: none;
+  &::placeholder {
+    color: white;
   }
 }
 
@@ -75,5 +90,52 @@
     &[data-correct='false'] {
       background-color: var(--red-5);
     }
+  }
+}
+
+.marker {
+  background: var(--yellow-4);
+  color: black;
+}
+
+.rememberText {
+  background: var(--blue-6) !important;
+  color: white;
+}
+//  new menu
+
+.Menu {
+  padding: 8px 7px 6px;
+  position: absolute;
+  z-index: 1;
+  top: -10000px;
+  left: -10000px;
+  margin-top: -6px;
+  opacity: 0;
+  background-color: #222;
+  border-radius: 4px;
+  transition: opacity 0.75s;
+}
+.tool_bar_menu {
+  display: flex;
+  gap: var(--size-3);
+}
+.format_button {
+  cursor: pointer;
+  color: var(--gray-5);
+  &:hover {
+    color: white;
+  }
+  &.active {
+    color: white;
+    font-weight: bold;
+  }
+}
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }

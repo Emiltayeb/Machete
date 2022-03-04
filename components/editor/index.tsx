@@ -1,34 +1,28 @@
 import React from 'react';
 import Prism from 'prismjs';
+import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
-
 import classes from './editor.module.scss';
-import {
-  BaseEditor,
-  createEditor,
-  Transforms,
-  Descendant,
-  Editor,
-  Text,
-  Element,
-} from 'slate';
-
+import { BaseEditor, createEditor, Descendant } from 'slate';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { DOMRange } from 'slate-react/dist/utils/dom';
-import Marker from '../floating-marker';
 import * as Types from './types';
-import * as Utils from './utils';
+import * as Utils from './editor-utils';
 import * as CustomComponents from './custom-components';
 import { withHistory } from 'slate-history';
-const detectLang = require('lang-detector');
+import { HoveringToolbar } from './hovering-toolbar';
+import { decorator } from './editor.configs';
+import * as Events from './editor-events';
+import { Box, Button, HStack, useToast } from '@chakra-ui/react';
+import { doc, where } from 'firebase/firestore';
+import { useUser } from 'reactfire';
+import useGetData from '../../utils/useGetData';
+import EditorActions from './editor-actions';
 
-interface EditorProps {
-  mode: 'training' | 'editing';
-}
+const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor;
@@ -38,268 +32,142 @@ declare module 'slate' {
   }
 }
 
-console.clear();
-
-const SlateEditor: React.FC<EditorProps> = () => {
-  const [editor] = React.useState(() => withHistory(withReact(createEditor())));
-  const [markerState, setMarkerState] = React.useState<Types.MarkerState>(null);
-  const [currentWordRange, setCurrentWordRange] =
-    React.useState<Types.CurrentWordRange>(null);
-  const editorRef = React.useRef<null | HTMLDivElement>(null);
-  const rangeRef = React.useRef<null | DOMRange>(null);
-  const markerVisibleREf = React.useRef<boolean>(false);
-  const [allowTrain, setAllowTrain] = React.useState(false);
-  const [editorCodeLang, setLanguage] = React.useState(
-    Utils.CodeLanguages.HTML
+const SlateEditor: React.FC<Types.EditorProps> = (props) => {
+  const editor = React.useMemo(
+    () => withHistory(withReact(createEditor())),
+    []
   );
-  const [editorValue, setEditorValue] = React.useState<null | Descendant[]>(
-    null
+  const [editorCodeLang, setLanguage] = React.useState<
+    Utils.CodeLanguages[] | null
+  >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
+  const [editorValue, setEditorValue] = React.useState(
+    props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
   );
+  const editorRef = React.useRef<HTMLDivElement | null>(null);
+  const [hideToolbar, setHideToolbar] = React.useState(false);
 
-  const [mode, setMode] = React.useState<Utils.EditorMode>(
+  const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     Utils.EditorMode.ADD
   );
+  const [allowTrain, setAllowTRain] = React.useState(false);
 
-  React.useEffect(() => {
-    rangeRef.current = document.createRange();
+  const { data: user } = useUser();
+  const { resultData: userDataFromDb, db } = useGetData({
+    dataBaseName: 'users',
+    options: [where('email', '==', user?.email ?? '')],
+  });
 
-    // loading the value from whatever you want on initial load..
-    try {
-      const dbStorage = JSON.parse(
-        localStorage?.getItem('editorValue') as string
+  const onCardSave = React.useCallback(
+    async ({
+      title,
+      exec,
+      category,
+    }: {
+      title: string;
+      category: string;
+      exec?: string;
+    }) => {
+      await Events.onCardSave(
+        {
+          text: JSON.stringify(editor.children),
+          codeLanguages: editorCodeLang,
+          id: props?.card?.id,
+          category,
+          title,
+          exec,
+        },
+        userDataFromDb,
+        db
       );
-      if (!dbStorage) throw Error;
-      setEditorValue(dbStorage);
-    } catch (error) {
-      setEditorValue(Utils.placeHolerElement);
-    }
-  }, []);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editorCodeLang, userDataFromDb]
+  );
 
+  console.log(allowTrain);
+  // Each time we change the editor value
   React.useEffect(() => {
-    if (!editorValue?.[0] || !editorRef.current) return;
-    // determine if we can be in training mod
-    setAllowTrain(
-      editorRef.current?.querySelectorAll('[data-selected]').length > 0
+    if (!editorValue?.[0]) return;
+    setAllowTRain(!!document.querySelector('[data-remember-text]'));
+    const detectCodeTimerId = setTimeout(
+      () => Events.handelCreatCodeBlock(editor, setLanguage),
+      600
     );
-    if (Utils.getEditorText(editor.children).length === 0) {
-      // save editor value to db
-      localStorage.setItem(
-        'editorValue',
-        JSON.stringify(Utils.placeHolerElement)
-      );
-      return;
-    }
-    const detectCodeTimerId = setTimeout(autoDetectEditorLang, 200);
-    localStorage.setItem('editorValue', JSON.stringify(editorValue));
     return () => {
       clearTimeout(detectCodeTimerId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorValue]);
 
-  const renderElement = React.useCallback(
-    (props) => {
-      switch (props.element.type) {
-        case 'placeHolder':
-          return <CustomComponents.PlaceHolder {...props} />;
-        default:
-          return (
-            <CustomComponents.DefaultElement
-              {...props}
-              editorTextType={Utils.EditorTextType.CODE}
-            />
-          );
-      }
-    },
-    [mode]
-  );
-
-  const renderLeaf = React.useCallback(
-    (props) => {
-      if (props.leaf[Utils.Marks.MARKED_TEXT]) {
-        if (mode === Utils.EditorMode.TRAIN) {
-          return <CustomComponents.TrainingInput {...props} />;
-        }
-        return (
-          <CustomComponents.RememberText
-            {...props}
-            onClick={(e: any) =>
-              Utils.handelRemoveSelection(e, setMarkerState, rangeRef)
-            }
-          />
-        );
-      }
-      return (
-        <CustomComponents.Leaf
-          {...props}
-          editorTextType={Utils.EditorTextType.CODE}
-        />
-      );
-    },
-    [mode]
-  );
-  // decorate function depends on the language selected
+  // for every lang we have in the editor - paint it.
   const decorate = React.useCallback(
     ([node, path]) => {
-      const ranges: any = [];
+      if (!editorCodeLang) return;
+      let finalDecorator: any = [];
+      editorCodeLang?.forEach((lang) => {
+        const dec = decorator([node, path], lang, editor);
+        finalDecorator.push(...dec);
+      });
 
-      if ((!Text.isText(node) as any) || node[Utils.Marks.MARKED_TEXT]) {
-        return ranges;
-      }
-
-      const tokens = Prism.tokenize(node.text, Prism.languages[editorCodeLang]);
-      let start = 0;
-
-      for (const token of tokens) {
-        const length = getLength(token);
-        const end = start + length;
-
-        if (typeof token !== 'string') {
-          ranges.push({
-            [token.type]: true,
-            anchor: { path, offset: start },
-            focus: { path, offset: end },
-          });
-        }
-
-        start = end;
-      }
-
-      return ranges;
+      return finalDecorator;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [editorCodeLang]
   );
 
-  const autoDetectEditorLang = function () {
-    const editorText = Utils.getEditorText(editor.children).trim();
-
-    let newLang = detectLang(editorText) as string;
-    console.log(
-      `🚀 ~ file: index.tsx ~ line 176 ~ autoDetectEditorLang ~ newLang`,
-      newLang
-    );
-
-    if (/([a-zA-z1-9]:)|(type.\w)|(interface).\w/gim.test(editorText)) {
-      newLang = 'typescript';
+  const renderElement = React.useCallback((props) => {
+    switch (props.element.type) {
+      case 'code':
+        return <CustomComponents.CodeElement {...props} />;
+      default:
+        return <CustomComponents.DefaultElement {...props} />;
     }
-    if (!Utils.CodeLanguages[newLang.toLocaleUpperCase()]) {
-      newLang = 'plaintext';
-    }
+  }, []);
 
-    setLanguage(newLang.toLocaleLowerCase() as Utils.CodeLanguages);
-  };
-  return editorValue ? (
+  return (
     <div ref={editorRef}>
-      <Slate
-        editor={editor}
-        value={editorValue}
-        onChange={(newValue) => {
-          setEditorValue(newValue as any);
-          const children = editor.children[0] as any;
-          if (children?.type === 'placeHolder') {
-            Transforms.select(editor, {
-              anchor: Editor.start(editor, []),
-              focus: Editor.end(editor, []),
-            });
-            Transforms.delete(editor);
-            Transforms.setNodes(editor, { type: 'p' });
-          }
-        }}>
+      <Slate editor={editor} value={editorValue} onChange={setEditorValue}>
+        <HoveringToolbar
+          shouldHide={hideToolbar}
+          setShouldHide={setHideToolbar}
+        />
         <Editable
+          tabIndex={1}
+          autoFocus
+          readOnly={editorMode === Utils.EditorMode.TRAIN}
+          style={{ color: 'black' }}
+          onBlur={() => setHideToolbar(true)}
+          placeholder='Enter some text'
+          decorate={decorate}
+          id={SLATE_EDITOR_ID}
+          className={classes.editor}
+          renderElement={renderElement}
           onPaste={(event) => {
             event.preventDefault();
-            const text = event.clipboardData.getData('text');
-            try {
-              editor.insertText(text);
-            } catch (error) {
-              Transforms.delete(editor);
-              Transforms.insertText(editor, text);
-            }
+            const text = event.clipboardData.getData('Text');
+            editor.insertText(text);
           }}
-          decorate={decorate}
-          readOnly={mode === Utils.EditorMode.TRAIN}
-          id='SLATE_EDITOR'
-          className={classes.editor}
-          onKeyDown={(event) => {
-            switch (event.key) {
-              case 'a':
-                event.ctrlKey &&
-                  Transforms.select(editor, {
-                    anchor: Editor.start(editor, []),
-                    focus: Editor.end(editor, []),
-                  });
-                break;
-              case 'Escape':
-                setMarkerState(null);
-                Transforms.select(editor, {
-                  anchor: Editor.end(editor, []),
-                  focus: Editor.end(editor, []),
-                });
-
-                break;
-              default:
-                break;
-            }
-          }}
-          onSelect={(e) => {
-            mode === Utils.EditorMode.ADD &&
-              Utils.onSelectionChanged(
-                e,
-                setMarkerState,
-                editor,
-                setCurrentWordRange,
-                markerVisibleREf
-              );
-          }}
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}></Editable>
+          onKeyDown={(event) => Events.handelKeyDown(event, editor)}
+          renderLeaf={(props) => (
+            <CustomComponents.Leaf
+              {...props}
+              editorMode={editorMode}
+              editor={editor}
+            />
+          )}
+        />
       </Slate>
 
-      {markerState && (
-        <Marker
-          onMarkerClick={(e: React.MouseEvent<HTMLDivElement>) => {
-            e.stopPropagation();
-            Utils.onMarkerClick(
-              e,
-              editor,
-              currentWordRange,
-              setMarkerState,
-              markerState
-            );
-            setCurrentWordRange(null);
-          }}
-          markerState={markerState}
-        />
-      )}
-
-      <div className={classes.actions}>
-        <button
-          disabled={!allowTrain}
-          onClick={() => setMode(Utils.EditorMode.TRAIN)}
-          className={mode === Utils.EditorMode.TRAIN ? classes.active : ''}>
-          Train
-        </button>
-        <button
-          className={mode === Utils.EditorMode.ADD ? classes.active : ''}
-          onClick={() => setMode(Utils.EditorMode.ADD)}>
-          Edit
-        </button>
-      </div>
+      <EditorActions
+        allowTrain={allowTrain}
+        editorMode={editorMode}
+        onCardSave={onCardSave}
+        setEditorMode={setEditorMode}
+        card={props.card}
+      />
     </div>
-  ) : (
-    <p>Loading..</p>
   );
 };
 
 export default SlateEditor;
-
-const getLength = (token: any) => {
-  if (typeof token === 'string') {
-    return token.length;
-  } else if (typeof token.content === 'string') {
-    return token.content.length;
-  } else {
-    return token.content.reduce((l: any, t: any) => l + getLength(t), 0);
-  }
-};
-
 Prism.languages.typeScript = Prism.languages.extend('typescript', {});

@@ -1,14 +1,16 @@
+import { CodeLanguages } from './utils';
 export type CustomElement = { type: any; children: any };
 export type CustomText = { text: any };
-export type MarkerState = {
-  directions: DOMRect;
-  offset: number;
-  functionality?: 'add' | 'remove';
-  node?: any;
-  isText: any;
-} | null;
 
-export type CurrentWordRange = {
-  range: Range;
-  word: string | undefined;
-} | null;
+export type CardType = {
+  text: string;
+  title: string;
+  id?: string;
+  exec?: string;
+  category: string;
+  codeLanguages: CodeLanguages[] | null;
+};
+export interface EditorProps {
+  mode: 'training' | 'editing';
+  card?: CardType | null;
+}
