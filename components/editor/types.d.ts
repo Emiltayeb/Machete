@@ -10,8 +10,11 @@ export type CardType = {
   category: string;
   allowTrain: boolean;
   codeLanguages: CodeLanguages[] | null;
+
 };
 export interface EditorProps {
   mode: 'training' | 'editing';
   card?: CardType | null;
+  userDataFromDb: any;
+  db: any
 }

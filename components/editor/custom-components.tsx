@@ -1,9 +1,9 @@
 import React from 'react';
 import classes from './editor.module.scss';
 import { css } from '@emotion/css';
-import { Descendant, Editor, Transforms, Text } from 'slate';
+import { Descendant, Editor, Transforms } from 'slate';
 import { EditorMode, selectCurrentNode } from './editor-utils';
-import { Input } from '@chakra-ui/react';
+import { Text, Input, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Box, Portal } from '@chakra-ui/react';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
@@ -15,10 +15,10 @@ export const initialValue: Descendant[] = [
 
 const CodeCss = (leaf: any) =>
   `${leaf.comment
-      ? css`
+    ? css`
           color: slategray;
         `
-      : ''
+    : ''
     }
       ${leaf.property
       ? css`
@@ -91,9 +91,13 @@ export const DefaultElement = (props: any) => {
   return <p {...props.attributes}>{props.children}</p>;
 };
 
+
+
+
 // leaf - is text node
 export const Leaf = (props: any) => {
   let { attributes, children, leaf, editorMode, editor } = props;
+
 
   if (leaf.bold) {
     children = (
@@ -129,14 +133,15 @@ export const Leaf = (props: any) => {
           {children}
         </span>
       );
-  }
 
+  }
   return (
     <span {...attributes} className={CodeCss(leaf)}>
       {children}
     </span>
   );
 };
+
 
 // Handel the training input.
 export const TrainingInput = (props: any) => {
@@ -145,6 +150,7 @@ export const TrainingInput = (props: any) => {
     status: false,
   });
   const [inputState, setInputState] = React.useState<string>('');
+  const [openFeedback, setOpenFeedback] = React.useState(false);
 
   React.useEffect(() => {
     // add on enter event
@@ -158,33 +164,50 @@ export const TrainingInput = (props: any) => {
     if (e.key !== 'Enter') return;
     const correctText = props.leaf.text.trim();
     setAnswerStatus({ status: inputState === correctText, answered: true });
+    setOpenFeedback(true)
   };
+
 
   return (
     <span
       {...props.attributes}
       onKeyPress={handelSubmit}
       className={classes.training_card}>
-      <span style={{ userSelect: 'none' }} contentEditable={false}>
-        <Input
-          bg={'linkedin.400'}
-          autoFocus
-          pl={3}
-          data-answered={answerStatus.answered}
-          data-correct={answerStatus.status}
-          placeholder='...'
-          type='text'
-          value={inputState}
-          style={{
-            width: `${inputState.length + 2}ch`,
-            height: 'auto',
-          }}
-          onChange={(e) =>
-            !answerStatus.answered && setInputState(e.target.value)
-          }
-          className={classes.train_input}
-        />
-      </span>
+      <Popover
+        onClose={() => setOpenFeedback(false)}
+        placement='bottom' isOpen={openFeedback} closeOnBlur closeOnEsc returnFocusOnClose={false}>
+        <PopoverTrigger>
+          <Input
+            onClick={() => answerStatus.answered && setOpenFeedback(true)}
+            bg={'linkedin.400'}
+            pl={3}
+            data-answered={answerStatus.answered}
+            data-correct={answerStatus.status}
+            placeholder='...'
+            type='text'
+            value={inputState}
+            style={{
+              width: `${inputState.length + 2}ch`,
+              height: 'auto',
+            }}
+            onChange={(e) =>
+              !answerStatus.answered && setInputState(e.target.value)
+            }
+            className={classes.train_input}
+          />
+        </PopoverTrigger>
+        <Portal >
+          <PopoverContent width={"auto"}>
+            <PopoverArrow />
+            <PopoverCloseButton />
+            <PopoverBody>
+              <Text color={answerStatus.status ? "whatsapp.400" : "red.400"}>Submission  - {inputState}</Text>
+              <Text color={"whatsapp.400"}>Correct answer  - {props.leaf.text.trim()}</Text>
+            </PopoverBody>
+          </PopoverContent>
+        </Portal>
+      </Popover >
     </span>
   );
 };
+

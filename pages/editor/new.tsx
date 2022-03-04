@@ -14,13 +14,11 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import useGetLoadingStatus from '../../utils/useGetLoadingStatus';
+
 import PrivateRoute from '../../components/PrivateRoute';
-// user code
 
 const Home = (props: any) => {
-  const textColor = useColorModeValue('black', 'white');
-
+  const textColor = useColorModeValue("teal.700", "white")
   return (
     <Container maxW={'container.lg'} p={4}>
       <Head>
@@ -34,7 +32,7 @@ const Home = (props: any) => {
           <Heading color={textColor}>Create card</Heading>
           <Text>Here you can creat a memory card and save it.</Text>
         </VStack>
-        <Editor mode='editing' />
+        <Editor mode='editing' {...props} />
       </VStack>
     </Container>
   );

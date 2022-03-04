@@ -16,9 +16,6 @@ import { withHistory } from 'slate-history';
 import { HoveringToolbar } from './hovering-toolbar';
 import { decorator } from './editor.configs';
 import * as Events from './editor-events';
-import { where } from 'firebase/firestore';
-import { useUser } from 'reactfire';
-import useGetData from '../../utils/useGetData';
 import EditorActions from './editor-actions';
 import { useRouter } from 'next/router';
 
@@ -51,46 +48,39 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   );
   const allowTrain = React.useRef(props.card?.allowTrain)
 
-  const { data: user } = useUser();
-  const { resultData: userDataFromDb, db } = useGetData({
-    options: [where('email', '==', user?.email ?? '')],
-  });
+  const onCardSave = async function ({
+    title,
+    exec,
+    category,
+  }: {
+    title: string;
+    category: string;
+    exec?: string;
+  }) {
+    await Events.onCardSave(
+      {
+        text: JSON.stringify(editor.children),
+        codeLanguages: editorCodeLang,
+        id: props?.card?.id,
+        category,
+        title,
+        exec,
+        allowTrain: !!allowTrain.current,
+      },
+      props.userDataFromDb,
+      props.db
+    );
+  }
 
-
-
-  const onCardSave = React.useCallback(
-    async ({
-      title,
-      exec,
-      category,
-    }: {
-      title: string;
-      category: string;
-      exec?: string;
-    }) => {
-      console.log(allowTrain)
-      await Events.onCardSave(
-        {
-          text: JSON.stringify(editor.children),
-          codeLanguages: editorCodeLang,
-          id: props?.card?.id,
-          category,
-          title,
-          exec,
-          allowTrain: !!allowTrain.current,
-        },
-        userDataFromDb,
-        db
-      );
-    },
+  React.useEffect(() => {
+    if (editorMode === Utils.EditorMode.ADD) return
+    (document.querySelector(`#${SLATE_EDITOR_ID} input`) as HTMLInputElement)?.focus()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editorCodeLang, userDataFromDb]
-  );
-
+  }, [])
 
   // Each time we change the editor value
   React.useEffect(() => {
-    if (!editorValue?.[0]) return;
+    if (!editorValue?.[0] || editorMode === Utils.EditorMode.TRAIN) return;
     allowTrain.current = !!document.querySelector('[data-remember-text]')
     const detectCodeTimerId = setTimeout(
       () => Events.handelCreatCodeBlock(editor, setLanguage),
@@ -127,13 +117,16 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     }
   }, []);
 
+
   return (
     <div ref={editorRef}>
       <Slate editor={editor} value={editorValue} onChange={setEditorValue}>
-        <HoveringToolbar
-          shouldHide={hideToolbar}
-          setShouldHide={setHideToolbar}
-        />
+        {
+          editorMode === Utils.EditorMode.ADD && <HoveringToolbar
+            shouldHide={hideToolbar}
+            setShouldHide={setHideToolbar}
+          />
+        }
         <Editable
           tabIndex={1}
           autoFocus

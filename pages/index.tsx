@@ -11,30 +11,32 @@ import {
   Grid,
   Heading,
   Text,
+  useBreakpoint,
+  useBreakpointValue,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
 import PrivateRoute from '../components/PrivateRoute';
-import { deleteDoc, doc } from 'firebase/firestore';
 import { onDeleteCard } from '../components/editor/editor-events';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { GiMachete } from "react-icons/gi";
 import { EditorMode } from '../components/editor/editor-utils';
+import CreateCard from '../components/layout/navigation/CreateCard';
+
 const Login = (props: any) => {
   const router = useRouter();
-
-  const textColor = useColorModeValue('black', 'white');
+  const textColor = useColorModeValue("teal.700", "white")
   const cardBgColor = useColorModeValue('gray.300', 'gray.700');
+  const gridTemplateCols = useBreakpointValue({ base: "1fr", md: "repeat(3, minmax(150px, 1fr) )" })
 
   const onCardClick = function (id?: string) {
     if (!id) return;
     router.push(`editor/${id}`);
   };
 
-
   return (
     <Container maxW={'container.xl'}>
-      <VStack alignItems={'flex-start'} spacing={3}>
+      <VStack alignItems={'flex-start'} spacing={1}>
         <Heading
           color={textColor}
           marginBlockStart={5}
@@ -43,28 +45,19 @@ const Login = (props: any) => {
         </Heading>
         <Text fontSize={{ base: 'small', sm: 'xl' }}>
           Here you can view your cards or you can{' '}
-          <Button
-            size={'sm'}
-            colorScheme='whatsapp'
-            onClick={() => router.push('/editor/new')}>
-            {' '}
-            Creat Card
-          </Button>
+          <CreateCard />
         </Text>
       </VStack>
-
-      <Divider maxW={'container.md'} marginBlockStart={3} />
-
       <Box
         p={{ base: 2, sm: 5, md: 10 }}
         bg={cardBgColor}
         marginBlock={7}
-
         rounded='2xl'>
         <Grid
-          gridTemplateColumns={"repeat( auto-fit, minmax(150px, 1fr) )"}
+          gridTemplateColumns={gridTemplateCols}
           gap={5}
         >
+
           {props.userDataFromDb?.cards?.map((card: CardType) => (
             <Box
               flex='1'
@@ -88,7 +81,7 @@ const Login = (props: any) => {
                     {card.exec}
                   </Text>
                 </VStack>
-                <Flex gap={3} flexWrap="wrap">
+                <Flex gap={3} flexWrap="wrap" >
                   <Button
                     size={'xs'}
                     colorScheme="linkedin"
@@ -113,12 +106,16 @@ const Login = (props: any) => {
                     onClick={() => { router.push(`editor/${card.id}?mode=${EditorMode.TRAIN}`); }}>
                     Train
                   </Button>
+
                 </Flex>
               </Flex>
             </Box>
           ))}
         </Grid>
+
       </Box>
+
+
     </Container>
   );
 };

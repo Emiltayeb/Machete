@@ -24,13 +24,14 @@ import NextLink from 'next/link';
 import { HamburgerIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/router';
 import { GiMachete } from "react-icons/gi";
+import CreateCard from './CreateCard';
 
 const Navigation = () => {
   const auth = getAuth();
   const { data: user } = useUser();
   const { toggleColorMode, colorMode } = useColorMode();
   const DarkModeIcon = colorMode === 'dark' ? SunIcon : MoonIcon;
-  const navigationBgColor = useColorModeValue("cyan.400", "black");
+  const navigationBgColor = useColorModeValue("teal.300", "black");
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const mobileOrDesktopSize = useBreakpointValue({ base: "xs", sm: "sm" })
@@ -57,7 +58,7 @@ const Navigation = () => {
         <Flex alignItems={"center"} gap={2}>
           {user && (
             <ListItem>
-              <Button size={mobileOrDesktopSize} colorScheme={'whatsapp'} onClick={() => router.push("/editor/new")}>Create Card</Button>
+              <CreateCard />
             </ListItem>
           )}
           <ListItem>

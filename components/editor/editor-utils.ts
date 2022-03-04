@@ -39,24 +39,20 @@ export const toggleFormat = (
   format: any,
   isActive: boolean
 ) => {
-  const [match] = SlateEditor.nodes(editor, {
-    match: (node) => {
-      if (!Text.isText(node)) return false;
-      return true;
-    },
-  }) as any;
-  const { text, ...restFormats } = match[0];
-
+  const { node } = findClosestBlockAndNode(editor)
+  const { text, ...restFormats } = node.nodeData[0];
+  //Todo  check if the format was a comment - revet back?
   Transforms.insertNodes(
     editor,
     [
+
       {
         ...restFormats,
         [format]: !isActive,
         text: window.getSelection()?.toString()?.trim(),
       },
     ],
-    { match: Text.isText }
+    { match: Text.isText, hanging: true }
   );
 };
 
