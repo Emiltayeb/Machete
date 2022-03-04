@@ -1,8 +1,5 @@
 import React from 'react';
-import { useUser } from 'reactfire';
 import { useRouter } from 'next/router';
-import useGetData from '../utils/useGetData';
-import { where } from 'firebase/firestore';
 import { CardType } from '../components/editor/types';
 import {
   Badge,
@@ -11,16 +8,21 @@ import {
   Container,
   Divider,
   Flex,
+  Grid,
   Heading,
-  HStack,
   Text,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
 import PrivateRoute from '../components/PrivateRoute';
-
+import { deleteDoc, doc } from 'firebase/firestore';
+import { onDeleteCard } from '../components/editor/editor-events';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { GiMachete } from "react-icons/gi";
+import { EditorMode } from '../components/editor/editor-utils';
 const Login = (props: any) => {
   const router = useRouter();
+
   const textColor = useColorModeValue('black', 'white');
   const cardBgColor = useColorModeValue('gray.300', 'gray.700');
 
@@ -28,6 +30,7 @@ const Login = (props: any) => {
     if (!id) return;
     router.push(`editor/${id}`);
   };
+
 
   return (
     <Container maxW={'container.xl'}>
@@ -55,15 +58,19 @@ const Login = (props: any) => {
       <Box
         p={{ base: 2, sm: 5, md: 10 }}
         bg={cardBgColor}
-        marginBlockStart={7}
+        marginBlock={7}
+
         rounded='2xl'>
-        <Flex wrap={'wrap'} justifyContent='space-between' gap={5}>
+        <Grid
+          gridTemplateColumns={"repeat( auto-fit, minmax(150px, 1fr) )"}
+          gap={5}
+        >
           {props.userDataFromDb?.cards?.map((card: CardType) => (
             <Box
               flex='1'
               bg={'white'}
               borderRadius='lg'
-              p={{ base: 2, sm: 6 }}
+              p={2}
               key={card.id}>
               <Flex
                 flexDirection={'column'}
@@ -72,27 +79,45 @@ const Login = (props: any) => {
                 alignItems='flex-start'
                 justifyContent='space-between'>
                 <VStack alignItems={'flex-start'} spacing={1}>
-                  <Badge colorScheme={'facebook'}>{card.category}</Badge>
-                  <Heading color={'black'} fontSize={'md'}>
+                  <Badge colorScheme={'facebook'} fontSize={"x-small"} >{card.category}</Badge>
+                  <Heading color={'black'} fontSize={{ base: "sm", md: "md" }}>
                     {card.title}
                   </Heading>
 
-                  <Text color={'black'} fontSize={{ base: 'sm', sm: 'sm' }}>
+                  <Text color={'black'} fontSize={{ base: 'xs', sm: 'sm' }}>
                     {card.exec}
                   </Text>
                 </VStack>
+                <Flex gap={3} flexWrap="wrap">
+                  <Button
+                    size={'xs'}
+                    colorScheme="linkedin"
+                    leftIcon={<EditIcon />}
 
-                <Button
-                  size={'sm'}
-                  bg={'linkedin.300'}
-                  color='white'
-                  onClick={() => onCardClick(card?.id)}>
-                  View Card
-                </Button>
+                    onClick={() => onCardClick(card?.id)}>
+                    Edit
+                  </Button>
+                  <Button
+                    size={'xs'}
+                    colorScheme="red"
+
+                    leftIcon={<DeleteIcon />}
+                    onClick={() => onDeleteCard(props.userDataFromDb, props.db, card.id)}>
+                    Delete
+                  </Button>
+                  <Button
+                    size={'xs'}
+                    colorScheme="linkedin"
+                    disabled={!card.allowTrain}
+                    leftIcon={<GiMachete />}
+                    onClick={() => { router.push(`editor/${card.id}?mode=${EditorMode.TRAIN}`); }}>
+                    Train
+                  </Button>
+                </Flex>
               </Flex>
             </Box>
           ))}
-        </Flex>
+        </Grid>
       </Box>
     </Container>
   );

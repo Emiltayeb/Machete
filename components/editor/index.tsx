@@ -16,11 +16,11 @@ import { withHistory } from 'slate-history';
 import { HoveringToolbar } from './hovering-toolbar';
 import { decorator } from './editor.configs';
 import * as Events from './editor-events';
-import { Box, Button, HStack, useToast } from '@chakra-ui/react';
-import { doc, where } from 'firebase/firestore';
+import { where } from 'firebase/firestore';
 import { useUser } from 'reactfire';
 import useGetData from '../../utils/useGetData';
 import EditorActions from './editor-actions';
+import { useRouter } from 'next/router';
 
 const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -33,6 +33,7 @@ declare module 'slate' {
 }
 
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
+  const router = useRouter()
   const editor = React.useMemo(
     () => withHistory(withReact(createEditor())),
     []
@@ -45,17 +46,17 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   );
   const editorRef = React.useRef<HTMLDivElement | null>(null);
   const [hideToolbar, setHideToolbar] = React.useState(false);
-
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
-    Utils.EditorMode.ADD
+    router.query.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
-  const [allowTrain, setAllowTRain] = React.useState(false);
+  const allowTrain = React.useRef(props.card?.allowTrain)
 
   const { data: user } = useUser();
   const { resultData: userDataFromDb, db } = useGetData({
-    dataBaseName: 'users',
     options: [where('email', '==', user?.email ?? '')],
   });
+
+
 
   const onCardSave = React.useCallback(
     async ({
@@ -67,6 +68,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
       category: string;
       exec?: string;
     }) => {
+      console.log(allowTrain)
       await Events.onCardSave(
         {
           text: JSON.stringify(editor.children),
@@ -75,6 +77,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
           category,
           title,
           exec,
+          allowTrain: !!allowTrain.current,
         },
         userDataFromDb,
         db
@@ -84,11 +87,11 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     [editorCodeLang, userDataFromDb]
   );
 
-  console.log(allowTrain);
+
   // Each time we change the editor value
   React.useEffect(() => {
     if (!editorValue?.[0]) return;
-    setAllowTRain(!!document.querySelector('[data-remember-text]'));
+    allowTrain.current = !!document.querySelector('[data-remember-text]')
     const detectCodeTimerId = setTimeout(
       () => Events.handelCreatCodeBlock(editor, setLanguage),
       600
@@ -159,7 +162,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
       </Slate>
 
       <EditorActions
-        allowTrain={allowTrain}
         editorMode={editorMode}
         onCardSave={onCardSave}
         setEditorMode={setEditorMode}

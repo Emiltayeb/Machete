@@ -6,11 +6,8 @@ import useGetLoadingStatus from '../utils/useGetLoadingStatus';
 const PrivateRoute = (Component: any) => {
   const Auth = (props: any) => {
     const router = useRouter();
-    const { user, isLoading, userDataFromDb } = useGetLoadingStatus();
+    const { user, isLoading, userDataFromDb, db, dataStatus } = useGetLoadingStatus();
 
-    React.useEffect(() => {
-      console.log(user, isLoading);
-    }, [user]);
     // Login data added to props via redux-store (or use react context for example)
 
     if (isLoading) {
@@ -22,7 +19,7 @@ const PrivateRoute = (Component: any) => {
     }
 
     // If user is logged in, return original component
-    return <Component {...props} userDataFromDb={userDataFromDb} user={user} />;
+    return <Component {...props} userDataFromDb={userDataFromDb} user={user} db={db} dbStatus={dataStatus} />;
   };
 
   // Copy getInitial props so it will run as well

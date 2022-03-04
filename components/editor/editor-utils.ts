@@ -11,8 +11,8 @@ import { ReactEditor } from 'slate-react';
 type Editor = BaseEditor & ReactEditor;
 
 export enum EditorMode {
-  TRAIN,
-  ADD,
+  TRAIN = "train",
+  ADD = "add",
 }
 
 export enum CodeLanguages {

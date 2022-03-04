@@ -14,82 +14,72 @@ export const initialValue: Descendant[] = [
 ];
 
 const CodeCss = (leaf: any) =>
-  `${
-    leaf.comment
+  `${leaf.comment
       ? css`
           color: slategray;
         `
       : ''
-  }
-      ${
-        leaf.property
-          ? css`
+    }
+      ${leaf.property
+      ? css`
               color: var(--green-6);
             `
-          : ''
-      } 
-        ${
-          leaf.builtin
-            ? css`
+      : ''
+    } 
+        ${leaf.builtin
+      ? css`
                 color: var(--green-6);
               `
-            : ''
-        }
-        ${
-          leaf.operator || leaf.url
-            ? css`
+      : ''
+    }
+        ${leaf.operator || leaf.url
+      ? css`
                 color: #9a6e3a;
               `
-            : ''
-        }
-        ${
-          leaf.keyword
-            ? css`
+      : ''
+    }
+        ${leaf.keyword
+      ? css`
                 color: #07a;
               `
-            : ''
-        }
-        ${
-          leaf.variable || leaf.regex
-            ? css`
+      : ''
+    }
+        ${leaf.variable || leaf.regex
+      ? css`
                 color: #e90;
               `
-            : ''
-        }
-        ${
-          leaf.number ||
-          leaf.boolean ||
-          leaf.tag ||
-          leaf.constant ||
-          leaf.symbol ||
-          leaf['attr-name'] ||
-          leaf.selector
-            ? css`
+      : ''
+    }
+        ${leaf.number ||
+      leaf.boolean ||
+      leaf.tag ||
+      leaf.constant ||
+      leaf.symbol ||
+      leaf['attr-name'] ||
+      leaf.selector
+      ? css`
                 color: #905;
               `
-            : ''
-        }
-        ${
-          leaf.punctuation
-            ? css`
+      : ''
+    }
+        ${leaf.punctuation
+      ? css`
                 color: #999;
               `
-            : ''
-        }
-        ${
-          leaf.string || leaf.char
-            ? css`
+      : ''
+    }
+        ${leaf.string || leaf.char
+      ? css`
                 color: #690;
               `
-            : ''
-        }
-        ${
-          leaf.function || leaf['class-name']
-            ? css`
+      : ''
+    }
+        ${leaf.function || leaf['class-name']
+      ? css`
                 color: #dd4a68;
               `
-            : ''
-        }
+      : ''
+    }
     `.trim();
 
 // Elements - basically a block
@@ -155,9 +145,10 @@ export const TrainingInput = (props: any) => {
     status: false,
   });
   const [inputState, setInputState] = React.useState<string>('');
+
   React.useEffect(() => {
     // add on enter event
-    return () => {};
+    return () => { };
   }, []);
 
   const handelSubmit = function (e: React.KeyboardEvent<HTMLSpanElement>) {

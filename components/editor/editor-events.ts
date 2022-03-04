@@ -4,7 +4,6 @@ import * as Utils from './editor-utils';
 import { CardType } from './types';
 import { doc, updateDoc } from 'firebase/firestore';
 import { v4 } from 'uuid';
-import { ReactEditor } from 'slate-react';
 
 let isAllChildrenSelected = false;
 
@@ -25,10 +24,12 @@ export const handelKeyDown = function (
   switch (key) {
     case 'Enter':
       // find current  node
-      const { node } = Utils.findClosestBlockAndNode(editor);
+      const { node, parent } = Utils.findClosestBlockAndNode(editor);
       const { nodeData } = node;
-      if (nodeData.type === 'code') {
+      const { parentData } = parent
+      if (nodeData.type === 'code' || parentData.type === "code") {
         event.preventDefault();
+
         if (shiftKey) {
           editor.insertText('\n');
           break;
@@ -110,26 +111,45 @@ export const onCardSave = async function (
     if (isNewCard) {
       cardId = v4();
     }
-    const updatedData = isNewCard
+    const updatedData: CardType[] = isNewCard
       ? [
-          ...userData?.cards,
-          {
-            text: newCard.text,
-            id: cardId,
-            codeLanguages: newCard.codeLanguages,
-          },
-        ]
+        ...userData?.cards,
+        {
+          text: newCard.text,
+          id: cardId,
+          codeLanguages: newCard.codeLanguages,
+          category: newCard.category,
+          title: newCard.title,
+          exec: newCard.exec,
+        },
+      ]
       : userData.cards.map((currCard: CardType) => {
-          if (newCard.id === currCard.id) {
-            return newCard;
-          }
-          return currCard;
-        });
+        if (newCard.id === currCard.id) {
+          return newCard;
+        }
+        return currCard;
+      });
 
     await updateDoc(updateDocREf, {
       cards: updatedData,
     });
   } catch (error) {
     throw error;
+  }
+};
+
+export const onDeleteCard = async function (
+  userData: any,
+  db: any,
+  cardId?: string,
+) {
+  try {
+    const ref = doc(db, 'users', userData.NO_ID_FIELD);
+    const updatedCards = userData?.cards.filter((card: any) => card.id !== cardId)
+    await updateDoc(ref, {
+      cards: updatedCards,
+    });
+  } catch (error) {
+    console.log(error)
   }
 };

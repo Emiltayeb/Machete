@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <RecoilRoot>
           <ChakraProvider>
             <Navigation />
-            <Box minH={{ base: 'auto', sm: '90vh' }}>
+            <Box height={"90vh"} minHeight={"90vh"} >
               <Component {...pageProps} />
             </Box>
             <Footer />

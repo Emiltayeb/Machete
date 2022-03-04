@@ -2,13 +2,11 @@ import React from 'react';
 import { collection, query } from 'firebase/firestore';
 import { useFirestore, useFirestoreCollectionData } from 'reactfire';
 
-const useGetData = ({
-  dataBaseName,
-  options,
-}: {
-  dataBaseName: string;
+type GetDataProps = {
+  dataBaseName?: string;
   options?: any;
-}) => {
+}
+const useGetData = ({ dataBaseName = "users", options, }: GetDataProps) => {
   const firestore = useFirestore();
   const collections = collection(firestore, dataBaseName);
   const queryRef = options

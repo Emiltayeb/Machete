@@ -20,6 +20,11 @@
     white-space: inherit;
     font-size: 75%;
   }
+
+  :where(span,p)::selection{
+    background-color: var(--blue-5);
+    color: white;
+  }
 }
 
 .marked_text {
@@ -28,6 +33,7 @@
   user-select: none;
 }
 
+
 .actions {
   max-width: var(--size-fluid-10);
   margin: 0 auto;
@@ -35,9 +41,6 @@
   display: flex;
   gap: var(--shadow-3);
   justify-content: space-around;
-}
-
-.actions {
   button {
     color: white;
     padding-inline: var(--size-4);
@@ -102,8 +105,8 @@
   background: var(--blue-6) !important;
   color: white;
 }
-//  new menu
 
+//  new menu
 .Menu {
   padding: 8px 7px 6px;
   position: absolute;
@@ -129,13 +132,5 @@
   &.active {
     color: white;
     font-weight: bold;
-  }
-}
-@keyframes blink {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
   }
 }
