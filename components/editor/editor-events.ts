@@ -121,6 +121,7 @@ export const onCardSave = async function (
           category: newCard.category,
           title: newCard.title,
           exec: newCard.exec,
+          allowTrain: newCard.allowTrain
         },
       ]
       : userData.cards.map((currCard: CardType) => {
@@ -130,10 +131,13 @@ export const onCardSave = async function (
         return currCard;
       });
 
+    console.log(updatedData);
+
     await updateDoc(updateDocREf, {
       cards: updatedData,
     });
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };

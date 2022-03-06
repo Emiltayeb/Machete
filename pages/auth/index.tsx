@@ -48,18 +48,20 @@ enum FormMode {
 const Login = () => {
   const auth = getAuth();
   const router = useRouter();
+  const { data: user } = useUser();
   const { ref } = useGetData({ dataBaseName: 'users' });
   const email = React.useRef<HTMLInputElement>(null);
   const password = React.useRef<HTMLInputElement>(null);
   const name = React.useRef<HTMLInputElement>(null);
   const [formMode, setFormMode] = React.useState<FormMode>(FormMode.LOGIN);
   const toast = useToast();
-  const { data: user } = useUser();
   const [error, setError] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  // chakra light  dark colors
   const bgColor = useColorModeValue('gray.50', 'gray.700');
   const formBgColor = useColorModeValue('gray.100', 'gray.800');
   const textColor = useColorModeValue('black', 'white');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const switchFormMode = () =>
     setFormMode((prev) =>
       prev === FormMode.SIGN_UP ? FormMode.LOGIN : FormMode.SIGN_UP
@@ -191,13 +193,13 @@ const Login = () => {
                 {formMode === FormMode.LOGIN ? 'Login' : 'Sign Up'}
               </Button>
               <Flex alignItems='center' gap={2}>
-                <Text fontSize={{ base: 'small', md: 'md' }}>
+                <Text fontSize={{ base: 'x-small', md: 'md' }}>
                   {formMode === FormMode.LOGIN
                     ? 'No user?'
                     : 'Have an Account?'}
                 </Text>
                 <Link
-                  fontSize={{ base: 'small', md: 'md' }}
+                  fontSize={{ base: 'xs', md: 'md' }}
                   onClick={switchFormMode}
                   color='teal.500'>
                   {formMode === FormMode.LOGIN ? 'Sign Up' : 'Login'}

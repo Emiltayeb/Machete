@@ -43,7 +43,6 @@ const Navigation = () => {
       alignItems='center'
       p={3}>
 
-
       <Flex gap={1}>
         <NextLink href={'/'}>
           <Link textDecoration={"underline"} color="white" fontSize={'xl'} className={classes.logo}>

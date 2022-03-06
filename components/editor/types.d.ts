@@ -1,4 +1,4 @@
-import { CodeLanguages } from './utils';
+import { CodeLanguage, EditorMode } from './editor-utils';
 export type CustomElement = { type: any; children: any };
 export type CustomText = { text: any };
 
@@ -13,8 +13,8 @@ export type CardType = {
 
 };
 export interface EditorProps {
-  mode: 'training' | 'editing';
+  mode: EditorMode;
   card?: CardType | null;
-  userDataFromDb: any;
-  db: any
+  userDataFromDb?: any;
+  db?: any
 }

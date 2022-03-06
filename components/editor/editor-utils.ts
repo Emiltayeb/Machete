@@ -13,6 +13,7 @@ type Editor = BaseEditor & ReactEditor;
 export enum EditorMode {
   TRAIN = "train",
   ADD = "add",
+  MULTIPLE_TRAIN = "train-by-multiple"
 }
 
 export enum CodeLanguages {

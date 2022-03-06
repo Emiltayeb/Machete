@@ -2,8 +2,6 @@ import { where } from 'firebase/firestore';
 import router from 'next/router';
 import React from 'react';
 import { useUser } from 'reactfire';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-import { isLoadingState, cardsCategories } from '../store';
 import useGetData from './useGetData';
 
 const useGetLoadingStatus = function () {

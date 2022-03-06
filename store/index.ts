@@ -1,11 +1,15 @@
+import { CardType } from './../components/editor/types.d';
 import { atom } from 'recoil';
 
-export const isLoadingState = atom({
-  key: 'isLoading', // unique ID (with respect to other atoms/selectors)
-  default: false, // default value (aka initial value)
+export const userCategoriesAtom = atom({
+  key: 'userCategories', // unique ID (with respect to other atoms/selectors)
+  default: [], // default value (aka initial value)
 });
 
-export const cardsCategories = atom({
-  key: 'cardsCategories', // unique ID (with respect to other atoms/selectors)
-  default: [] as string[], // default value (aka initial value)
+
+export const trainCardsAtom = atom({
+  key: 'trainCards', // unique ID (with respect to other atoms/selectors)
+  default: [] as CardType[], // default value (aka initial value)
 });
+
+

@@ -8,6 +8,7 @@ import { FirebaseAppProvider } from 'reactfire';
 import FirebaseWrapper from '../components/layout/FirebaseWrapper';
 import Head from 'next/head';
 import Navigation from '../components/layout/navigation/Navigation';
+import OffLineModal from '../components/OfflineModal';
 import { RecoilRoot } from 'recoil';
 
 
@@ -19,15 +20,18 @@ function MyApp({ Component, pageProps }: AppProps) {
         <Head>
           <title>Machete</title>
         </Head>
+
         <RecoilRoot>
           <ChakraProvider >
+            <OffLineModal />
             <Navigation />
-            <Box height={"90vh"} minHeight={"90vh"}  >
+            <Box height={{ base: "unset", sm: "100vh" }} minHeight={{ base: "unset", sm: "100vh" }} >
               <Component {...pageProps} />
             </Box>
             <Footer />
           </ChakraProvider>
         </RecoilRoot>
+
       </FirebaseWrapper>
     </FirebaseAppProvider>
   );

@@ -3,7 +3,9 @@ import classes from './editor.module.scss';
 import { css } from '@emotion/css';
 import { Descendant, Editor, Transforms } from 'slate';
 import { EditorMode, selectCurrentNode } from './editor-utils';
-import { Text, Input, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Box, Portal } from '@chakra-ui/react';
+import { Text, Input, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Box, Portal, useDisclosure } from '@chakra-ui/react';
+import { findDiff } from '../../utils/getStringDiffrences';
+import { AiOutlineFontColors } from 'react-icons/ai';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
@@ -148,25 +150,24 @@ export const TrainingInput = (props: any) => {
   const [answerStatus, setAnswerStatus] = React.useState({
     answered: false,
     status: false,
+    differences: "",
   });
   const [inputState, setInputState] = React.useState<string>('');
-  const [openFeedback, setOpenFeedback] = React.useState(false);
+  const { onClose, onOpen, isOpen } = useDisclosure()
+  const correctText = props.leaf.text.trim();
 
-  React.useEffect(() => {
-    // add on enter event
-    return () => { };
-  }, []);
+
 
   const handelSubmit = function (e: React.KeyboardEvent<HTMLSpanElement>) {
     if (e.shiftKey && e.key === 'Enter') {
       return;
     }
     if (e.key !== 'Enter') return;
-    const correctText = props.leaf.text.trim();
-    setAnswerStatus({ status: inputState === correctText, answered: true });
-    setOpenFeedback(true)
-  };
 
+    setAnswerStatus({ status: inputState === correctText, answered: true, differences: findDiff(correctText, inputState) });
+    onOpen()
+
+  };
 
   return (
     <span
@@ -174,11 +175,11 @@ export const TrainingInput = (props: any) => {
       onKeyPress={handelSubmit}
       className={classes.training_card}>
       <Popover
-        onClose={() => setOpenFeedback(false)}
-        placement='bottom' isOpen={openFeedback} closeOnBlur closeOnEsc returnFocusOnClose={false}>
+        onClose={onClose}
+        placement='bottom' isOpen={isOpen} closeOnBlur closeOnEsc returnFocusOnClose={false}>
         <PopoverTrigger>
           <Input
-            onClick={() => answerStatus.answered && setOpenFeedback(true)}
+            onClick={() => answerStatus.answered && onOpen()}
             bg={'linkedin.400'}
             pl={3}
             data-answered={answerStatus.answered}
@@ -201,8 +202,9 @@ export const TrainingInput = (props: any) => {
             <PopoverArrow />
             <PopoverCloseButton />
             <PopoverBody>
-              <Text color={answerStatus.status ? "whatsapp.400" : "red.400"}>Submission  - {inputState}</Text>
-              <Text color={"whatsapp.400"}>Correct answer  - {props.leaf.text.trim()}</Text>
+              <Text color={answerStatus.status ? "whatsapp.400" : "red.400"}><Text fontWeight={"bold"} as="span">Submission</Text>  - {inputState}</Text>
+              <Text color={"whatsapp.400"}> <Text as="span" fontWeight={"bold"}>Correct answer</Text> - {props.leaf.text.trim()}</Text>
+              {answerStatus.differences.length > 0 && <Text color="yellow.400"><Text as="span" fontWeight={"bold"} >Differences</Text> - {answerStatus.differences}</Text>}
             </PopoverBody>
           </PopoverContent>
         </Portal>

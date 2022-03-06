@@ -38,13 +38,14 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editorCodeLang, setLanguage] = React.useState<
     Utils.CodeLanguages[] | null
   >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
+
   const [editorValue, setEditorValue] = React.useState(
     props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
   );
   const editorRef = React.useRef<HTMLDivElement | null>(null);
   const [hideToolbar, setHideToolbar] = React.useState(false);
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
-    router.query.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
+    router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
   const allowTrain = React.useRef(props.card?.allowTrain)
 
@@ -101,7 +102,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         const dec = decorator([node, path], lang, editor);
         finalDecorator.push(...dec);
       });
-
       return finalDecorator;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,7 +119,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 
 
   return (
-    <div ref={editorRef}>
+    <div ref={editorRef} data-editor>
       <Slate editor={editor} value={editorValue} onChange={setEditorValue}>
         {
           editorMode === Utils.EditorMode.ADD && <HoveringToolbar
@@ -128,7 +128,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
           />
         }
         <Editable
-          tabIndex={1}
+          tabIndex={10}
           autoFocus
           readOnly={editorMode === Utils.EditorMode.TRAIN}
           style={{ color: 'black' }}
@@ -143,7 +143,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
             const text = event.clipboardData.getData('Text');
             editor.insertText(text);
           }}
-          onKeyDown={(event) => Events.handelKeyDown(event, editor)}
+          onKeyDown={(event) => editorMode === Utils.EditorMode.ADD && Events.handelKeyDown(event, editor)}
           renderLeaf={(props) => (
             <CustomComponents.Leaf
               {...props}
@@ -158,8 +158,10 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         editorMode={editorMode}
         onCardSave={onCardSave}
         setEditorMode={setEditorMode}
+        cardText={Utils.getEditorText(editor.children)}
         card={props.card}
       />
+
     </div>
   );
 };

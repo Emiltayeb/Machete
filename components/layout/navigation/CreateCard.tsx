@@ -5,11 +5,10 @@ const CreateCard = function () {
 	const router = useRouter();
 	const mobileOrDesktopSize = useBreakpointValue({ base: "xs", sm: "sm" })
 
-	// ...code
-	return <Button size={mobileOrDesktopSize}
-		bgColor="teal.700" color={"white"}
-		_hover={{ bg: "white", color: "teal.700" }}
-		onClick={() => router.push("/editor/new")}>Create Card</Button>
+	return <Button border={"1px solid transparent"} size={mobileOrDesktopSize}
+		bgColor="whatsapp.700" color={"white"}
+		_hover={{ bg: "white", color: "teal.700", borderColor: "black" }}
+		onClick={() => router.push("editor/create")}>Create Card</Button>
 }
 
 export default CreateCard;

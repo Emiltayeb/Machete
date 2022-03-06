@@ -9,23 +9,22 @@ import {
   InputLeftAddon,
   Divider,
   Flex,
-  Popover,
-  PopoverArrow,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverTrigger,
-  useDisclosure,
-  Portal
+  FormControl,
+  Select,
+  IconButton,
 } from '@chakra-ui/react';
 import React from 'react';
 import * as Utils from './editor-utils';
 import { CardType } from './types';
-import { CheckIcon, ViewIcon, InfoIcon } from '@chakra-ui/icons';
-import FocusLock from "react-focus-lock"
+import { ArrowBackIcon, CheckIcon, EditIcon } from '@chakra-ui/icons';
+import { useRecoilValue } from 'recoil';
+import { userCategoriesAtom } from '../../store';
+import ReactFocusLock from 'react-focus-lock';
 
 
 type ActionsProps = {
-  card: CardType | null | undefined;
+  cardText: string;
+  card: CardType | undefined | null;
   editorMode: Utils.EditorMode;
   onCardSave: ({
     title,
@@ -38,21 +37,33 @@ type ActionsProps = {
   }) => void;
   setEditorMode: any;
 };
+
+
 enum ActionState {
   SUBMITTING,
   READY,
 }
+
+enum CategoryState { NEW, EXISTING }
+
 const EditorActions = (props: ActionsProps) => {
   const { editorMode, onCardSave, setEditorMode, card } = props;
+  const userCategories = useRecoilValue(userCategoriesAtom)
   const [isSubmitting, setIsSubmitting] = React.useState(ActionState.READY);
+  const [categoryState, setCategoryState] = React.useState(CategoryState.EXISTING);
+  const toast = useToast();
+
+
   const [cardDetailState, setCardDetailState] = React.useState({
+
     title: card?.title ?? '',
-    category: card?.category ?? '',
+    category: card?.category ?? userCategories[0] ?? "",
     exec: card?.exec ?? '',
   });
-  const firstFieldRef = React.useRef(null)
-  const { onOpen, onClose, isOpen } = useDisclosure()
-  const toast = useToast();
+
+  const isCategoryInvalid = categoryState === CategoryState.NEW && cardDetailState.category == ""
+  const isInvalidForm = cardDetailState.title === "" || isCategoryInvalid || props.cardText.length === 0
+
 
   const handelCardSave = async function () {
     setIsSubmitting(ActionState.SUBMITTING);
@@ -65,24 +76,34 @@ const EditorActions = (props: ActionsProps) => {
       setIsSubmitting(ActionState.READY);
     }
   };
-  const updatedCardDetail = function (e: React.ChangeEvent<HTMLInputElement>) {
+  const updatedCardDetail = function (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setCardDetailState((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const CardDetailsForm = function () {
-    return <>
-      <Text fontWeight={'semibold'}>Card Details</Text>
-      <Flex
-        direction={"column"}
+  const handelSelectCategory = function (e: React.ChangeEvent<HTMLSelectElement>) {
+    const filterVal = e.target.value;
+    if (filterVal === "new") {
+      setCategoryState(CategoryState.NEW)
+    } else {
+      categoryState === CategoryState.NEW && setCategoryState(CategoryState.EXISTING)
+      updatedCardDetail(e)
+    }
+  }
 
-        gap={2}>
-        <InputGroup>
+  const CardDetailsForm = function () {
+    return <Flex
+      wrap={{ base: "wrap", md: "nowrap" }}
+      gap={2}>
+      <FormControl isInvalid={cardDetailState.title == ""}>
+        <InputGroup size={"xs"}>
           <InputLeftAddon>Title</InputLeftAddon>
           <Input
-            ref={firstFieldRef}
+
+            required
+            autoFocus
             type={'text'}
             value={cardDetailState.title}
             name='title'
@@ -90,30 +111,43 @@ const EditorActions = (props: ActionsProps) => {
             onChange={(e) => updatedCardDetail(e)}
           />
         </InputGroup>
+      </FormControl>
 
-        <InputGroup>
+      <FormControl isInvalid={isCategoryInvalid}>
+        <InputGroup size={"xs"} alignItems="self-end">
           <InputLeftAddon>Category</InputLeftAddon>
-          <Input
-            onChange={(e) => updatedCardDetail(e)}
-            value={cardDetailState.category}
-            type={'text'}
-            name='category'
-            placeholder='Things to know...'
-          />
-        </InputGroup>
+          {categoryState === CategoryState.NEW ? <>
 
-        <InputGroup>
-          <InputLeftAddon>Exec</InputLeftAddon>
-          <Input
-            onChange={(e) => updatedCardDetail(e)}
-            type={'text'}
-            value={cardDetailState.exec}
-            name='exec'
-            placeholder='Learn how to..'
-          />
+            <Input
+              size={"xs"}
+              onChange={(e) => updatedCardDetail(e)}
+              value={cardDetailState.category}
+              type={'text'}
+              name='category'
+              placeholder='Things to know...'
+            />
+
+            <IconButton size={'xs'} aria-label='back to list' icon={<ArrowBackIcon />} onClick={() => setCategoryState(CategoryState.EXISTING)} />
+          </> : <Select size={"xs"} name='category' onChange={handelSelectCategory} >
+            {userCategories?.map((cat: string, index: number) => <option selected={index == 0} key={cat}>{cat}</option>)}
+            <option value="new"> + Add Category</option>
+          </Select>}
+
+
         </InputGroup>
-      </Flex>
-    </>
+      </FormControl>
+
+      <InputGroup size={"xs"}>
+        <InputLeftAddon>Exec</InputLeftAddon>
+        <Input
+          onChange={(e) => updatedCardDetail(e)}
+          type={'text'}
+          value={cardDetailState.exec}
+          name='exec'
+          placeholder='Learn how to..'
+        />
+      </InputGroup>
+    </Flex>
   }
 
 
@@ -123,36 +157,13 @@ const EditorActions = (props: ActionsProps) => {
       <Box marginBlockStart={3}>
         {
           editorMode === Utils.EditorMode.ADD ?
-            <HStack>
-              <Popover
-                isOpen={isOpen}
-                onOpen={onOpen}
-                onClose={onClose}
-                placement='top'
-                closeOnBlur
-                initialFocusRef={firstFieldRef}
-
-              >
-                <PopoverTrigger>
-                  <Button size={"sm"} leftIcon={<InfoIcon />} colorScheme="yellow">
-                    Card Details
-                  </Button>
-                </PopoverTrigger>
-                <Portal >
-                  <PopoverContent p={5} width="unset" margin="0 auto">
-                    <FocusLock returnFocus persistentFocus={false}>
-                      <PopoverArrow />
-                      <PopoverCloseButton />
-                      {CardDetailsForm()}
-                    </FocusLock>
-                  </PopoverContent>
-                </Portal>
-              </Popover>
-
-
+            <HStack wrap={{ base: "wrap", md: "nowrap" }} gap={{ base: 2, md: 0 }}>
+              {CardDetailsForm()}
               <Button
-                size={"sm"}
+                isDisabled={isInvalidForm}
+                size={"xs"}
                 colorScheme={'whatsapp'}
+
                 leftIcon={<CheckIcon />}
                 isLoading={isSubmitting === ActionState.SUBMITTING}
                 onClick={handelCardSave}>
@@ -160,7 +171,7 @@ const EditorActions = (props: ActionsProps) => {
               </Button>
 
             </HStack> :
-            <Button colorScheme="linkedin" onClick={() => setEditorMode(Utils.EditorMode.ADD)}> Edit</Button>
+            <Button size="xs" colorScheme="linkedin" leftIcon={<EditIcon />} onClick={() => setEditorMode(Utils.EditorMode.ADD)}> Edit</Button>
         }
       </Box>
 
