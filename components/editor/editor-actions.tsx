@@ -48,16 +48,15 @@ enum CategoryState { NEW, EXISTING }
 
 const EditorActions = (props: ActionsProps) => {
   const { editorMode, onCardSave, setEditorMode, card } = props;
-  const userCategories = useRecoilValue(userCategoriesAtom)
+  const userCategoriesState = useRecoilValue(userCategoriesAtom)
   const [isSubmitting, setIsSubmitting] = React.useState(ActionState.READY);
-  const [categoryState, setCategoryState] = React.useState(CategoryState.EXISTING);
+  const [categoryState, setCategoryState] = React.useState(userCategoriesState.length > 0 ? CategoryState.EXISTING : CategoryState.NEW);
   const toast = useToast();
 
 
   const [cardDetailState, setCardDetailState] = React.useState({
-
     title: card?.title ?? '',
-    category: card?.category ?? userCategories[0] ?? "",
+    category: card?.category ?? userCategoriesState[0] ?? "",
     exec: card?.exec ?? '',
   });
 
@@ -127,9 +126,9 @@ const EditorActions = (props: ActionsProps) => {
               placeholder='Things to know...'
             />
 
-            <IconButton size={'xs'} aria-label='back to list' icon={<ArrowBackIcon />} onClick={() => setCategoryState(CategoryState.EXISTING)} />
+            <IconButton disabled={userCategoriesState.length === 0} size={'xs'} aria-label='back to list' icon={<ArrowBackIcon />} onClick={() => setCategoryState(CategoryState.EXISTING)} />
           </> : <Select size={"xs"} name='category' onChange={handelSelectCategory} >
-            {userCategories?.map((cat: string, index: number) => <option selected={index == 0} key={cat}>{cat}</option>)}
+            {userCategoriesState?.map((cat: string, index: number) => <option selected={index == 0} key={cat}>{cat}</option>)}
             <option value="new"> + Add Category</option>
           </Select>}
 
@@ -153,7 +152,6 @@ const EditorActions = (props: ActionsProps) => {
 
   return (
     <Box marginBlockStart={5}>
-      <Divider />
       <Box marginBlockStart={3}>
         {
           editorMode === Utils.EditorMode.ADD ?
@@ -169,7 +167,13 @@ const EditorActions = (props: ActionsProps) => {
                 onClick={handelCardSave}>
                 Save
               </Button>
-
+              <Button
+                isDisabled={isInvalidForm}
+                size={"xs"}
+                colorScheme={'teal'}
+                onClick={() => setEditorMode(Utils.EditorMode.TRAIN)}>
+                Train
+              </Button>
             </HStack> :
             <Button size="xs" colorScheme="linkedin" leftIcon={<EditIcon />} onClick={() => setEditorMode(Utils.EditorMode.ADD)}> Edit</Button>
         }

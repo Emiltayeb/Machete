@@ -9,7 +9,7 @@ export const userCategoriesAtom = atom({
 
 export const trainCardsAtom = atom({
   key: 'trainCards', // unique ID (with respect to other atoms/selectors)
-  default: [] as CardType[], // default value (aka initial value)
+  default: [] as CardType[] | CardType, // default value (aka initial value)
 });
 
 

@@ -3,18 +3,27 @@ import { Box, Flex, VStack, Badge, Heading, Button, Text } from '@chakra-ui/reac
 import { useRouter } from 'next/router';
 import React from 'react'
 import { GiMachete } from 'react-icons/gi';
+import { useSetRecoilState } from 'recoil';
+import { trainCardsAtom } from '../store';
 import { onDeleteCard } from './editor/editor-events';
-import { EditorMode } from './editor/editor-utils';
+
 import { CardType } from './editor/types';
 
 const CardsByUser = function (props: any) {
 
 	const router = useRouter();
-	const onCardClick = function (id?: string) {
+	console.log(router.query)
+	const setTrainingCardsState = useSetRecoilState(trainCardsAtom)
+
+	const onEditorCard = function (id?: string) {
 		if (!id) return;
 		router.push(`editor/${id}`);
 	};
 
+	const onSingleCardTrain = function (card: CardType) {
+		setTrainingCardsState(card)
+		router.push(`editor/train?mode=single`)
+	}
 	if (!props?.cards) return <></>
 	return <>
 		{props.cards.map((card: CardType) => (
@@ -45,7 +54,7 @@ const CardsByUser = function (props: any) {
 							size={'xs'}
 							colorScheme="linkedin"
 							leftIcon={<EditIcon />}
-							onClick={() => onCardClick(card?.id)}>
+							onClick={() => onEditorCard(card?.id)}>
 							Edit
 						</Button>
 						<Button
@@ -53,7 +62,7 @@ const CardsByUser = function (props: any) {
 							colorScheme="teal"
 							disabled={!card.allowTrain}
 							leftIcon={<GiMachete />}
-							onClick={() => { router.push(`editor/${card.id}?mode=${EditorMode.TRAIN}`); }}>
+							onClick={() => onSingleCardTrain(card)}>
 							Train
 						</Button>
 

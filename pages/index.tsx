@@ -39,7 +39,6 @@ const HomePage = (props: any) => {
   React.useEffect(() => {
     setFilteredCards(currentCategoryFilter.current.value !== "all" ? props?.userDataFromDb?.cards.filter((card: CardType) => card.category === currentCategoryFilter.current.value)
       : props?.userDataFromDb?.cards)
-
     setTrainingCards(props?.userDataFromDb?.cards)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props?.userDataFromDb?.cards])
@@ -77,7 +76,7 @@ const HomePage = (props: any) => {
 
 
       <VStack marginBlock={14} alignItems='flex-start'>
-        <HStack alignItems={"center"} >
+        <Flex width={"full"} alignItems={{ base: "flex-start", sm: "center" }} direction={{ base: "column", sm: "row" }} wrap={"wrap"} gap={2} >
           <Text fontSize={"sm"}>Category:</Text>
           <Select onChange={onCategoryFilter} maxW="sm" size={"sm"} flex={1} ref={currentCategoryFilter}>
             <option value={'all'} >All</option>
@@ -87,10 +86,10 @@ const HomePage = (props: any) => {
 
           <Input flex={1} variant="flushed" onChange={onFreeSearchFilter} />
           <Button disabled={filteredCards?.length === 0}
-            onClick={() => router.push("editor/train?mode=train-by-multiple")}
+            onClick={() => router.push("editor/train?mode=multiple")}
             colorScheme="teal" size={"sm"}>
             Train {currentCategoryFilter.current?.value || "all"} Cards</Button>
-        </HStack>
+        </Flex>
         <Divider />
         <Box
           p={{ base: 2, sm: 5, md: 10 }}

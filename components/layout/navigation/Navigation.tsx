@@ -36,6 +36,12 @@ const Navigation = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const mobileOrDesktopSize = useBreakpointValue({ base: "xs", sm: "sm" })
 
+  const handelLogout = function () {
+    if (user) {
+      signOut(auth)
+    }
+    router.push('/auth')
+  }
   const NavigationLinks = () => {
     return <Flex
       justifyContent={{ base: 'center', sm: 'space-between' }}
@@ -63,9 +69,7 @@ const Navigation = () => {
           <ListItem>
             <Button
               size={mobileOrDesktopSize}
-              onClick={() =>
-                user ? signOut(auth) : router.push('/auth')
-              }>
+              onClick={handelLogout}>
               {user ? 'Logout' : 'Login'}
             </Button>
           </ListItem>
