@@ -4,10 +4,6 @@ import {
 	BreadcrumbItem,
 	BreadcrumbLink,
 	BreadcrumbSeparator,
-	Box,
-	Button,
-	HStack,
-	Text,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react';

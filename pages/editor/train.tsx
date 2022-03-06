@@ -52,10 +52,11 @@ const MultipleTrainCards = function (props: any) {
 }
 
 const UserCard = function (props: any) {
-  const mode = useRouter().query.mode;
+  const router = useRouter();
   const textColor = useColorModeValue("teal.700", "white")
   const trainingCards = useRecoilValue(trainCardsAtom)
   const noTrainingCards = !trainingCards || Array.isArray(trainingCards) && !trainingCards?.length
+
 
   return (
     <Container maxW={"container.xl"}>
@@ -80,7 +81,7 @@ const UserCard = function (props: any) {
           <Heading color={textColor} >Train your cards</Heading>
           {
             noTrainingCards ? <Text>No cards.</Text> :
-              mode === EditorMode.MULTIPLE_TRAIN ?
+              router.query.mode === EditorMode.MULTIPLE_TRAIN ?
                 <MultipleTrainCards
                   trainingCards={trainingCards} {...props} />
                 : <Editor mode={EditorMode.TRAIN} card={trainingCards as CardType}
