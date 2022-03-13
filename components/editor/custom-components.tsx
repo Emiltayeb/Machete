@@ -11,7 +11,7 @@ import { AiOutlineFontColors } from 'react-icons/ai';
 export const initialValue: Descendant[] = [
   {
     type: 'block',
-    children: [{ text: '' }],
+    children: [{ text: '', type: "span" }],
   },
 ];
 

@@ -43,11 +43,10 @@ export const toggleFormat = (
 ) => {
   const { node } = findClosestBlockAndNode(editor)
   const { text, ...restFormats } = node.nodeData[0];
-  //Todo  check if the format was a comment - revet back?
+
   Transforms.insertNodes(
     editor,
     [
-
       {
         ...restFormats,
         [format]: !isActive,

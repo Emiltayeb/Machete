@@ -1,11 +1,12 @@
+import { Button } from '@chakra-ui/react';
 import { cx } from '@emotion/css';
 import React, { PropsWithChildren, Ref } from 'react';
 import { useRef } from 'react';
 import { Editor, Text, Range } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
-import { Portal } from '../layout/Portal';
 import { CustomFormats, toggleFormat } from './editor-utils';
 import classes from './editor.module.scss';
+import EditorPortal from './EditorPotral';
 
 interface BaseProps {
   className: string;
@@ -25,65 +26,34 @@ export const Menu = React.forwardRef(
 );
 const matchedNodes = {} as any;
 
-export const HoveringToolbar = (props: {
-  shouldHide: boolean;
-  setShouldHide: any;
-}) => {
-  const ref = useRef<HTMLDivElement | null>();
+export const HoveringToolbar = () => {
   const currNodeRef = useRef<any>();
+
   const editor = useSlate();
 
-  const selectedText = window.getSelection()?.toString();
-
   React.useEffect(() => {
-    const el = ref.current;
-    const { selection } = editor;
 
-    if (!el) {
-      return;
-    }
     const [match] = Editor.nodes(editor, {
       match: (node) => {
         if (!Text.isText(node)) return false;
         const index = ReactEditor.findPath(editor, node).join('');
-        matchedNodes[index] = node;
+        matchedNodes[index] = node
         return true;
       },
     }) as any;
 
     currNodeRef.current = match?.[0];
 
-    // if the current node type is remember me - display the remove marker.
-    if (
-      !selection ||
-      !ReactEditor?.isFocused(editor) ||
-      Range?.isCollapsed?.(selection) ||
-      window.getSelection()?.toString().length === 0 ||
-      props.shouldHide ||
-      Editor.string(editor, selection) === ''
-    ) {
-      el.removeAttribute('style');
-      props.setShouldHide(false);
-      return;
-    }
-    const domSelection = window.getSelection();
-    const domRange = domSelection?.getRangeAt(0);
-    const rect = domRange?.getBoundingClientRect();
-    if (!rect) {
-      return;
-    }
-    el.style.opacity = '1';
-    el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
-    el.style.left = `${
-      rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2
-    }px`;
-  });
+  })
+
 
   // Check if we need to apply format
   const compareFormat = function (format: CustomFormats) {
     if (!editor.selection) return;
+
     const { anchor, focus } = editor.selection;
     if (!anchor.path || !focus.path) return;
+
     const { path: anchorPath } = anchor;
     const { path: focusPath } = focus;
 
@@ -119,68 +89,60 @@ export const HoveringToolbar = (props: {
 
     return shouldFormat;
   };
+
+  const displayToolBar = editor?.selection && Editor.string(editor, editor?.selection as any).length && ReactEditor?.isFocused(editor)
   return (
-    <Portal>
-      <Menu ref={ref} className={classes.Menu}>
-        <FormatButton
-          isFormatActive={compareFormat(CustomFormats.BOLD)}
-          format='bold'
-          icon='B'
-        />
-        {!currNodeRef.current?.[CustomFormats.REMEMBER_TEXT] && (
+    <EditorPortal>
+
+      {
+        displayToolBar ? <Menu className={classes.Menu}>
           <FormatButton
-            currNode={currNodeRef.current}
+            isFormatActive={compareFormat(CustomFormats.BOLD)}
+            format='bold'
+            icon='B'
+            currNode={currNodeRef}
+          />
+
+          <FormatButton
+            currNode={currNodeRef}
             isFormatActive={compareFormat(CustomFormats.MARKER)}
             format={CustomFormats.MARKER}
+            disableMarker={CustomFormats.REMEMBER_TEXT}
             icon='H'
           />
-        )}
-        {!currNodeRef.current?.[CustomFormats.MARKER] && (
+
+
           <FormatButton
             isFormatActive={compareFormat(CustomFormats.REMEMBER_TEXT)}
             format={CustomFormats.REMEMBER_TEXT}
+            disableMarker={CustomFormats.MARKER}
+            currNode={currNodeRef}
             icon='R'
           />
-        )}
-      </Menu>
-    </Portal>
+
+        </Menu> : <></>
+      }
+    </EditorPortal>
   );
 };
 
 export const FormatButton = (props: any) => {
-  const { format, icon, isFormatActive } = props;
+  const { format, icon, currNode, disableMarker } = props;
   const editor = useSlate();
   return (
     <Button
-      active={isFormatActive}
-      reversed
+      colorScheme={"black"}
+      className={cx(classes.format_button, props.isFormatActive ? classes.active : '')}
+      size="sm"
+      disabled={currNode.current?.[disableMarker]}
       onMouseDown={(event: any) => {
         event.preventDefault();
-        toggleFormat(editor, format, isFormatActive);
+        toggleFormat(editor, format, props.isFormatActive);
       }}>
+
       <div>{icon}</div>
     </Button>
   );
 };
 
-// eslint-disable-next-line react/display-name
-export const Button = React.forwardRef(
-  (
-    {
-      active,
-      ...props
-    }: PropsWithChildren<
-      {
-        active: boolean;
-        reversed: boolean;
-      } & BaseProps
-    >,
-    ref: Ref<OrNull<HTMLSpanElement>>
-  ) => (
-    <span
-      {...props}
-      ref={ref as any}
-      className={cx(classes.format_button, active ? classes.active : '')}
-    />
-  )
-);
+

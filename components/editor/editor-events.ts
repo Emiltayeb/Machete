@@ -65,6 +65,19 @@ export const handelKeyDown = function (
   }
 };
 
+export const showOptions = function (editor: Editor, setShowOptions: (toShow: boolean) => void) {
+  const [currentNode] = Utils.findCurrentNodeAtSelection(editor);
+  const toShowOptions = currentNode?.[0].text?.match(/\//);
+  setShowOptions(toShowOptions?.length > 0)
+}
+
+export const createCodeBlock = function (editor: Editor) {
+  editor.deleteBackward('word');
+  Transforms.insertNodes(editor, [
+    { type: 'code', children: [{ text: '' }] },
+  ]);
+
+}
 export const handelCreatCodeBlock = function (
   editor: Editor,
   setLanguage: any

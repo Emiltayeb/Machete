@@ -8,7 +8,7 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
 import classes from './editor.module.scss';
 import { BaseEditor, createEditor, Descendant } from 'slate';
-import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
+import { Editable, ReactEditor, Slate, useSlate, withReact } from 'slate-react';
 import * as Types from './types';
 import * as Utils from './editor-utils';
 import * as CustomComponents from './custom-components';
@@ -18,6 +18,8 @@ import { decorator } from './editor.configs';
 import * as Events from './editor-events';
 import EditorActions from './editor-actions';
 import { useRouter } from 'next/router';
+import EditorPortal from './EditorPotral';
+import { Box, Button, Text } from '@chakra-ui/react';
 
 const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -27,6 +29,19 @@ declare module 'slate' {
     Text: Types.CustomText;
     Descendant: Descendant & { type: string };
   }
+}
+
+const EditorOptions = function (props: any) {
+  const editor = useSlate();
+
+  const Option = function (text: string, operation: any) {
+    return <Button onClick={operation} p={2} colorScheme="linkedin" cursor="pointer">{text}</Button>
+  }
+  return props.showOptions ? <EditorPortal>
+    <Box bgColor={"linkedin.400"} color="white" p={4}>
+      {Option("Create code", () => { Events.createCodeBlock(editor) })}
+    </Box>
+  </EditorPortal> : <></>
 }
 
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
@@ -43,10 +58,11 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
   );
   const editorRef = React.useRef<HTMLDivElement | null>(null);
-  const [hideToolbar, setHideToolbar] = React.useState(false);
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
+  const [showOptions, setShowOptions] = React.useState(false)
+
   const allowTrain = React.useRef(props.card?.allowTrain)
 
   const onCardSave = async function ({
@@ -81,15 +97,18 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 
   // Each time we change the editor value
   React.useEffect(() => {
-    if (!editorValue?.[0] || editorMode === Utils.EditorMode.TRAIN) return;
+    if (!editorValue?.[0] || editorMode === Utils.EditorMode.TRAIN) return;;
     allowTrain.current = !!document.querySelector('[data-remember-text]')
-    const detectCodeTimerId = setTimeout(
-      () => Events.handelCreatCodeBlock(editor, setLanguage),
-      600
-    );
-    return () => {
-      clearTimeout(detectCodeTimerId);
-    };
+    const [currentNode] = Utils.findCurrentNodeAtSelection(editor);
+    const toShowOptions = currentNode?.[0].text?.match(/\//);
+    setShowOptions(toShowOptions?.length > 0)
+    // const detectCodeTimerId = setTimeout(
+    //   () => Events.showOptions(editor, setShowOptions),
+    //   600
+    // );
+    // return () => {
+    //   clearTimeout(detectCodeTimerId);
+    // };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorValue]);
 
@@ -120,20 +139,20 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 
   return (
     <div ref={editorRef} data-editor>
-      <Slate editor={editor} value={editorValue} onChange={setEditorValue}>
+      <Slate editor={editor} value={editorValue} onChange={(value) => setEditorValue(value)}>
         {
-          editorMode === Utils.EditorMode.ADD && <HoveringToolbar
-            shouldHide={hideToolbar}
-            setShouldHide={setHideToolbar}
-          />
+          editorMode === Utils.EditorMode.ADD && <>
+            <HoveringToolbar />
+
+            <EditorOptions showOptions={showOptions} />
+          </>
         }
         <Editable
           tabIndex={10}
           autoFocus
           readOnly={editorMode === Utils.EditorMode.TRAIN}
           style={{ color: 'black' }}
-          onBlur={() => setHideToolbar(true)}
-          placeholder='Enter some text'
+          placeholder='Enter some text (type "/" for more options)'
           decorate={decorate}
           id={SLATE_EDITOR_ID}
           className={classes.editor}
@@ -167,4 +186,4 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 };
 
 export default SlateEditor;
-Prism.languages.typeScript = Prism.languages.extend('typescript', {});
+Prism.languages.typeScript = Prism.languages.extend('typescript ', {});
