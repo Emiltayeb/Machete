@@ -3,7 +3,6 @@ import {
 	Breadcrumb,
 	BreadcrumbItem,
 	BreadcrumbLink,
-	BreadcrumbSeparator,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -32,12 +31,9 @@ const NewCard = function (props: any) {
 			</Breadcrumb>
 
 			<Container maxW={'container.lg'} p={4}>
-
 				<VStack alignItems={'stretch'} spacing={0}>
-
 					<Heading color={textColor} > New Card</Heading>
-
-					<Editor mode={EditorMode.ADD}  {...props} />
+					<Editor mode={EditorMode.ADD} />
 				</VStack>
 			</Container>
 		</Container>

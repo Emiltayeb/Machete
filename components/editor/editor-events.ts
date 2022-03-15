@@ -1,5 +1,4 @@
 import { Editor, Transforms } from 'slate';
-
 import * as Utils from './editor-utils';
 import { CardType } from './types';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -27,28 +26,38 @@ export const handelKeyDown = function (
       const { node, parent } = Utils.findClosestBlockAndNode(editor);
       const { nodeData } = node;
       const { parentData } = parent
+      event.preventDefault();
+      // reset events
       if (nodeData.type === 'code' || parentData.type === "code") {
-        event.preventDefault();
 
+        // in case of code element - simply go down on line when pressing with shift
         if (shiftKey) {
           editor.insertText('\n');
           break;
         }
+        Utils.moveCursorToEndOfCurrentBlock(editor)
         Transforms.insertNodes(editor, {
           type: 'block',
           children: [{ text: '' }],
         });
       }
+      else {
+        // reset styles after enter
+        Transforms.insertNodes(editor, {
+          type: 'block',
+          children: [{ text: '' }],
+        });
 
+      }
       break;
 
     case 'Backspace':
       {
         const { parent } = Utils.findClosestBlockAndNode(editor);
-        const { parentData, parentPath } = parent;
+        const { parentData } = parent;
 
         if (parentData.type === 'code') {
-          const isEmpty = parentData?.children?.[0].text.length - 1 <= 0;
+          const isEmpty = parentData?.children?.[0].text.length <= 0;
 
           if (isEmpty) {
             Transforms.setNodes(editor, { type: 'span' });
@@ -72,12 +81,25 @@ export const showOptions = function (editor: Editor, setShowOptions: (toShow: bo
 }
 
 export const createCodeBlock = function (editor: Editor) {
-  editor.deleteBackward('word');
-  Transforms.insertNodes(editor, [
+  editor.deleteBackward("character")
+  Utils.moveCursorToEndOfCurrentBlock(editor)
+  editor.insertBreak();
+  Transforms.insertFragment(editor, [
     { type: 'code', children: [{ text: '' }] },
   ]);
-
+  Utils.focusCurrentNode(editor)
 }
+
+
+export const createHEading = function (editor: Editor) {
+  Utils.moveCursorToEndOfCurrentBlock(editor)
+  editor.insertBreak();
+  Transforms.insertFragment(editor, [
+    { type: 'heading', children: [{ text: 'Heading' }] },
+  ]);
+  Utils.focusCurrentNode(editor)
+}
+
 export const handelCreatCodeBlock = function (
   editor: Editor,
   setLanguage: any
@@ -143,8 +165,6 @@ export const onCardSave = async function (
         }
         return currCard;
       });
-
-    console.log(updatedData);
 
     await updateDoc(updateDocREf, {
       cards: updatedData,

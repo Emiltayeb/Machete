@@ -2,17 +2,17 @@ import { Button } from '@chakra-ui/react';
 import { cx } from '@emotion/css';
 import React, { PropsWithChildren, Ref } from 'react';
 import { useRef } from 'react';
-import { Editor, Text, Range } from 'slate';
+import { Editor, Text } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
-import { CustomFormats, toggleFormat } from './editor-utils';
-import classes from './editor.module.scss';
-import EditorPortal from './EditorPotral';
+import { CustomFormats, toggleFormat } from '../editor-utils';
+import classes from './hovering-toolbar.module.scss';
+import EditorPortal from '../EditorPotral';
+
 
 interface BaseProps {
   className: string;
   [key: string]: unknown;
 }
-type OrNull<T> = T | null;
 
 // eslint-disable-next-line react/display-name
 export const Menu = React.forwardRef(
@@ -24,9 +24,10 @@ export const Menu = React.forwardRef(
     />
   )
 );
-const matchedNodes = {} as any;
+
 
 export const HoveringToolbar = () => {
+  const matchedNodes = useRef<Record<string, any>>({});
   const currNodeRef = useRef<any>();
 
   const editor = useSlate();
@@ -36,9 +37,13 @@ export const HoveringToolbar = () => {
     const [match] = Editor.nodes(editor, {
       match: (node) => {
         if (!Text.isText(node)) return false;
-        const index = ReactEditor.findPath(editor, node).join('');
-        matchedNodes[index] = node
-        return true;
+        try {
+          const index = ReactEditor.findPath(editor, node).join('');
+          matchedNodes.current[index] = node
+          return true;
+        } catch (error) {
+          return false
+        }
       },
     }) as any;
 
@@ -62,11 +67,11 @@ export const HoveringToolbar = () => {
     );
 
     if (delta === 0) {
-      return matchedNodes[anchorPath.join('')]?.[format];
+      return matchedNodes.current[anchorPath.join('')]?.[format];
     } else if (delta === 1) {
       // simply check if both of the nodes has the requested format
-      const firstNode = matchedNodes[anchorPath.join('')];
-      const secondNode = matchedNodes[focusPath.join('')];
+      const firstNode = matchedNodes.current[anchorPath.join('')];
+      const secondNode = matchedNodes.current[focusPath.join('')];
       return firstNode?.[format] && secondNode?.[format];
     }
     // making sure to loop loop only for the necessary nodes.
@@ -74,14 +79,14 @@ export const HoveringToolbar = () => {
     const anchorNumber = +anchorPath.join('');
     const focusNumber = +focusPath.join('');
 
-    const keys = Object.keys(matchedNodes)
+    const keys = Object.keys(matchedNodes.current)
       .sort()
       .map((val) => +val)
       .filter((val) => val - anchorNumber >= 0 || val - focusNumber >= 0);
 
     let shouldFormat = true;
     for (const key of keys) {
-      const node = matchedNodes[key.toString()];
+      const node = matchedNodes.current[key.toString()];
       if (!node?.[format]) {
         shouldFormat = false;
       }
@@ -92,36 +97,33 @@ export const HoveringToolbar = () => {
 
   const displayToolBar = editor?.selection && Editor.string(editor, editor?.selection as any).length && ReactEditor?.isFocused(editor)
   return (
-    <EditorPortal>
+    <EditorPortal toShow={!!displayToolBar}>
+      <Menu className={classes.Root}>
+        <FormatButton
+          isFormatActive={compareFormat(CustomFormats.BOLD)}
+          format='bold'
+          icon='B'
+          currNode={currNodeRef}
+        />
 
-      {
-        displayToolBar ? <Menu className={classes.Menu}>
-          <FormatButton
-            isFormatActive={compareFormat(CustomFormats.BOLD)}
-            format='bold'
-            icon='B'
-            currNode={currNodeRef}
-          />
-
-          <FormatButton
-            currNode={currNodeRef}
-            isFormatActive={compareFormat(CustomFormats.MARKER)}
-            format={CustomFormats.MARKER}
-            disableMarker={CustomFormats.REMEMBER_TEXT}
-            icon='H'
-          />
+        <FormatButton
+          currNode={currNodeRef}
+          isFormatActive={compareFormat(CustomFormats.MARKER)}
+          format={CustomFormats.MARKER}
+          disableMarker={CustomFormats.REMEMBER_TEXT}
+          icon='H'
+        />
 
 
-          <FormatButton
-            isFormatActive={compareFormat(CustomFormats.REMEMBER_TEXT)}
-            format={CustomFormats.REMEMBER_TEXT}
-            disableMarker={CustomFormats.MARKER}
-            currNode={currNodeRef}
-            icon='R'
-          />
+        <FormatButton
+          isFormatActive={compareFormat(CustomFormats.REMEMBER_TEXT)}
+          format={CustomFormats.REMEMBER_TEXT}
+          disableMarker={CustomFormats.MARKER}
+          currNode={currNodeRef}
+          icon='R'
+        />
 
-        </Menu> : <></>
-      }
+      </Menu>
     </EditorPortal>
   );
 };

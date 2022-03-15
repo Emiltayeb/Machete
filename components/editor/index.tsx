@@ -8,18 +8,16 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
 import classes from './editor.module.scss';
 import { BaseEditor, createEditor, Descendant } from 'slate';
-import { Editable, ReactEditor, Slate, useSlate, withReact } from 'slate-react';
+import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import * as Types from './types';
 import * as Utils from './editor-utils';
-import * as CustomComponents from './custom-components';
+import * as CustomComponents from './custom-slate-elemnts';
 import { withHistory } from 'slate-history';
 import { HoveringToolbar } from './hovering-toolbar';
-import { decorator } from './editor.configs';
 import * as Events from './editor-events';
 import EditorActions from './editor-actions';
 import { useRouter } from 'next/router';
-import EditorPortal from './EditorPotral';
-import { Box, Button, Text } from '@chakra-ui/react';
+import EditorOptions from './editor-options';
 
 const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -31,25 +29,9 @@ declare module 'slate' {
   }
 }
 
-const EditorOptions = function (props: any) {
-  const editor = useSlate();
-
-  const Option = function (text: string, operation: any) {
-    return <Button onClick={operation} p={2} colorScheme="linkedin" cursor="pointer">{text}</Button>
-  }
-  return props.showOptions ? <EditorPortal>
-    <Box bgColor={"linkedin.400"} color="white" p={4}>
-      {Option("Create code", () => { Events.createCodeBlock(editor) })}
-    </Box>
-  </EditorPortal> : <></>
-}
-
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const router = useRouter()
-  const editor = React.useMemo(
-    () => withHistory(withReact(createEditor())),
-    []
-  );
+  const [editor] = React.useState(withHistory(withReact(createEditor())))
   const [editorCodeLang, setLanguage] = React.useState<
     Utils.CodeLanguages[] | null
   >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
@@ -61,7 +43,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
-  const [showOptions, setShowOptions] = React.useState(false)
+  const showOptionsRef = React.useRef(false)
 
   const allowTrain = React.useRef(props.card?.allowTrain)
 
@@ -97,18 +79,8 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 
   // Each time we change the editor value
   React.useEffect(() => {
-    if (!editorValue?.[0] || editorMode === Utils.EditorMode.TRAIN) return;;
+    if (editorMode === Utils.EditorMode.TRAIN) return;;
     allowTrain.current = !!document.querySelector('[data-remember-text]')
-    const [currentNode] = Utils.findCurrentNodeAtSelection(editor);
-    const toShowOptions = currentNode?.[0].text?.match(/\//);
-    setShowOptions(toShowOptions?.length > 0)
-    // const detectCodeTimerId = setTimeout(
-    //   () => Events.showOptions(editor, setShowOptions),
-    //   600
-    // );
-    // return () => {
-    //   clearTimeout(detectCodeTimerId);
-    // };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorValue]);
 
@@ -118,7 +90,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
       if (!editorCodeLang) return;
       let finalDecorator: any = [];
       editorCodeLang?.forEach((lang) => {
-        const dec = decorator([node, path], lang, editor);
+        const dec = Utils.decorator([node, path], lang, editor);
         finalDecorator.push(...dec);
       });
       return finalDecorator;
@@ -130,12 +102,13 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
-        return <CustomComponents.CodeElement {...props} />;
+        return <CustomComponents.CodeElement {...props} setLanguage={setLanguage} />;
+      case "heading":
+        return <h1 {...props.attributes} >{props.children}</h1>;
       default:
         return <CustomComponents.DefaultElement {...props} />;
     }
   }, []);
-
 
   return (
     <div ref={editorRef} data-editor>
@@ -143,8 +116,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         {
           editorMode === Utils.EditorMode.ADD && <>
             <HoveringToolbar />
-
-            <EditorOptions showOptions={showOptions} />
+            <EditorOptions editor={editor} />
           </>
         }
         <Editable

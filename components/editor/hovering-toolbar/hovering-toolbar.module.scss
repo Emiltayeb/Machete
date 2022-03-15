@@ -1,0 +1,25 @@
+.Root {
+  padding: 8px 7px 6px;
+  position: absolute;
+  z-index: 1;
+  background-color: #222;
+  border-radius: 4px;
+  transition: opacity 0.75s;
+}
+.tool_bar_menu {
+  display: flex;
+  gap: var(--size-3);
+}
+
+.format_button {
+  cursor: pointer;
+  color: var(--gray-5);
+  &:hover {
+    color: white;
+  }
+  &.active {
+    color: black;
+    background-color: white;
+    font-weight: bold;
+  }
+}

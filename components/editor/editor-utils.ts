@@ -1,12 +1,13 @@
 import {
   BaseEditor,
-  Path,
   Editor as SlateEditor,
   Transforms,
   Node,
   Text,
+
 } from 'slate';
 import { ReactEditor } from 'slate-react';
+import Prism from 'prismjs';
 
 type Editor = BaseEditor & ReactEditor;
 
@@ -32,7 +33,7 @@ export enum CustomFormats {
   BOLD = 'bold',
   REMEMBER_TEXT = 'rememberText',
 }
-export const getEditorText = (nodes: any) => {
+export const getEditorText = (nodes: any): string => {
   return nodes.map((n: any) => Node.string(n)).join('\n');
 };
 
@@ -79,3 +80,68 @@ export const selectCurrentNode = function (editor: Editor) {
   if (!match) return;
   Transforms.select(editor, match[1]);
 };
+
+
+
+const getLength = (token: any) => {
+  if (typeof token === 'string') {
+    return token.length;
+  } else if (typeof token.content === 'string') {
+    return token.content.length;
+  } else {
+    return token.content.reduce((l: any, t: any) => l + getLength(t), 0);
+  }
+};
+
+
+// get the code block and set custom css for 
+export const decorator = (
+  [node, path]: any,
+  editorCodeLang: any,
+  editor: Editor
+) => {
+  const ranges: any = [];
+  if ((!Text.isText(node) as any) || !editorCodeLang || node.rememberText) {
+    return ranges;
+  }
+  const [parent] = SlateEditor.parent(editor, path) as any;
+  if (parent.type !== 'code') {
+    return ranges;
+  }
+
+  const tokens = Prism.tokenize(node.text, Prism.languages[editorCodeLang]);
+  let start = 0;
+
+  for (const token of tokens) {
+    const length = getLength(token);
+    const end = start + length;
+
+    if (typeof token !== 'string') {
+      ranges.push({
+        [token.type]: true,
+        anchor: { path, offset: start },
+        focus: { path, offset: end },
+      });
+    }
+
+    start = end;
+  }
+  return ranges;
+};
+
+export const focusCurrentNode = function (editor: Editor) {
+  const [currentNode] = findCurrentNodeAtSelection(editor);
+  ReactEditor.focus(editor);
+  Transforms.collapse(editor, currentNode[1])
+}
+
+export const moveCursorToEndOfCurrentBlock = function (editor: Editor) {
+  ReactEditor.focus(editor);
+  const { node } = findClosestBlockAndNode(editor)
+  console.log(node)
+  ReactEditor.focus(editor);
+  Transforms.select(editor, SlateEditor.end(editor, []));
+}
+export const getCurrentSelectedText = function () {
+  return window.getSelection()?.toString()
+}

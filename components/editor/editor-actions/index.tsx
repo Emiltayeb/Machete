@@ -4,23 +4,19 @@ import {
   useToast,
   Input,
   Box,
-  Text,
   InputGroup,
   InputLeftAddon,
-  Divider,
   Flex,
   FormControl,
   Select,
   IconButton,
 } from '@chakra-ui/react';
 import React from 'react';
-import * as Utils from './editor-utils';
-import { CardType } from './types';
+import * as Utils from '../editor-utils';
+import { CardType } from '../types';
 import { ArrowBackIcon, CheckIcon, EditIcon } from '@chakra-ui/icons';
 import { useRecoilValue } from 'recoil';
-import { userCategoriesAtom } from '../../store';
-import ReactFocusLock from 'react-focus-lock';
-
+import { userCategoriesAtom } from '../../../store';
 
 type ActionsProps = {
   cardText: string;
@@ -151,37 +147,37 @@ const EditorActions = (props: ActionsProps) => {
 
 
   return (
-    <Box marginBlockStart={5}>
-      <Box marginBlockStart={3}>
-        {
-          editorMode === Utils.EditorMode.ADD ?
-            <HStack wrap={{ base: "wrap", md: "nowrap" }} gap={{ base: 2, md: 0 }}>
-              {CardDetailsForm()}
-              <Button
-                isDisabled={isInvalidForm}
-                size={"xs"}
-                colorScheme={'whatsapp'}
 
-                leftIcon={<CheckIcon />}
-                isLoading={isSubmitting === ActionState.SUBMITTING}
-                onClick={handelCardSave}>
-                Save
-              </Button>
-              <Button
-                isDisabled={isInvalidForm}
-                size={"xs"}
-                colorScheme={'teal'}
-                onClick={() => setEditorMode(Utils.EditorMode.TRAIN)}>
-                Train
-              </Button>
-            </HStack> :
-            <Button size="xs" colorScheme="linkedin" leftIcon={<EditIcon />} onClick={() => setEditorMode(Utils.EditorMode.ADD)}> Edit</Button>
-        }
-      </Box>
+    <Box marginBlockStart={3}>
+      {
+        editorMode === Utils.EditorMode.ADD ?
+          <HStack wrap={{ base: "wrap", md: "nowrap" }} gap={{ base: 2, md: 0 }}>
+            {CardDetailsForm()}
+            <Button
+              isDisabled={isInvalidForm}
+              size={"xs"}
+              colorScheme={'whatsapp'}
 
-
-
+              leftIcon={<CheckIcon />}
+              isLoading={isSubmitting === ActionState.SUBMITTING}
+              onClick={handelCardSave}>
+              Save
+            </Button>
+            <Button
+              isDisabled={isInvalidForm}
+              size={"xs"}
+              colorScheme={'teal'}
+              onClick={() => setEditorMode(Utils.EditorMode.TRAIN)}>
+              Train
+            </Button>
+          </HStack> :
+          <Button size="xs" colorScheme="linkedin" leftIcon={<EditIcon />} onClick={() => setEditorMode(Utils.EditorMode.ADD)}> Edit</Button>
+      }
     </Box>
+
+
+
+
   );
 };
 

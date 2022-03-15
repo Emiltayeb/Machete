@@ -25,7 +25,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <ChakraProvider >
             <OffLineModal />
             <Navigation />
-            <Box height={{ base: "unset", sm: "100vh" }} minHeight={{ base: "unset", sm: "100vh" }} >
+            <Box height={{ base: "unset" }} minHeight={{ base: "unset", sm: "100vh" }} >
               <Component {...pageProps} />
             </Box>
             <Footer />

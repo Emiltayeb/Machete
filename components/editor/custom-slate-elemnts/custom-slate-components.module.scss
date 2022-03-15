@@ -1,32 +1,3 @@
-.editor {
-  margin-block-start: var(--size-3);
-  background: var(--gray-1);
-  padding: var(--size-3);
-  min-height: 200px !important;
-  caret-color: var(--blue-5);
-  position: relative;
-  font-size: var(--font-size-3);
-  overflow-x: hidden;
-  cursor: auto;
-
-  [data-slate-custom-leaf='true'] {
-    cursor: pointer;
-  }
-
-
-  :where(span,p)::selection{
-    background-color: var(--blue-5);
-    color: white;
-  }
-
-  h1{
-    color: unset;
-  }
-}
-
-.placeHolder {
-  color: var(--gray-4);
-}
 
 .train_input {
   box-sizing: content-box;
@@ -41,6 +12,25 @@
   }
 }
 
+.codeElement{
+    max-inline-size: unset;
+    background: rgb(255, 255, 255);
+    padding: var(--size-3);
+    margin-block: vaR(--size-1);
+    white-space: inherit;
+    font-size: 75%;
+  position: relative;
+
+  .codeLangs{
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    color: white;
+    width: 20vw;
+    max-width: 100px;
+  }
+
+}
 .training_card {
   [data-answered='true'] {
     &[data-correct='true'] {
