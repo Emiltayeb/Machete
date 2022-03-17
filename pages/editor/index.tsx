@@ -33,7 +33,7 @@ const NewCard = function (props: any) {
 			<Container maxW={'container.lg'} p={4}>
 				<VStack alignItems={'stretch'} spacing={0}>
 					<Heading color={textColor} > New Card</Heading>
-					<Editor mode={EditorMode.ADD} />
+					<Editor mode={EditorMode.ADD} {...props} />
 				</VStack>
 			</Container>
 		</Container>

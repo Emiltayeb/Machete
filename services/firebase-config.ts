@@ -1,5 +1,3 @@
-// Your web app's Firebase configuration
-console.log("calling firebae config")
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,

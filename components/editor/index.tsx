@@ -43,7 +43,8 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
-  const showOptionsRef = React.useRef(false)
+
+
 
   const allowTrain = React.useRef(props.card?.allowTrain)
 
@@ -102,7 +103,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
-        return <CustomComponents.CodeElement {...props} setLanguage={setLanguage} />;
+        return <CustomComponents.CodeElement {...props} mode={editorMode} setLanguage={setLanguage} />;
       case "heading":
         return <h1 {...props.attributes} >{props.children}</h1>;
       default:

@@ -1,5 +1,5 @@
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
-import { Box, Flex, VStack, Badge, Heading, Button, Text } from '@chakra-ui/react';
+import { Box, Flex, VStack, Badge, Heading, Button, Text, useColorModeValue } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react'
 import { GiMachete } from 'react-icons/gi';
@@ -12,9 +12,9 @@ import { CardType } from './editor/types';
 const CardsByUser = function (props: any) {
 
 	const router = useRouter();
-	console.log(router.query)
 	const setTrainingCardsState = useSetRecoilState(trainCardsAtom)
-
+	const cardBgColor = useColorModeValue('white', 'black');
+	const cardTextColor = useColorModeValue('black', 'white');
 	const onEditorCard = function (id?: string) {
 		if (!id) return;
 		router.push(`editor/${id}`);
@@ -22,14 +22,14 @@ const CardsByUser = function (props: any) {
 
 	const onSingleCardTrain = function (card: CardType) {
 		setTrainingCardsState(card)
-		router.push(`editor/train?mode=single`)
+		router.push(`editor/train?mode=single&cardId=${card.id}`)
 	}
 	if (!props?.cards) return <></>
 	return <>
 		{props.cards.map((card: CardType) => (
 			<Box
 				flex='1'
-				bg={'white'}
+				bg={cardBgColor}
 				borderRadius='lg'
 				p={2}
 				key={card.id}>
@@ -41,11 +41,11 @@ const CardsByUser = function (props: any) {
 					justifyContent='space-between'>
 					<VStack alignItems={'flex-start'} spacing={1}>
 						<Badge colorScheme={'facebook'} fontSize={"x-small"} >{card.category}</Badge>
-						<Heading color={'black'} fontSize={{ base: "sm", md: "md" }}>
+						<Heading color={cardTextColor} fontSize={{ base: "sm", md: "md" }}>
 							{card.title}
 						</Heading>
 
-						<Text color={'black'} fontSize={{ base: 'xs', sm: 'sm' }}>
+						<Text color={cardTextColor} fontSize={{ base: 'xs', sm: 'sm' }}>
 							{card.exec}
 						</Text>
 					</VStack>

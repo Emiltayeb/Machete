@@ -51,6 +51,8 @@ const MultipleTrainCards = function (props: any) {
 
 }
 
+// TODO: This page should get ad id in the param so make it act like smart-link - load the card  if its not in the store
+
 const UserCard = function (props: any) {
   const router = useRouter();
   const textColor = useColorModeValue("teal.700", "white")

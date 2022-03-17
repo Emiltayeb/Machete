@@ -3,7 +3,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { Descendant, Editor, Transforms } from 'slate';
 import { CodeLanguages, EditorMode, selectCurrentNode } from '../editor-utils';
-import { Text, Input, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Box, Portal, useDisclosure } from '@chakra-ui/react';
+import { Text, Input, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon } from '@chakra-ui/react';
 import { findDiff } from '../../../utils/getStringDiffrences';
 import classes from "./custom-slate-components.module.scss";
 import ReactFocusLock from 'react-focus-lock';
@@ -107,15 +107,16 @@ export const CodeElement = (props: any) => {
 				selectedLang || CodeLanguages.PLAIN_TEXT,
 			];
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedLang])
 
 
 
 	return <pre {...props.attributes} className={classes.codeElement} >
-		<select name="code-lang" onChange={(e) => setSelectedLag(CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages])}
+		{props.mode !== EditorMode.TRAIN && <select name="code-lang" onChange={(e) => setSelectedLag(CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages])}
 			className={classes.codeLangs}
 		>	{Object.keys(CodeLanguages).map((lang) => <option key={lang}>{lang.toLowerCase()}</option>)}
-		</select>
+		</select>}
 		{props.children}
 	</pre >;
 };
@@ -207,27 +208,27 @@ export const TrainingInput = (props: any) => {
 				onClose={onClose}
 				placement='bottom' isOpen={isOpen} closeOnBlur closeOnEsc returnFocusOnClose={false}>
 				<PopoverTrigger>
-					<Input
-						onClick={() => answerStatus.answered && onOpen()}
-						bg={'linkedin.400'}
-						pl={3}
-						data-answered={answerStatus.answered}
-						data-correct={answerStatus.status}
-						placeholder='...'
-						type='text'
-						value={inputState}
-						style={{
-							width: `${inputState.length + 2}ch`,
-							height: 'auto',
-						}}
-						onChange={(e) =>
-							!answerStatus.answered && setInputState(e.target.value)
-						}
-						className={classes.train_input}
-					/>
+					<InputGroup size={"xs"} display={"inline-flex"} width="auto" marginInline={"1"}>
+						<Input
+
+							bg={'linkedin.400'}
+							pl={3}
+							data-correct={answerStatus.status}
+							placeholder='...'
+							type='text'
+							value={inputState}
+							style={{
+								width: `${inputState.length + 2}ch`,
+								height: 'auto',
+							}}
+							onChange={(e) => setInputState(e.target.value)}
+							className={classes.train_input}
+						/>
+						<InputRightAddon >	<Button size={"xs"} height={"inherit"} onClick={answerStatus.answered ? onOpen : undefined}>?</Button></InputRightAddon>
+					</InputGroup>
 				</PopoverTrigger>
 				<Portal >
-					<PopoverContent width={"auto"}>
+					<PopoverContent>
 						<PopoverArrow />
 						<PopoverCloseButton />
 						<PopoverBody>
@@ -238,7 +239,8 @@ export const TrainingInput = (props: any) => {
 					</PopoverContent>
 				</Portal>
 			</Popover >
-		</span>
+
+		</span >
 	);
 };
 
