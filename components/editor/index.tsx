@@ -18,6 +18,7 @@ import * as Events from './editor-events';
 import EditorActions from './editor-actions';
 import { useRouter } from 'next/router';
 import EditorOptions from './editor-options';
+import { Badge, Box, Heading, HStack, Text as ChakraText, useColorModeValue, VStack } from '@chakra-ui/react';
 
 const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -27,6 +28,19 @@ declare module 'slate' {
     Text: Types.CustomText;
     Descendant: Descendant & { type: string };
   }
+}
+
+const CardData = function (props: { card?: Types.CardType | null }) {
+  const textColor = useColorModeValue("black", "white")
+  const bgColor = useColorModeValue("gray.200", "black")
+  console.log(props.card)
+  if (!props.card) return <></>
+  return <Box p={2} color={textColor} bg={bgColor} marginBlockEnd={4}>
+    <HStack alignItems={"center"} spacing={2} flexWrap={"wrap"}>
+      <Badge colorScheme={'facebook'} fontSize={"x-small"} >{props.card.category}</Badge>
+      <ChakraText fontSize={"smaller"} >{props.card.title}</ChakraText>
+    </HStack>
+  </Box>
 }
 
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
@@ -68,8 +82,13 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         allowTrain: !!allowTrain.current,
       },
       props.userDataFromDb,
-      props.db
+      props.db, (id) => {
+        if (!props?.card?.id) {
+          router.push(`/editor/${id}`)
+        }
+      }
     );
+
   }
 
   React.useEffect(() => {
@@ -109,6 +128,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
       default:
         return <CustomComponents.DefaultElement {...props} />;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -120,6 +140,8 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
             <EditorOptions editor={editor} />
           </>
         }
+
+        {editorMode === Utils.EditorMode.TRAIN && <CardData card={props.card} />}
         <Editable
           tabIndex={10}
           autoFocus

@@ -57,9 +57,7 @@ const EditorActions = (props: ActionsProps) => {
   });
 
   const isCategoryInvalid = categoryState === CategoryState.NEW && cardDetailState.category == ""
-  const isInvalidForm = cardDetailState.title === "" || isCategoryInvalid || props.cardText.length === 0
-
-
+  const isInvalidForm = cardDetailState.title === "" || isCategoryInvalid || props.card?.text.length === 0
   const handelCardSave = async function () {
     setIsSubmitting(ActionState.SUBMITTING);
     try {
@@ -71,6 +69,7 @@ const EditorActions = (props: ActionsProps) => {
       setIsSubmitting(ActionState.READY);
     }
   };
+
   const updatedCardDetail = function (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setCardDetailState((prev) => ({
       ...prev,
@@ -112,7 +111,7 @@ const EditorActions = (props: ActionsProps) => {
         <InputGroup size={"xs"} alignItems="self-end">
           <InputLeftAddon>Category</InputLeftAddon>
           {categoryState === CategoryState.NEW ? <>
-
+            {/* TODO:: Update category name*/}
             <Input
               size={"xs"}
               onChange={(e) => updatedCardDetail(e)}

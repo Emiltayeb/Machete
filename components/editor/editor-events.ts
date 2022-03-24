@@ -136,7 +136,8 @@ export const handelCreatCodeBlock = function (
 export const onCardSave = async function (
   newCard: CardType,
   userData: any,
-  db: any
+  db: any,
+  onCreate?: (id: any) => void
 ) {
   let cardId;
   try {
@@ -169,6 +170,7 @@ export const onCardSave = async function (
     await updateDoc(updateDocREf, {
       cards: updatedData,
     });
+    onCreate?.(cardId)
   } catch (error) {
     console.log(error);
     throw error;
