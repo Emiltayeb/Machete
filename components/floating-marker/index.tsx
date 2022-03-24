@@ -38,8 +38,6 @@ const StyledFloatingMenu = styled.div<MarkerProps | any>`
   }
 `;
 
-// TODO: this will be the remove marker?
-
 const Marker: React.FC<MarkerProps> = ({ markerState, onMarkerClick }) => {
   return ReactDOM.createPortal(
     <StyledFloatingMenu
