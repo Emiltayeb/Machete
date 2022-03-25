@@ -15,7 +15,6 @@ const NewCard = function (props: any) {
 
 	const textColor = useColorModeValue("teal.700", "white");
 
-
 	return (
 		<Container maxW={"container.xl"}>
 			<Breadcrumb separator={"-"} marginBlockStart={3}>

@@ -113,7 +113,7 @@ export const CodeElement = (props: any) => {
 
 
 	return <pre {...props.attributes} className={classes.codeElement} >
-		{props.mode !== EditorMode.TRAIN && <span contentEditable={false}>
+		{props.mode !== EditorMode.TRAIN && <span contentEditable={true}>
 			<select name="code-lang" onChange={(e) => setSelectedLag(CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages])}
 				className={classes.codeLangs}
 			>	{Object.keys(CodeLanguages).map((lang) => <option key={lang}>{lang.toLowerCase()}</option>)}
