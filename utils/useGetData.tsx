@@ -1,4 +1,3 @@
-import React from 'react';
 import { collection, query, } from 'firebase/firestore';
 import { useFirestoreCollectionData } from 'reactfire';
 import { db } from '../services/firebase-config';

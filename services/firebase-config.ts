@@ -1,6 +1,6 @@
 import { getApp as _getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth as _getAuth } from "firebase/auth";
-import { enableIndexedDbPersistence, getFirestore, getFirestore as _getFirestore } from "firebase/firestore";
+import { getAuth, getAuth as _getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 
 export const firebaseConfig = {
@@ -24,3 +24,4 @@ export function getApp() {
 
 export const app = getApp();
 export const db = getFirestore(app);
+export const auth = getAuth(app);

@@ -11,30 +11,30 @@ import Head from 'next/head';
 import Navigation from '../components/layout/navigation/Navigation';
 import OffLineModal from '../components/OfflineModal';
 import { RecoilRoot } from 'recoil';
-
+import NoSSR from 'react-no-ssr';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
   return (
-    <FirebaseAppProvider firebaseConfig={firebaseConfig}>
-      <FirebaseWrapper>
-        <Head>
-          <title>Machete</title>
-        </Head>
-
-        <RecoilRoot>
-          <ChakraProvider >
-            <OffLineModal />
-            <Navigation />
-            <Box height={{ base: "unset" }} minHeight={{ base: "unset", sm: "100vh" }} >
-              <Component {...pageProps} />
-            </Box>
-            <Footer />
-          </ChakraProvider>
-        </RecoilRoot>
-
-      </FirebaseWrapper>
-    </FirebaseAppProvider>
+    <NoSSR>
+      <FirebaseAppProvider firebaseConfig={firebaseConfig}>
+        <FirebaseWrapper>
+          <Head>
+            <title>Machete</title>
+          </Head>
+          <RecoilRoot>
+            <ChakraProvider >
+              <OffLineModal />
+              <Navigation />
+              <Box height={{ base: "unset" }} minHeight={{ base: "unset", sm: "100vh" }} >
+                <Component {...pageProps} />
+              </Box>
+              <Footer />
+            </ChakraProvider>
+          </RecoilRoot>
+        </FirebaseWrapper>
+      </FirebaseAppProvider>
+    </NoSSR>
   );
 }
 
