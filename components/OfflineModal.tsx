@@ -7,6 +7,7 @@ const OffLineModal = function () {
 		if (window === undefined || typeof window === undefined) return
 		if (window?.navigator.onLine) return
 		onOpen()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [window?.navigator.onLine])
 	return (
 		<>

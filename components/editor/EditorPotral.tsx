@@ -9,7 +9,7 @@ const EditorPortal: React.FC<{ toShow?: boolean }> = (props) => {
 		if (!el) {
 			return;
 		}
-
+		if (!window || typeof window === undefined) return
 		try {
 			const domSelection = window.getSelection();
 			const domRange = domSelection?.getRangeAt(0);

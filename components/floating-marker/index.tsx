@@ -39,6 +39,7 @@ const StyledFloatingMenu = styled.div<MarkerProps | any>`
 `;
 
 const Marker: React.FC<MarkerProps> = ({ markerState, onMarkerClick }) => {
+  if (!window || typeof window === undefined) return <></>
   return ReactDOM.createPortal(
     <StyledFloatingMenu
       data-editor-marker='true'
