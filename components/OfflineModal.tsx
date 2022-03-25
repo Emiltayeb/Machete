@@ -3,12 +3,12 @@ import React from 'react'
 const OffLineModal = function () {
 	const { isOpen, onOpen, onClose, } = useDisclosure()
 
-	React.useEffect(() => {
-		if (window === undefined || typeof window === undefined) return
-		if (window?.navigator.onLine) return
-		onOpen()
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [window?.navigator.onLine])
+	// React.useEffect(() => {
+	// 	if (window === undefined || typeof window === undefined) return
+	// 	if (window?.navigator.onLine) return
+	// 	onOpen()
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, [window?.navigator.onLine])
 	return (
 		<>
 			<Modal isOpen={isOpen} onClose={onClose}>
