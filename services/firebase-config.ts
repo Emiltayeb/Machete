@@ -15,7 +15,11 @@ export const firebaseConfig = {
 const firebaseIsRunning = () => !!(getApps().length);
 
 export function getApp() {
-  if (!firebaseIsRunning()) initializeApp(firebaseConfig);
-
+  if (!firebaseIsRunning()) {
+    console.log("initzliing..")
+    initializeApp(firebaseConfig);
+  }
   return _getApp();
 }
+
+getApp()

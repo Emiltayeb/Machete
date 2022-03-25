@@ -15,7 +15,6 @@ import { RecoilRoot } from 'recoil';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
-  React.useEffect(() => { getApp() }, [])
   return (
     <FirebaseAppProvider firebaseConfig={firebaseConfig}>
       <FirebaseWrapper>
