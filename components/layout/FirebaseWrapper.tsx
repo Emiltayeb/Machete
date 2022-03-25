@@ -1,3 +1,4 @@
+import { getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth'; // Firebase v9+
 import { getDatabase } from 'firebase/database'; // Firebase v9+
 import { initializeFirestore } from 'firebase/firestore';
@@ -9,8 +10,9 @@ import {
   useFirebaseApp,
 } from 'reactfire';
 
+
 const FirebaseWrapper: React.FC = ({ children }) => {
-  const app = useFirebaseApp(); // a parent component contains a `FirebaseAppProvider`
+  const app = getApp(); // a parent component contains a `FirebaseAppProvider`
 
   const { status, data: firestoreInstance } = useInitFirestore(
     async (firebaseApp) => {
