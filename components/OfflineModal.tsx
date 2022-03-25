@@ -4,6 +4,7 @@ const OffLineModal = function () {
 	const { isOpen, onOpen, onClose, } = useDisclosure()
 
 	React.useEffect(() => {
+		if (window === undefined || typeof window === undefined) return
 		if (window?.navigator.onLine) return
 		onOpen()
 	}, [window?.navigator.onLine])
