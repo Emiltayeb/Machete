@@ -1,4 +1,5 @@
 import { Progress } from '@chakra-ui/react';
+import { getApp } from 'firebase/app';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useSetRecoilState } from 'recoil';
