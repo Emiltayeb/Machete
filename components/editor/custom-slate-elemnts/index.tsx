@@ -6,7 +6,7 @@ import { CodeLanguages, EditorMode, selectCurrentNode } from '../editor-utils';
 import { Text, Input, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon } from '@chakra-ui/react';
 import { findDiff } from '../../../utils/getStringDiffrences';
 import classes from "./custom-slate-components.module.scss";
-import ReactFocusLock from 'react-focus-lock';
+// import ReactFocusLock from 'react-focus-lock';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
@@ -131,7 +131,6 @@ export const DefaultElement = (props: any) => {
 // leaf - is text node
 export const Leaf = (props: any) => {
 	let { attributes, children, leaf, editorMode, editor } = props;
-
 
 	if (leaf.bold) {
 		children = (

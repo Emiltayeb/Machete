@@ -19,6 +19,9 @@ import { useRecoilValue } from 'recoil';
 import { trainCardsAtom } from '../../store';
 import { EditorMode } from '../../components/editor/editor-utils';
 
+
+
+
 const MultipleTrainCards = function (props: any) {
 
   const currentCardIndex = React.useRef(0);
@@ -84,7 +87,7 @@ const UserCard = function (props: any) {
             noTrainingCards ? <Text>No cards.</Text> :
               router.query.mode === EditorMode.MULTIPLE_TRAIN ?
                 <MultipleTrainCards
-                  trainingCards={trainingCards} {...props} />
+                  trainingCards={Array.isArray(trainingCards) ? [...trainingCards].sort(() => .5 - Math.random()) : trainingCards} {...props} />
                 : <Editor mode={EditorMode.TRAIN} card={trainingCards as CardType}
                   {...props} />
           }

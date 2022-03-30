@@ -1,10 +1,11 @@
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
-import { Box, Flex, VStack, Badge, Heading, Button, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Flex, VStack, Badge, Heading, Button, Text, useColorModeValue, Tooltip } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react'
 import { GiMachete } from 'react-icons/gi';
 import { useSetRecoilState } from 'recoil';
 import { trainCardsAtom } from '../store';
+import { isMobile } from '../utils';
 import { onDeleteCard } from './editor/editor-events';
 
 import { CardType } from './editor/types';
@@ -15,6 +16,7 @@ const CardsByUser = function (props: any) {
 	const setTrainingCardsState = useSetRecoilState(trainCardsAtom)
 	const cardBgColor = useColorModeValue('white', 'black');
 	const cardTextColor = useColorModeValue('black', 'white');
+	const isMobileView = isMobile()
 	const onEditorCard = function (id?: string) {
 		if (!id) return;
 		router.push(`editor/${id}`);
@@ -50,13 +52,17 @@ const CardsByUser = function (props: any) {
 						</Text>
 					</VStack>
 					<Flex gap={3} flexWrap="wrap"  >
-						<Button
-							size={'xs'}
-							colorScheme="linkedin"
-							leftIcon={<EditIcon />}
-							onClick={() => onEditorCard(card?.id)}>
-							Edit
-						</Button>
+						<Tooltip hasArrow shouldWrapChildren label={isMobileView ? "edit is disabled on mobile" : ""}>
+							<Button
+								pointerEvents={"auto"}
+								size={'xs'}
+								colorScheme="linkedin"
+								isDisabled={isMobileView}
+								leftIcon={<EditIcon />}
+								onClick={() => onEditorCard(card?.id)}>
+								Edit
+							</Button>
+						</Tooltip>
 						<Button
 							size={'xs'}
 							colorScheme="teal"

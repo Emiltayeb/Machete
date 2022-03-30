@@ -10,13 +10,16 @@ import {
   FormControl,
   Select,
   IconButton,
+  InputRightAddon,
+  Tooltip,
 } from '@chakra-ui/react';
 import React from 'react';
 import * as Utils from '../editor-utils';
 import { CardType } from '../types';
 import { ArrowBackIcon, CheckIcon, EditIcon } from '@chakra-ui/icons';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { userCategoriesAtom } from '../../../store';
+import { isMobile } from '../../../utils';
 
 type ActionsProps = {
   cardText: string;
@@ -31,7 +34,9 @@ type ActionsProps = {
     category: string;
     exec?: string;
   }) => void;
+  onCategorySave: any;
   setEditorMode: any;
+  userCards?: CardType[]
 };
 
 
@@ -40,21 +45,22 @@ enum ActionState {
   READY,
 }
 
-enum CategoryState { NEW, EXISTING }
+enum CategoryState { NEW, EXISTING, UPDATE }
 
 const EditorActions = (props: ActionsProps) => {
   const { editorMode, onCardSave, setEditorMode, card } = props;
-  const userCategoriesState = useRecoilValue(userCategoriesAtom)
+  const [userCategoriesState, setUserCategoriesState] = useRecoilState(userCategoriesAtom)
   const [isSubmitting, setIsSubmitting] = React.useState(ActionState.READY);
-  const [categoryState, setCategoryState] = React.useState(userCategoriesState.length > 0 ? CategoryState.EXISTING : CategoryState.NEW);
+  const [categoryState, setCategoryState] = React.useState(userCategoriesState.length > 0 || card?.category ? CategoryState.EXISTING : CategoryState.NEW);
   const toast = useToast();
-
-
+  const isMobileView = isMobile()
+  console.log(card?.category)
   const [cardDetailState, setCardDetailState] = React.useState({
     title: card?.title ?? '',
-    category: card?.category ?? userCategoriesState[0] ?? "",
+    category: card?.category ?? userCategoriesState[0] ?? props.userCards?.[0]?.category ?? "",
     exec: card?.exec ?? '',
   });
+  const categoryRef = React.useRef<any>(cardDetailState.category)
 
   const isCategoryInvalid = categoryState === CategoryState.NEW && cardDetailState.category == ""
   const isInvalidForm = cardDetailState.title === "" || isCategoryInvalid || props.card?.text.length === 0
@@ -70,6 +76,22 @@ const EditorActions = (props: ActionsProps) => {
     }
   };
 
+
+  const editCardCategory = async function () {
+    setIsSubmitting(ActionState.SUBMITTING);
+    try {
+      const updatedCategories = userCategoriesState.map((cat) => cat === categoryRef.current ? cardDetailState.category : cat)
+      // 1 update current.
+      setUserCategoriesState(updatedCategories as any)
+      // 2 take all the current user card and update thier catgories as well?
+      await props.onCategorySave(categoryRef.current, cardDetailState.category)
+      toast({ status: 'success', title: 'Card saved.' });
+    } catch (error) {
+      toast({ status: 'error', title: 'Card not saved.' });
+    } finally {
+      setIsSubmitting(ActionState.READY);
+    }
+  }
   const updatedCardDetail = function (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setCardDetailState((prev) => ({
       ...prev,
@@ -84,6 +106,7 @@ const EditorActions = (props: ActionsProps) => {
     } else {
       categoryState === CategoryState.NEW && setCategoryState(CategoryState.EXISTING)
       updatedCardDetail(e)
+      categoryRef.current = e.target.value
     }
   }
 
@@ -110,8 +133,7 @@ const EditorActions = (props: ActionsProps) => {
       <FormControl isInvalid={isCategoryInvalid}>
         <InputGroup size={"xs"} alignItems="self-end">
           <InputLeftAddon>Category</InputLeftAddon>
-          {categoryState === CategoryState.NEW ? <>
-            {/* TODO:: Update category name*/}
+          {categoryState === CategoryState.NEW || categoryState === CategoryState.UPDATE ? <>
             <Input
               size={"xs"}
               onChange={(e) => updatedCardDetail(e)}
@@ -120,12 +142,26 @@ const EditorActions = (props: ActionsProps) => {
               name='category'
               placeholder='Things to know...'
             />
-
-            <IconButton disabled={userCategoriesState.length === 0} size={'xs'} aria-label='back to list' icon={<ArrowBackIcon />} onClick={() => setCategoryState(CategoryState.EXISTING)} />
-          </> : <Select size={"xs"} name='category' onChange={handelSelectCategory} >
-            {userCategoriesState?.map((cat: string, index: number) => <option selected={index == 0} key={cat}>{cat}</option>)}
-            <option value="new"> + Add Category</option>
-          </Select>}
+            <IconButton disabled={userCategoriesState.length === 0} bgColor={categoryState === CategoryState.UPDATE ? 'whatsapp.400' : ""} size={'xs'} aria-label='back to list'
+              icon={categoryState === CategoryState.NEW ? <ArrowBackIcon /> : <CheckIcon />}
+              onClick={() => categoryState === CategoryState.UPDATE ? editCardCategory() : setCategoryState(CategoryState.EXISTING)} />
+            {
+              categoryState === CategoryState.UPDATE && <>
+                <IconButton disabled={userCategoriesState.length === 0} size={'xs'} aria-label='back to list'
+                  icon={<ArrowBackIcon />}
+                  onClick={() => setCategoryState(CategoryState.EXISTING)} />
+              </>
+            }
+          </> : <>
+            <Select size={"xs"} name='category' onChange={handelSelectCategory} defaultValue={card?.category} >
+              {userCategoriesState?.map((cat: string, index: number) => <option key={cat}>{cat}</option>)}
+              <option value="new"> + Add Category</option>
+            </Select>
+            <InputRightAddon>
+              <IconButton disabled={userCategoriesState.length === 0} size={'xs'} aria-label='Edit' icon={<EditIcon />}
+                onClick={() => setCategoryState(CategoryState.UPDATE)} />
+            </InputRightAddon>
+          </>}
 
 
         </InputGroup>
@@ -170,9 +206,15 @@ const EditorActions = (props: ActionsProps) => {
               Train
             </Button>
           </HStack> :
-          <Button size="xs" colorScheme="linkedin" leftIcon={<EditIcon />} onClick={() => setEditorMode(Utils.EditorMode.ADD)}> Edit</Button>
+          <Tooltip hasArrow shouldWrapChildren label={isMobileView ? "edit is disabled on mobile" : ""}>
+            <Button size="xs" colorScheme="linkedin"
+              disabled={isMobileView}
+              leftIcon={<EditIcon />} onClick={() => setEditorMode(Utils.EditorMode.ADD)}>
+              Edit
+            </Button>
+          </Tooltip>
       }
-    </Box>
+    </Box >
 
 
 

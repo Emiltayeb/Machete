@@ -39,11 +39,12 @@ export const getEditorText = (nodes: any): string => {
 
 export const toggleFormat = (
   editor: Editor,
-  format: any,
-  isActive: boolean
+  format: CustomFormats,
 ) => {
   const { node } = findClosestBlockAndNode(editor)
   const { text, ...restFormats } = node.nodeData[0];
+  const [nodeData] = findCurrentNodeAtSelection(editor);
+  const isActive = !!nodeData[0][format]
 
   Transforms.insertNodes(
     editor,

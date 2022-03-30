@@ -3,6 +3,7 @@ import * as Utils from './editor-utils';
 import { CardType } from './types';
 import { doc, updateDoc } from 'firebase/firestore';
 import { v4 } from 'uuid';
+import { toggleFormat } from './editor-utils';
 
 let isAllChildrenSelected = false;
 
@@ -12,14 +13,14 @@ export const handelKeyDown = function (
 ) {
   const { key, shiftKey, ctrlKey, metaKey } = event;
 
-  if (isAllChildrenSelected) {
-    Transforms.delete(editor);
-    Transforms.setNodes(editor, {
-      text: ' ',
-      type: 'span',
-    });
-    isAllChildrenSelected = false;
-  }
+  // if (isAllChildrenSelected) {
+  //   Transforms.delete(editor);
+  //   Transforms.setNodes(editor, {
+  //     text: ' ',
+  //     type: 'span',
+  //   });
+  //   isAllChildrenSelected = false;
+  // }
   switch (key) {
     case 'Enter':
       // find current  node
@@ -69,6 +70,13 @@ export const handelKeyDown = function (
       if (metaKey || ctrlKey) {
         isAllChildrenSelected = true;
       }
+
+    case "b":
+      if (ctrlKey || metaKey) {
+
+        toggleFormat(editor, Utils.CustomFormats.BOLD)
+      }
+      break;
     default:
       break;
   }
@@ -185,7 +193,7 @@ export const onDeleteCard = async function (
 ) {
   try {
     const ref = doc(db, 'users', userData.NO_ID_FIELD);
-    const updatedCards = userData?.cards.filter((card: any) => card.id !== cardId)
+    const updatedCards = userData?.cards.filter((card: CardType) => card.id !== cardId)
     await updateDoc(ref, {
       cards: updatedCards,
     });
@@ -193,3 +201,25 @@ export const onDeleteCard = async function (
     console.log(error)
   }
 };
+
+
+export const onCardCategoryChange = async function (userData: any, db: any, oldCat: string, newCategory: string) {
+  try {
+    const ref = doc(db, 'users', userData.NO_ID_FIELD);
+
+    console.log([...userData?.cards])
+    const updatedCards = [...userData?.cards].map((card: CardType) => {
+      if (card.category === oldCat) {
+        const temCard = Object.assign({}, card)
+        temCard.category = newCategory
+        return temCard
+      }
+      return card
+    })
+    await updateDoc(ref, {
+      cards: updatedCards,
+    });
+  } catch (error) {
+    console.log(error)
+  }
+}

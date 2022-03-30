@@ -33,7 +33,6 @@ declare module 'slate' {
 const CardData = function (props: { card?: Types.CardType | null }) {
   const textColor = useColorModeValue("black", "white")
   const bgColor = useColorModeValue("gray.200", "black")
-  console.log(props.card)
   if (!props.card) return <></>
   return <Box p={2} color={textColor} bg={bgColor} marginBlockEnd={4}>
     <HStack alignItems={"center"} spacing={2} flexWrap={"wrap"}>
@@ -57,11 +56,9 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
-
-
-
   const allowTrain = React.useRef(props.card?.allowTrain)
 
+  // Events 
   const onCardSave = async function ({
     title,
     exec,
@@ -91,6 +88,9 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 
   }
 
+  const onCategorySave = async function (oldCat: string, newCat: string) {
+    await Events.onCardCategoryChange(props.userDataFromDb, props.db, oldCat, newCat)
+  }
   React.useEffect(() => {
     if (editorMode === Utils.EditorMode.ADD) return
     (document.querySelector(`#${SLATE_EDITOR_ID} input`) as HTMLInputElement)?.focus()
@@ -171,9 +171,11 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
       <EditorActions
         editorMode={editorMode}
         onCardSave={onCardSave}
+        onCategorySave={onCategorySave}
         setEditorMode={setEditorMode}
         cardText={Utils.getEditorText(editor.children)}
         card={props.card}
+        userCards={props.userDataFromDb.cards}
       />
 
     </div>

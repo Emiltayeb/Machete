@@ -35,11 +35,11 @@ const HomePage = (props: any) => {
   const router = useRouter()
   // changes from firebaes (delete,add..)
 
-
   React.useEffect(() => {
     setFilteredCards(currentCategoryFilter.current.value !== "all" ? props?.userDataFromDb?.cards.filter((card: CardType) => card.category === currentCategoryFilter.current.value)
       : props?.userDataFromDb?.cards)
-    setTrainingCards(props?.userDataFromDb?.cards)
+    console.log(props?.userDataFromDb?.cards)
+    setTrainingCards(props?.userDataFromDb?.cards.filter((card: CardType) => card.allowTrain))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props?.userDataFromDb?.cards])
 
