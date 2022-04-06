@@ -11,9 +11,10 @@ import { getDownloadURL, uploadBytesResumable } from "firebase/storage";
 
 
 
-const uploadImage = function (e: React.FormEvent<HTMLFormElement>, setProg: any, setImageToEditor: any) {
+const uploadImage = function (e: any, setProg: any, setImageToEditor: any) {
 	e.preventDefault()
-	const file = e.target[0].files[0]
+	if (!e.target) return
+	const file = e?.target[0]?.files[0]
 	if (!file) return
 	const storageRef = ref(storage, `/files/${file.name}`)
 	const uploadTask = uploadBytesResumable(storageRef, file)
