@@ -13,14 +13,14 @@ export const handelKeyDown = function (
 ) {
   const { key, shiftKey, ctrlKey, metaKey } = event;
 
-  // if (isAllChildrenSelected) {
-  //   Transforms.delete(editor);
-  //   Transforms.setNodes(editor, {
-  //     text: ' ',
-  //     type: 'span',
-  //   });
-  //   isAllChildrenSelected = false;
-  // }
+  if (isAllChildrenSelected) {
+    Transforms.delete(editor);
+    Transforms.setNodes(editor, {
+      text: ' ',
+      type: 'span',
+    });
+    isAllChildrenSelected = false;
+  }
   switch (key) {
     case 'Enter':
       // find current  node

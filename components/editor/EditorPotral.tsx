@@ -4,6 +4,8 @@ import { Portal } from '@chakra-ui/react'
 
 const EditorPortal: React.FC<{ toShow?: boolean }> = (props) => {
 	const ref = useRef<HTMLDivElement | null>(null);
+
+
 	React.useEffect(() => {
 		const el = ref.current;
 		if (!el) {
