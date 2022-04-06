@@ -24,7 +24,7 @@ const EditorPortal: React.FC<{ toShow?: boolean }> = (props) => {
 				el.style.display = "unset"
 				el.style.position = "absolute"
 				el.style.opacity = '1';
-				el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
+				el.style.top = `${Math.max(rect.top + window.pageYOffset - el.offsetHeight, 72)}px`;
 				el.style.left = `${rect.left + window.pageXOffset + rect.width / 2
 					}px`;
 				el.style.marginInlineStart = `${offset}ch`

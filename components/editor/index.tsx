@@ -18,7 +18,8 @@ import * as Events from './editor-events';
 import EditorActions from './editor-actions';
 import { useRouter } from 'next/router';
 import EditorOptions from './editor-options';
-import { Badge, Box, Heading, HStack, Text as ChakraText, useColorModeValue, VStack } from '@chakra-ui/react';
+import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeValue, VStack } from '@chakra-ui/react';
+import withImages from './with-image';
 
 const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -44,7 +45,8 @@ const CardData = function (props: { card?: Types.CardType | null }) {
 
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const router = useRouter()
-  const [editor] = React.useState(withHistory(withReact(createEditor())))
+  const [editor] = React.useState(withImages(withHistory(withReact(createEditor()))))
+
   const [editorCodeLang, setLanguage] = React.useState<
     Utils.CodeLanguages[] | null
   >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
@@ -125,6 +127,8 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         return <CustomComponents.CodeElement {...props} mode={editorMode} setLanguage={setLanguage} />;
       case "heading":
         return <h1 {...props.attributes} >{props.children}</h1>;
+      case 'image':
+        return <CustomComponents.Image {...props} />
       default:
         return <CustomComponents.DefaultElement {...props} />;
     }
@@ -177,6 +181,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         card={props.card}
         userCards={props.userDataFromDb.cards}
       />
+
 
     </div>
   );

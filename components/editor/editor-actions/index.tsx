@@ -54,7 +54,6 @@ const EditorActions = (props: ActionsProps) => {
   const [categoryState, setCategoryState] = React.useState(userCategoriesState.length > 0 || card?.category ? CategoryState.EXISTING : CategoryState.NEW);
   const toast = useToast();
   const isMobileView = isMobile()
-  console.log(card?.category)
   const [cardDetailState, setCardDetailState] = React.useState({
     title: card?.title ?? '',
     category: card?.category ?? userCategoriesState[0] ?? props.userCards?.[0]?.category ?? "",

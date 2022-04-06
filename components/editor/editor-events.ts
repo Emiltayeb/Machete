@@ -90,7 +90,6 @@ export const showOptions = function (editor: Editor, setShowOptions: (toShow: bo
 
 export const createCodeBlock = function (editor: Editor) {
   editor.deleteBackward("character")
-  Utils.moveCursorToEndOfCurrentBlock(editor)
   editor.insertBreak();
   Transforms.insertFragment(editor, [
     { type: 'code', children: [{ text: '' }] },
@@ -99,8 +98,7 @@ export const createCodeBlock = function (editor: Editor) {
 }
 
 
-export const createHEading = function (editor: Editor) {
-  Utils.moveCursorToEndOfCurrentBlock(editor)
+export const createHeading = function (editor: Editor) {
   editor.insertBreak();
   Transforms.insertFragment(editor, [
     { type: 'heading', children: [{ text: 'Heading' }] },
@@ -206,8 +204,6 @@ export const onDeleteCard = async function (
 export const onCardCategoryChange = async function (userData: any, db: any, oldCat: string, newCategory: string) {
   try {
     const ref = doc(db, 'users', userData.NO_ID_FIELD);
-
-    console.log([...userData?.cards])
     const updatedCards = [...userData?.cards].map((card: CardType) => {
       if (card.category === oldCat) {
         const temCard = Object.assign({}, card)

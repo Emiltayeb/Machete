@@ -1,21 +1,45 @@
-import { Box, Button, VStack } from "@chakra-ui/react";
+import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Progress, useDisclosure, VStack } from "@chakra-ui/react";
 import { ReactEditor, useSlate } from "slate-react";
 import EditorPortal from "./EditorPotral";
-import { createCodeBlock, createHEading } from "./editor-events"
+import { createCodeBlock, createHeading } from "./editor-events"
 import { CustomFormats, findCurrentNodeAtSelection, getCurrentSelectedText } from "./editor-utils";
-import ReactFocusLock, { MoveFocusInside } from "react-focus-lock";
 import * as React from 'react';
-import { Editor } from "slate";
+import { InsertImageButton, insertImage } from "./with-image";
+import { storage } from "../../services/firebase-config";
+import { ref } from "firebase/storage";
+import { getDownloadURL, uploadBytesResumable } from "firebase/storage";
+
+
+
+const uploadImage = function (e: React.FormEvent<HTMLFormElement>, setProg: any, setImageToEditor: any) {
+	e.preventDefault()
+	const file = e.target[0].files[0]
+	if (!file) return
+	const storageRef = ref(storage, `/files/${file.name}`)
+	const uploadTask = uploadBytesResumable(storageRef, file)
+
+	uploadTask.on("state_changed", (snapshot) => {
+		const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes)) * 100
+		setProg(prog)
+	}, (err) => { console.log(err); setProg(0) }, () => {
+		getDownloadURL(uploadTask.snapshot.ref).then(url => setImageToEditor(url))
+	})
+}
+
+
 
 const EditorOptions = function (props: any) {
 	const editor = useSlate();
 
 	const [currentNode] = findCurrentNodeAtSelection(editor);
 	const [toShow, setToShow] = React.useState(false)
+	const { isOpen, onOpen, onClose } = useDisclosure()
+	const [imageProgValue, setImageProgValue] = React.useState(0)
 	const ref = React.useRef<any>()
 
+
 	const handelCloseOptionsWhenOutOfFocus = (e: KeyboardEvent) => {
-		if (e.key !== "Escape") return
+		if (e.key === "Tab" || e.key === "Enter") return
 		setToShow(false)
 		ReactEditor.focus(editor)
 	}
@@ -29,6 +53,7 @@ const EditorOptions = function (props: any) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [toShow])
 
+
 	React.useEffect((() => {
 		setToShow(!!currentNode?.[0].text?.match(/\/$/) && !getCurrentSelectedText()?.length && currentNode.type !== CustomFormats.REMEMBER_TEXT)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,10 +66,27 @@ const EditorOptions = function (props: any) {
 	return <EditorPortal toShow={toShow}>
 		<VStack rounded="base" minWidth={"200px"} alignItems={"flex-start"} bgColor={"AppWorkspace"} color="white" p={2} >
 			{Option("Create code", () => { createCodeBlock(props.editor) }, ref)}
-			{Option("Heading", () => { createHEading(props.editor) })}
+			{Option("Add Image Link", () => { InsertImageButton(props.editor) })}
+			{Option("Upload Image", onOpen)}
+			{Option("Heading", () => { createHeading(props.editor) })}
 		</VStack>
 
+		<Modal isOpen={isOpen} onClose={onClose}>
+			<ModalOverlay />
+			<ModalContent>
+				<ModalHeader>Upload Image</ModalHeader>
+				<ModalCloseButton />
+				<ModalBody>
+					<form onSubmit={(e) => uploadImage(e, setImageProgValue, (imageLink: string) => insertImage(editor, imageLink))}>
+						<Input type={"file"} accept="image/png" colorScheme={"linkedin"} />
+						<Button size={"sm"} marginBlock={2} type="submit">Upload</Button>
+					</form>
+					<Progress value={imageProgValue} />
+				</ModalBody>
+			</ModalContent>
 
+
+		</Modal>
 
 	</EditorPortal>
 }

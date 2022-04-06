@@ -1,12 +1,19 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable jsx-a11y/alt-text */
 
 import React from 'react';
 import { css } from '@emotion/css';
 import { Descendant, Editor, Transforms } from 'slate';
 import { CodeLanguages, EditorMode, selectCurrentNode } from '../editor-utils';
-import { Text, Input, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon } from '@chakra-ui/react';
+import {
+	Text, Input,
+	Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent,
+	PopoverHeader, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon, Icon, IconButton
+} from '@chakra-ui/react';
 import { findDiff } from '../../../utils/getStringDiffrences';
 import classes from "./custom-slate-components.module.scss";
-// import ReactFocusLock from 'react-focus-lock';
+import { useSlateStatic, ReactEditor, useSelected, useFocused } from 'slate-react';
+import { DeleteIcon } from '@chakra-ui/icons';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
@@ -124,7 +131,7 @@ export const CodeElement = (props: any) => {
 };
 
 export const DefaultElement = (props: any) => {
-	return <p {...props.attributes}>{props.children}</p>;
+	return <p {...props.attributes} className={classes.defaultElement} >{props.children}</p>;
 };
 
 
@@ -245,3 +252,45 @@ export const TrainingInput = (props: any) => {
 	);
 };
 
+
+
+export const Image = ({ attributes, children, element }: { attributes: any, children: any, element: any }) => {
+	const editor = useSlateStatic()
+	const path = ReactEditor.findPath(editor, element)
+
+	const selected = useSelected()
+	const focused = useFocused()
+	return (
+		<div {...attributes}>
+			{children}
+			<div
+				contentEditable={false}
+				className={css`
+          position: relative;
+        `}
+			>
+				<img
+					src={element.url}
+					className={css`
+            display: block;
+            max-width: 100%;
+            max-height: 200px;
+            box-shadow: ${selected && focused ? '0 0 0 3px #B4D5FF' : 'none'};
+          `}
+				/>
+
+				<Button
+					className={css`
+									display: ${selected && focused ? 'inline' : 'none'};
+									position: absolute;
+									top: 0.5em;
+									left: 0.5em;
+								`}
+					aria-label='Remove image'
+					onMouseDown={() => { Transforms.removeNodes(editor, { at: path }); console.log("remove") }} leftIcon={<DeleteIcon />}>
+					Remove
+				</Button>
+			</div>
+		</div >
+	)
+}

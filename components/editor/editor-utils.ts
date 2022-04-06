@@ -70,8 +70,8 @@ export const findCurrentNodeAtSelection = function (editor: Editor) {
 
 export const findClosestBlockAndNode = function (editor: Editor) {
   const [nodeData] = findCurrentNodeAtSelection(editor);
-  const nodePath = nodeData[1];
-  const [parentData, parentPath] = SlateEditor.parent(editor, nodePath) as any;
+  const nodePath = nodeData?.[1];
+  const [parentData, parentPath] = SlateEditor.parent(editor, nodePath || SlateEditor.end(editor, [])) as any;
   return { node: { nodeData, nodePath }, parent: { parentData, parentPath } };
 };
 
@@ -133,13 +133,13 @@ export const decorator = (
 export const focusCurrentNode = function (editor: Editor) {
   const [currentNode] = findCurrentNodeAtSelection(editor);
   ReactEditor.focus(editor);
+  if (!currentNode) return
   Transforms.collapse(editor, currentNode[1])
 }
 
 export const moveCursorToEndOfCurrentBlock = function (editor: Editor) {
   ReactEditor.focus(editor);
   const { node } = findClosestBlockAndNode(editor)
-  console.log(node)
   ReactEditor.focus(editor);
   Transforms.select(editor, SlateEditor.end(editor, []));
 }
