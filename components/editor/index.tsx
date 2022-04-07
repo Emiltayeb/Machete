@@ -124,7 +124,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
-        return <CustomComponents.CodeElement {...props} mode={editorMode} setLanguage={setLanguage} />;
+        return <CustomComponents.CodeElement {...props} mode={editorMode} editorCodeLang={editorCodeLang} setLanguage={setLanguage} />;
       case "heading":
         return <h1 {...props.attributes} >{props.children}</h1>;
       case 'image':
@@ -133,7 +133,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         return <CustomComponents.DefaultElement {...props} />;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [editorMode]);
 
   return (
     <div ref={editorRef} data-editor>

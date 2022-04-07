@@ -94,10 +94,9 @@ const CodeCss = (leaf: any) =>
 
 // Elements - basically a block
 export const CodeElement = (props: any) => {
-
 	const [selectedLang, setSelectedLag] = React.useState(CodeLanguages.HTML)
 
-	// when changing the code lang - it currently adds the lang to our state
+	// when changing the code lang - it currently adds the lang to our statep
 	//  and then the decorate paints it all.
 	// so the select is a little misleading after changing it a few times
 	React.useEffect(() => {

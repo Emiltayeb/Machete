@@ -7,7 +7,6 @@ import { useSetRecoilState } from 'recoil';
 import { trainCardsAtom } from '../store';
 import { isMobile } from '../utils';
 import { onDeleteCard } from './editor/editor-events';
-
 import { CardType } from './editor/types';
 
 const CardsByUser = function (props: any) {
@@ -30,6 +29,8 @@ const CardsByUser = function (props: any) {
 	return <>
 		{props.cards.map((card: CardType) => (
 			<Box
+				cursor={"pointer"}
+				onClick={() => onEditorCard(card.id)}
 				flex='1'
 				bg={cardBgColor}
 				borderRadius='lg'
