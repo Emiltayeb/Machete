@@ -59,6 +59,7 @@ const EditorActions = (props: ActionsProps) => {
     category: card?.category ?? userCategoriesState[0] ?? props.userCards?.[0]?.category ?? "",
     exec: card?.exec ?? '',
   });
+  console.log(props.card)
   const categoryRef = React.useRef<any>(cardDetailState.category)
 
   const isCategoryInvalid = categoryState === CategoryState.NEW && cardDetailState.category == ""
@@ -198,7 +199,7 @@ const EditorActions = (props: ActionsProps) => {
               Save
             </Button>
             <Button
-              isDisabled={isInvalidForm}
+              isDisabled={isInvalidForm || !props.card?.allowTrain}
               size={"xs"}
               colorScheme={'teal'}
               onClick={() => setEditorMode(Utils.EditorMode.TRAIN)}>
