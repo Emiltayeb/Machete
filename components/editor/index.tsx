@@ -20,6 +20,7 @@ import { useRouter } from 'next/router';
 import EditorOptions from './editor-options';
 import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeValue, VStack } from '@chakra-ui/react';
 import withImages from './with-image';
+import { isMobile } from '../../utils';
 
 const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -46,7 +47,7 @@ const CardData = function (props: { card?: Types.CardType | null }) {
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const router = useRouter()
   const [editor] = React.useState(withImages(withHistory(withReact(createEditor()))))
-
+  const isMobileView = isMobile();
   const [editorCodeLang, setLanguage] = React.useState<
     Utils.CodeLanguages[] | null
   >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
@@ -149,7 +150,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         <Editable
           tabIndex={10}
           autoFocus
-          readOnly={editorMode === Utils.EditorMode.TRAIN}
+          readOnly={editorMode === Utils.EditorMode.TRAIN || isMobileView}
           style={{ color: 'black' }}
           placeholder='Enter some text (type "/" for more options)'
           decorate={decorate}
@@ -172,7 +173,8 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         />
       </Slate>
 
-      <EditorActions
+
+      < EditorActions
         editorMode={editorMode}
         onCardSave={onCardSave}
         onCategorySave={onCategorySave}
@@ -181,8 +183,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         card={props.card}
         userCards={props.userDataFromDb.cards}
       />
-
-
     </div>
   );
 };
