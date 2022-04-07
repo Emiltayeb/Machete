@@ -12,10 +12,10 @@ import Prism from 'prismjs';
 type Editor = BaseEditor & ReactEditor;
 
 export enum EditorMode {
-  TRAIN = "train",
-  ADD = "add",
-  MULTIPLE_TRAIN = "multiple",
-  SINGLE_TRAIN = "single"
+  TRAIN = "Train",
+  ADD = "Edit",
+  MULTIPLE_TRAIN = "multiple_train",
+  SINGLE_TRAIN = "single_train",
 }
 
 export enum CodeLanguages {

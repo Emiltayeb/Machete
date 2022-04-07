@@ -81,8 +81,6 @@ const UserCard = function (props: any) {
       <Container maxW={'container.lg'} p={4}>
 
         <VStack alignItems={'stretch'} spacing={0}>
-
-          <Heading color={textColor} >Train your cards</Heading>
           {
             noTrainingCards ? <Text>No cards.</Text> :
               router.query.mode === EditorMode.MULTIPLE_TRAIN ?

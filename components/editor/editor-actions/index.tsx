@@ -17,26 +17,25 @@ import React from 'react';
 import * as Utils from '../editor-utils';
 import { CardType } from '../types';
 import { ArrowBackIcon, CheckIcon, EditIcon } from '@chakra-ui/icons';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { userCategoriesAtom } from '../../../store';
 import { isMobile } from '../../../utils';
+import PrivateRoute from '../../PrivateRoute';
+import { onCardSave, onCardCategoryChange } from "../editor-events"
+import { Editor } from 'slate';
+import { useRouter } from 'next/router';
 
 type ActionsProps = {
   cardText: string;
   card: CardType | undefined | null;
   editorMode: Utils.EditorMode;
-  onCardSave: ({
-    title,
-    exec,
-    category,
-  }: {
-    title: string;
-    category: string;
-    exec?: string;
-  }) => void;
-  onCategorySave: any;
   setEditorMode: any;
-  userCards?: CardType[]
+  userCards?: CardType[];
+  userDataFromDb: any;
+  db: any;
+  codeLanguages: any
+  editor: Editor;
+  allowTrain: boolean
 };
 
 
@@ -48,28 +47,43 @@ enum ActionState {
 enum CategoryState { NEW, EXISTING, UPDATE }
 
 const EditorActions = (props: ActionsProps) => {
-  const { editorMode, onCardSave, setEditorMode, card } = props;
+  const { editorMode, setEditorMode, card, db, userDataFromDb, allowTrain } = props;
+
+
   const [userCategoriesState, setUserCategoriesState] = useRecoilState(userCategoriesAtom)
   const [isSubmitting, setIsSubmitting] = React.useState(ActionState.READY);
   const [categoryState, setCategoryState] = React.useState(userCategoriesState.length > 0 || card?.category ? CategoryState.EXISTING : CategoryState.NEW);
   const toast = useToast();
+  const router = useRouter()
   const isMobileView = isMobile()
   const [cardDetailState, setCardDetailState] = React.useState({
     title: card?.title ?? '',
     category: card?.category ?? userCategoriesState[0] ?? props.userCards?.[0]?.category ?? "",
     exec: card?.exec ?? '',
   });
-  console.log(props.card)
   const categoryRef = React.useRef<any>(cardDetailState.category)
 
   const isCategoryInvalid = categoryState === CategoryState.NEW && cardDetailState.category == ""
   const isInvalidForm = cardDetailState.title === "" || isCategoryInvalid || props.card?.text.length === 0
+
   const handelCardSave = async function () {
     setIsSubmitting(ActionState.SUBMITTING);
+    const cardData = {
+      text: JSON.stringify(props.editor.children),
+      codeLanguages: props.codeLanguages,
+      id: props?.card?.id,
+      ...cardDetailState,
+      allowTrain,
+    }
+
     try {
-      await onCardSave(cardDetailState);
+      await onCardSave(cardData, userDataFromDb, db, (id) => {
+        if (props.card?.id) return;
+        router.push(`/editor/${id}`)
+      });
       toast({ status: 'success', title: 'Card saved.' });
     } catch (error) {
+      console.log(error)
       toast({ status: 'error', title: 'Ops. card not saved' });
     } finally {
       setIsSubmitting(ActionState.READY);
@@ -84,7 +98,7 @@ const EditorActions = (props: ActionsProps) => {
       // 1 update current.
       setUserCategoriesState(updatedCategories as any)
       // 2 take all the current user card and update thier catgories as well?
-      await props.onCategorySave(categoryRef.current, cardDetailState.category)
+      await onCardCategoryChange(userDataFromDb, db, categoryRef.current, cardDetailState.category)
       toast({ status: 'success', title: 'Card saved.' });
     } catch (error) {
       toast({ status: 'error', title: 'Card not saved.' });
@@ -113,6 +127,7 @@ const EditorActions = (props: ActionsProps) => {
   const CardDetailsForm = function () {
     return <Flex
       wrap={{ base: "wrap", md: "nowrap" }}
+      flex={2}
       gap={2}>
       <FormControl isInvalid={cardDetailState.title == ""}>
         <InputGroup size={"xs"}>
@@ -222,4 +237,4 @@ const EditorActions = (props: ActionsProps) => {
   );
 };
 
-export default EditorActions;
+export default PrivateRoute(EditorActions);

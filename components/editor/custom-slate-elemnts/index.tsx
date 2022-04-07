@@ -266,6 +266,7 @@ export const Image = ({ attributes, children, element }: { attributes: any, chil
 				contentEditable={false}
 				className={css`
           position: relative;
+					margin:1rem 0;
         `}
 			>
 				<img

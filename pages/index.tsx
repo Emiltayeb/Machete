@@ -1,31 +1,17 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Input,
-  Select,
-  Text,
-  useBreakpointValue,
-  useColorModeValue,
-  VStack,
-} from '@chakra-ui/react';
+import { Box, Button, Container, Divider, Flex, Grid, Heading, Input, Select, Text, useBreakpointValue, useColorModeValue, VStack, } from '@chakra-ui/react';
 import PrivateRoute from '../components/PrivateRoute';
 import CreateCard from '../components/layout/navigation/CreateCard';
 import CardsByUser from '../components/CardsByUser';
 import { CardType } from '../components/editor/types';
 import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { userCategoriesAtom, trainCardsAtom } from '../store';
+import { EditorMode } from '../components/editor/editor-utils';
 
 const HomePage = (props: any) => {
   const textColor = useColorModeValue("teal.700", "white")
-  const cardBgColor = useColorModeValue('gray.300', 'gray.700');
+  const cardsGridBackground = useColorModeValue('gray.200', 'gray.700');
   const gridTemplateCols = useBreakpointValue({ base: "1fr", md: "repeat(3, minmax(150px, 1fr) )" })
   const userCards: CardType[] = props?.userDataFromDb?.cards;
   const [filteredCards, setFilteredCards] = React.useState<CardType[] | undefined>(props?.userDataFromDb?.cards)
@@ -33,7 +19,7 @@ const HomePage = (props: any) => {
   const setTrainingCards = useSetRecoilState(trainCardsAtom)
   const currentCategoryFilter = React.useRef<any>("all");
   const router = useRouter()
-  // changes from firebaes (delete,add..)
+
 
   React.useEffect(() => {
     setFilteredCards(currentCategoryFilter.current.value !== "all" ? props?.userDataFromDb?.cards.filter((card: CardType) => card.category === currentCategoryFilter.current.value)
@@ -85,14 +71,14 @@ const HomePage = (props: any) => {
 
           <Input flex={1} variant="flushed" onChange={onFreeSearchFilter} />
           <Button disabled={filteredCards?.length === 0}
-            onClick={() => router.push("editor/train?mode=multiple")}
+            onClick={() => router.push(`editor/train?mode=${EditorMode.MULTIPLE_TRAIN}`)}
             colorScheme="teal" size={"sm"}>
             Train {currentCategoryFilter.current?.value || "all"} Cards</Button>
         </Flex>
         <Divider />
         <Box
           p={{ base: 2, sm: 5, md: 10 }}
-          bg={cardBgColor}
+          bg={cardsGridBackground}
           rounded='2xl'>
           <Grid
             gridTemplateColumns={gridTemplateCols}

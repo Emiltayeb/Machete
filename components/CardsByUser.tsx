@@ -7,6 +7,7 @@ import { useSetRecoilState } from 'recoil';
 import { trainCardsAtom } from '../store';
 import { isMobile } from '../utils';
 import { onDeleteCard } from './editor/editor-events';
+import { EditorMode } from './editor/editor-utils';
 import { CardType } from './editor/types';
 
 const CardsByUser = function (props: any) {
@@ -23,14 +24,27 @@ const CardsByUser = function (props: any) {
 
 	const onSingleCardTrain = function (card: CardType) {
 		setTrainingCardsState(card)
-		router.push(`editor/train?mode=single&cardId=${card.id}`)
+		router.push(`editor/train?mode=${EditorMode.SINGLE_TRAIN}&cardId=${card.id}`)
 	}
 	if (!props?.cards) return <></>
+
+
 	return <>
 		{props.cards.map((card: CardType) => (
 			<Box
 				cursor={"pointer"}
-				onClick={() => onEditorCard(card.id)}
+				onClick={(e) => {
+					const element = e.target?.closest?.("button") as HTMLButtonElement
+					const name = element?.getAttribute("name")
+					if (!element || name === "edit") {
+						onEditorCard(card.id)
+					}
+					else if (name === "delete") {
+						onDeleteCard(props.userDataFromDb, props.db, card.id)
+					} else if (name === "train") {
+						onSingleCardTrain(card)
+					}
+				}}
 				flex='1'
 				bg={cardBgColor}
 				borderRadius='lg'
@@ -57,28 +71,30 @@ const CardsByUser = function (props: any) {
 							<Button
 								pointerEvents={"auto"}
 								size={'xs'}
+								name="edit"
 								colorScheme="linkedin"
 								isDisabled={isMobileView}
 								leftIcon={<EditIcon />}
-								onClick={() => onEditorCard(card?.id)}>
+							>
 								Edit
 							</Button>
 						</Tooltip>
 						<Button
 							size={'xs'}
+							name="train"
 							colorScheme="teal"
 							disabled={!card.allowTrain}
 							leftIcon={<GiMachete />}
-							onClick={() => onSingleCardTrain(card)}>
+						>
 							Train
 						</Button>
 
 						<Button
 							size={'xs'}
 							colorScheme="red"
-
+							name="delete"
 							leftIcon={<DeleteIcon />}
-							onClick={() => onDeleteCard(props.userDataFromDb, props.db, card.id)}>
+						>
 							Delete
 						</Button>
 

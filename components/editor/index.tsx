@@ -18,7 +18,7 @@ import * as Events from './editor-events';
 import EditorActions from './editor-actions';
 import { useRouter } from 'next/router';
 import EditorOptions from './editor-options';
-import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeValue, VStack } from '@chakra-ui/react';
+import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeValue } from '@chakra-ui/react';
 import withImages from './with-image';
 import { isMobile } from '../../utils';
 
@@ -32,7 +32,9 @@ declare module 'slate' {
   }
 }
 
-const CardData = function (props: { card?: Types.CardType | null }) {
+// TODO: Image element with shift + enter
+
+const CurrentCardInformation = function (props: { card?: Types.CardType | null }) {
   const textColor = useColorModeValue("black", "white")
   const bgColor = useColorModeValue("gray.200", "black")
   if (!props.card) return <></>
@@ -60,40 +62,10 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
   const allowTrain = React.useRef(props.card?.allowTrain)
+  const isReadOnly = editorMode === Utils.EditorMode.TRAIN || isMobileView
+  const textColor = useColorModeValue("teal.700", "white")
 
-  // Events 
-  const onCardSave = async function ({
-    title,
-    exec,
-    category,
-  }: {
-    title: string;
-    category: string;
-    exec?: string;
-  }) {
-    await Events.onCardSave(
-      {
-        text: JSON.stringify(editor.children),
-        codeLanguages: editorCodeLang,
-        id: props?.card?.id,
-        category,
-        title,
-        exec,
-        allowTrain: !!allowTrain.current,
-      },
-      props.userDataFromDb,
-      props.db, (id) => {
-        if (!props?.card?.id) {
-          router.push(`/editor/${id}`)
-        }
-      }
-    );
-
-  }
-
-  const onCategorySave = async function (oldCat: string, newCat: string) {
-    await Events.onCardCategoryChange(props.userDataFromDb, props.db, oldCat, newCat)
-  }
+  // Focus the editor on inita lboot
   React.useEffect(() => {
     if (editorMode === Utils.EditorMode.ADD) return
     (document.querySelector(`#${SLATE_EDITOR_ID} input`) as HTMLInputElement)?.focus()
@@ -138,50 +110,30 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 
   return (
     <div ref={editorRef} data-editor>
+      <Heading color={textColor}>{editorMode} Card</Heading>
+      {editorMode === Utils.EditorMode.TRAIN && <CurrentCardInformation card={props.card} />}
+
+
       <Slate editor={editor} value={editorValue} onChange={(value) => setEditorValue(value)}>
-        {
-          editorMode === Utils.EditorMode.ADD && <>
-            <HoveringToolbar />
-            <EditorOptions editor={editor} />
-          </>
+
+        {!isReadOnly && <>
+          <HoveringToolbar />
+          <EditorOptions editor={editor} />
+        </>
         }
 
-        {editorMode === Utils.EditorMode.TRAIN && <CardData card={props.card} />}
         <Editable
-          tabIndex={10}
-          autoFocus
-          readOnly={editorMode === Utils.EditorMode.TRAIN || isMobileView}
-          style={{ color: 'black' }}
-          placeholder='Enter some text (type "/" for more options)'
-          decorate={decorate}
-          id={SLATE_EDITOR_ID}
-          className={classes.editor}
-          renderElement={renderElement}
-          onPaste={(event) => {
-            event.preventDefault();
-            const text = event.clipboardData.getData('Text');
-            editor.insertText(text);
-          }}
+          autoFocus readOnly={isReadOnly} style={{ color: 'black' }}
+          placeholder='Enter some text (type "/" for more options)' decorate={decorate} id={SLATE_EDITOR_ID}
+          className={classes.editor} renderElement={renderElement}
+          onPaste={(event) => Events.handelPasteToEditor(event, editor)}
           onKeyDown={(event) => editorMode === Utils.EditorMode.ADD && Events.handelKeyDown(event, editor)}
-          renderLeaf={(props) => (
-            <CustomComponents.Leaf
-              {...props}
-              editorMode={editorMode}
-              editor={editor}
-            />
-          )}
+          renderLeaf={(props) => (<CustomComponents.Leaf {...props} editorMode={editorMode} editor={editor} />)}
         />
       </Slate>
 
-
-      < EditorActions
-        editorMode={editorMode}
-        onCardSave={onCardSave}
-        onCategorySave={onCategorySave}
-        setEditorMode={setEditorMode}
-        cardText={Utils.getEditorText(editor.children)}
-        card={props.card}
-        userCards={props.userDataFromDb.cards}
+      < EditorActions allowTrain={!!allowTrain.current} editorMode={editorMode} editor={editor} codeLanguages={editorCodeLang}
+        setEditorMode={setEditorMode} cardText={Utils.getEditorText(editor.children)} card={props.card} userCards={props.userDataFromDb.cards}
       />
     </div>
   );

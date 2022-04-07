@@ -82,6 +82,11 @@ export const handelKeyDown = function (
   }
 };
 
+export const handelPasteToEditor = function (e: React.ClipboardEvent<HTMLDivElement>, editor: Editor) {
+  e.preventDefault();
+  const text = e.clipboardData.getData('Text');
+  editor.insertText(text);
+}
 export const showOptions = function (editor: Editor, setShowOptions: (toShow: boolean) => void) {
   const [currentNode] = Utils.findCurrentNodeAtSelection(editor);
   const toShowOptions = currentNode?.[0].text?.match(/\//);
@@ -149,6 +154,7 @@ export const onCardSave = async function (
   let cardId;
   try {
     const isNewCard = !newCard.id;
+    console.log({ db, userData, newCard });
     const updateDocREf = doc(db, 'users', userData.NO_ID_FIELD);
 
     if (isNewCard) {

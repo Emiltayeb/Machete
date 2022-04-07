@@ -23,6 +23,24 @@ const EditCard = function (props: any) {
 	);
 
 
+	const CardDisplay = () => {
+		return <VStack alignItems={'stretch'} spacing={0}>
+			<Editor mode={EditorMode.ADD} card={card} {...props} />
+		</VStack>
+	}
+
+	const NoCardDisplay = () => {
+		return <>
+			<Heading color={textColor}>No card here :(</Heading>
+			<Text>
+				Go back
+				<NextLink href={'/'}>
+					<Link color={'facebook.400'}> Home </Link>
+				</NextLink>
+				and add some!.
+			</Text>
+		</>
+	}
 	return (
 		<Container maxW={"container.xl"}>
 			<Breadcrumb separator={"-"} marginBlockStart={3}>
@@ -34,28 +52,11 @@ const EditCard = function (props: any) {
 				</BreadcrumbItem>
 
 				<BreadcrumbItem>
-
 					<BreadcrumbLink>Edit Card</BreadcrumbLink>
-
 				</BreadcrumbItem>
 			</Breadcrumb>
 			<Container maxW={'container.lg'} p={4}>
-
-				{card ? <VStack alignItems={'stretch'} spacing={0}>
-
-					<Heading color={textColor} > Edit Card</Heading>
-
-					<Editor mode={EditorMode.ADD} card={card} {...props} />
-				</VStack> : <>
-					<Heading color={textColor}>No card here :(</Heading>
-					<Text>
-						Go back
-						<NextLink href={'/'}>
-							<Link color={'facebook.400'}> Home </Link>
-						</NextLink>
-						and add some!.
-					</Text>
-				</>}
+				{card ? <CardDisplay /> : <NoCardDisplay />}
 			</Container>
 		</Container>
 	);
