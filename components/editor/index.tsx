@@ -22,7 +22,7 @@ import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeVal
 import withImages from './with-image';
 import { isMobile } from '../../utils';
 
-const SLATE_EDITOR_ID = 'SLATE_EDITOR';
+export const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor;
@@ -61,7 +61,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
-  const allowTrain = React.useRef(props.card?.allowTrain)
   const isReadOnly = editorMode === Utils.EditorMode.TRAIN || isMobileView
   const textColor = useColorModeValue("teal.700", "white")
 
@@ -72,12 +71,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Each time we change the editor value
-  React.useEffect(() => {
-    if (editorMode === Utils.EditorMode.TRAIN) return;;
-    allowTrain.current = !!document.querySelector('[data-remember-text]')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editorValue]);
 
   // for every lang we have in the editor - paint it.
   const decorate = React.useCallback(
@@ -132,7 +125,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         />
       </Slate>
 
-      < EditorActions allowTrain={!!allowTrain.current} editorMode={editorMode} editor={editor} codeLanguages={editorCodeLang}
+      < EditorActions editorMode={editorMode} editor={editor} codeLanguages={editorCodeLang}
         setEditorMode={setEditorMode} cardText={Utils.getEditorText(editor.children)} card={props.card} userCards={props.userDataFromDb.cards}
       />
     </div>

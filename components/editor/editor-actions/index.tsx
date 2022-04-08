@@ -24,6 +24,7 @@ import PrivateRoute from '../../PrivateRoute';
 import { onCardSave, onCardCategoryChange } from "../editor-events"
 import { Editor } from 'slate';
 import { useRouter } from 'next/router';
+import { SLATE_EDITOR_ID } from '..';
 
 type ActionsProps = {
   cardText: string;
@@ -35,7 +36,6 @@ type ActionsProps = {
   db: any;
   codeLanguages: any
   editor: Editor;
-  allowTrain: boolean
 };
 
 
@@ -47,7 +47,7 @@ enum ActionState {
 enum CategoryState { NEW, EXISTING, UPDATE }
 
 const EditorActions = (props: ActionsProps) => {
-  const { editorMode, setEditorMode, card, db, userDataFromDb, allowTrain } = props;
+  const { editorMode, setEditorMode, card, db, userDataFromDb } = props;
 
 
   const [userCategoriesState, setUserCategoriesState] = useRecoilState(userCategoriesAtom)
@@ -65,15 +65,21 @@ const EditorActions = (props: ActionsProps) => {
 
   const isCategoryInvalid = categoryState === CategoryState.NEW && cardDetailState.category == ""
   const isInvalidForm = cardDetailState.title === "" || isCategoryInvalid || props.card?.text.length === 0
+  const allowTrain = React.useRef(props.card?.allowTrain)
+
+  React.useEffect(() => {
+    allowTrain.current = !!document.querySelector('[data-remember-text]')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
 
   const handelCardSave = async function () {
-    setIsSubmitting(ActionState.SUBMITTING);
+    //setIsSubmitting(ActionState.SUBMITTING);
     const cardData = {
       text: JSON.stringify(props.editor.children),
       codeLanguages: props.codeLanguages,
       id: props?.card?.id,
       ...cardDetailState,
-      allowTrain,
+      allowTrain: !!allowTrain.current,
     }
 
     try {
