@@ -34,7 +34,7 @@ const CardsByUser = function (props: any) {
 			<Box
 				cursor={"pointer"}
 				onClick={(e) => {
-					const element = e.target?.closest?.("button") as HTMLButtonElement
+					const element = (e.target as HTMLElement)?.closest?.("button") as HTMLButtonElement
 					const name = element?.getAttribute("name")
 					if (!element || name === "edit") {
 						onEditorCard(card.id)
