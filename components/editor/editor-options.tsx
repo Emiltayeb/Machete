@@ -28,6 +28,7 @@ const uploadImage = function (e: any, setProg: any, setImageToEditor: any) {
 }
 
 
+// TODO: after you enter / remove it.
 
 const EditorOptions = function (props: any) {
 	const editor = useSlate();
@@ -65,7 +66,7 @@ const EditorOptions = function (props: any) {
 			colorScheme="black" _focus={{ background: "blue.200" }} _hover={{ background: "white", color: "black" }} border={"1px solid white"} cursor="pointer">{text}</Button>
 	}
 	return <EditorPortal toShow={toShow}>
-		<VStack rounded="base" minWidth={"200px"} alignItems={"flex-start"} bgColor={"AppWorkspace"} color="white" p={2} >
+		<VStack rounded="base" minWidth={"200px"} alignItems={"flex-start"} bgColor={"black"} color="white" p={2} >
 			{Option("Create code", () => { createCodeBlock(props.editor) }, ref)}
 			{Option("Add Image Link", () => { InsertImageButton(props.editor) })}
 			{Option("Upload Image", onOpen)}

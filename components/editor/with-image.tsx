@@ -49,6 +49,7 @@ const withImages = (editor: Editor) => {
 export default withImages
 
 export const insertImage = (editor: Editor, url: any) => {
+	editor.deleteBackward("character")
 	const text = { text: '' }
 	const image: ImageElement = { type: 'image', url, children: [text] }
 	Transforms.insertNodes(editor, image)
@@ -63,6 +64,9 @@ const isImageUrl = (url: string) => {
 
 
 export const InsertImageButton = (editor?: any) => {
+	editor.deleteBackward("character")
 	const url = window.prompt('Enter the URL of the image:')
+	if (!url) return false
+	if (!isUrl(url)) return false
 	insertImage(editor, url)
 }

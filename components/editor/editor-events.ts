@@ -104,6 +104,7 @@ export const createCodeBlock = function (editor: Editor) {
 
 
 export const createHeading = function (editor: Editor) {
+  editor.deleteBackward("character")
   editor.insertBreak();
   Transforms.insertFragment(editor, [
     { type: 'heading', children: [{ text: 'Heading' }] },
