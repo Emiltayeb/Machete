@@ -1,13 +1,5 @@
 import {
-  Container, Heading, VStack, useColorModeValue,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  Box,
-  Button,
-  HStack,
-  Text,
-  Divider,
+  Container, VStack, Breadcrumb, BreadcrumbItem, BreadcrumbLink, Box, Button, HStack, Text, Divider,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -15,9 +7,9 @@ import Editor from '../../components/editor';
 import { CardType } from '../../components/editor/types';
 import PrivateRoute from '../../components/PrivateRoute';
 import NextLink from 'next/link';
-import { useRecoilValue } from 'recoil';
-import { trainCardsAtom } from '../../store';
 import { EditorMode } from '../../components/editor/editor-utils';
+import { shuffleArray } from '../../utils';
+
 
 
 
@@ -53,43 +45,43 @@ const MultipleTrainCards = function (props: any) {
 
 }
 
-// TODO: This page should get ad id in the param so make it act like smart-link - load the card  if its not in the store
+const NoCards = function () {
+  return <Text>No cards.</Text>
+}
 
 const UserCard = function (props: any) {
   const router = useRouter();
-  const textColor = useColorModeValue("teal.700", "white")
-  const trainingCards = useRecoilValue(trainCardsAtom)
-  const noTrainingCards = !trainingCards || Array.isArray(trainingCards) && !trainingCards?.length
+  const { cardId, mode } = router.query;
+  const [editorCards] = React.useState(() => {
+    if (mode === EditorMode.SINGLE_TRAIN) {
+      return props.userDataFromDb.cards.find((card: CardType) => card.id === cardId)
+    }
+    return shuffleArray(props.userDataFromDb.cards.filter((card: CardType) => card.allowTrain))
+  })
+
+  const isEmptyCards = !editorCards || props.userDataFromDb.cards.length === 0;
 
 
   return (
     <Container maxW={"container.xl"}>
       <Breadcrumb separator={"-"} marginBlockStart={3}>
         <BreadcrumbItem>
-          <NextLink href='/'
-          >
+          <NextLink href='/' >
             <BreadcrumbLink>Home</BreadcrumbLink>
           </NextLink>
         </BreadcrumbItem>
-
         <BreadcrumbItem>
-
           <BreadcrumbLink>Machete your cards!</BreadcrumbLink>
-
         </BreadcrumbItem>
       </Breadcrumb>
+
       <Container maxW={'container.lg'} p={4}>
 
         <VStack alignItems={'stretch'} spacing={0}>
           {
-            noTrainingCards ? <Text>No cards.</Text> :
-              router.query.mode === EditorMode.MULTIPLE_TRAIN ?
-                <MultipleTrainCards
-                  trainingCards={Array.isArray(trainingCards) ? [...trainingCards].sort(() => .5 - Math.random()) : trainingCards} {...props} />
-                : <Editor mode={EditorMode.TRAIN} card={trainingCards as CardType}
-                  {...props} />
+            isEmptyCards ? <NoCards /> : router.query.mode === EditorMode.MULTIPLE_TRAIN ?
+              <MultipleTrainCards trainingCards={editorCards} {...props} /> : <Editor mode={EditorMode.TRAIN} card={editorCards as CardType} {...props} />
           }
-
         </VStack>
       </Container>
     </Container>

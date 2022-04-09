@@ -54,6 +54,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     Utils.CodeLanguages[] | null
   >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
 
+  console.log(props);
   const [editorValue, setEditorValue] = React.useState(
     props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
   );

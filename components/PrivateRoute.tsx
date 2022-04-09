@@ -12,6 +12,7 @@ const PrivateRoute = (Component: any) => {
     const router = useRouter();
     const { user, isLoading, userDataFromDb, db, dataStatus } = useGetLoadingStatus();
     const setUserCategories = useSetRecoilState<any>(userCategoriesAtom)
+
     React.useEffect(() => {
       if (dataStatus === "loading") return
       const categories = userDataFromDb?.cards?.map((card: CardType) => card.category)

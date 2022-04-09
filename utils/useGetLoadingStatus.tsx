@@ -1,5 +1,4 @@
 import { where } from 'firebase/firestore';
-import router from 'next/router';
 import React from 'react';
 import { useUser } from 'reactfire';
 import useGetData from './useGetData';
@@ -21,6 +20,7 @@ const useGetLoadingStatus = function () {
   React.useEffect(() => {
     const isLoadingUser = status === 'loading' || typeof user === 'undefined';
     setLoading(isLoadingUser);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return { user, isLoading, userDataFromDb, dataStatus, db };

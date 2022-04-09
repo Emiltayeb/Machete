@@ -201,7 +201,8 @@ export const TrainingInput = (props: any) => {
 		}
 		if (e.key !== 'Enter') return;
 
-		setAnswerStatus({ status: inputState === correctText, answered: true, differences: findDiff(correctText, inputState) });
+		const trimmedAns = inputState.trim()
+		setAnswerStatus({ status: trimmedAns === correctText, answered: true, differences: findDiff(correctText, trimmedAns) });
 		onOpen()
 
 	};
@@ -217,7 +218,6 @@ export const TrainingInput = (props: any) => {
 				<PopoverTrigger>
 					<InputGroup size={"xs"} display={"inline-flex"} width="auto" marginInline={"1"}>
 						<Input
-
 							bg={'linkedin.400'}
 							pl={3}
 							data-correct={answerStatus.status}

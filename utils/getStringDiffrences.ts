@@ -1,8 +1,7 @@
-export const findDiff = (corr: string, sub: string) => {
-	//const diffs: Record<string, string> = {}
+export const findDiff = (correctAns: string, checkAnswer: string) => {
 	let diffs = "";
-	corr.split("").forEach(function (el, index) {
-		if (sub[index] !== el) {
+	correctAns.split("").forEach(function (el, index) {
+		if (checkAnswer[index] !== el) {
 			diffs += `${el},`
 		}
 	})

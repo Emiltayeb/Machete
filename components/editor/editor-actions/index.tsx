@@ -202,6 +202,11 @@ const EditorActions = (props: ActionsProps) => {
   }
 
 
+  const onTrainClick = function () {
+    setEditorMode(Utils.EditorMode.TRAIN)
+    window.history.pushState(null, 'EDitor train', `/editor/train/?mode=${Utils.EditorMode.SINGLE_TRAIN}&cardId=${props.card?.id}`);
+  }
+
   return (
 
     <Box marginBlockStart={3}>
@@ -223,7 +228,7 @@ const EditorActions = (props: ActionsProps) => {
               isDisabled={isInvalidForm || !props.card?.allowTrain}
               size={"xs"}
               colorScheme={'teal'}
-              onClick={() => setEditorMode(Utils.EditorMode.TRAIN)}>
+              onClick={onTrainClick}>
               Train
             </Button>
           </HStack> :
