@@ -207,41 +207,65 @@ export const TrainingInput = (props: any) => {
 
 	};
 
+	const focusNextElement = function () {
+		const nextElement = document.querySelector(`input[data-answered *= 'false']`) as HTMLElement;
+		nextElement ? nextElement.focus() : (document.querySelector("#NEXT_TRAIN_CARD") as HTMLElement).focus()
+	}
+
+	const onClosePopover = function () {
+		onClose();
+		focusNextElement()
+
+	}
+
+	const onOpenPopOver = function () {
+		console.log("add event")
+	}
+
 	return (
 		<span
 			{...props.attributes}
 			onKeyPress={handelSubmit}
 			className={classes.training_card}>
 			<Popover
-				onClose={onClose}
+				onClose={onClosePopover}
+				onOpen={onOpenPopOver}
 				placement='bottom' isOpen={isOpen} closeOnBlur closeOnEsc returnFocusOnClose={false}>
 				<PopoverTrigger>
 					<InputGroup size={"xs"} display={"inline-flex"} width="auto" marginInline={"1"}>
 						<Input
-							bg={'linkedin.400'}
+							bg={'linkedin.300'}
 							pl={3}
 							data-correct={answerStatus.status}
+							data-answered={answerStatus.answered}
 							placeholder='...'
 							type='text'
 							value={inputState}
 							style={{
 								width: `${inputState.length + 2}ch`,
 								height: 'auto',
+								color: "white"
+							}}
+							_selection={{
+								background: "teal"
 							}}
 							onChange={(e) => setInputState(e.target.value)}
 							className={classes.train_input}
 						/>
-						<InputRightAddon >	<Button size={"xs"} height={"inherit"} onClick={answerStatus.answered ? onOpen : undefined}>?</Button></InputRightAddon>
+						<InputRightAddon >	<Button size={"xs"} height={"inherit"} onClick={onOpen}>?</Button></InputRightAddon>
 					</InputGroup>
 				</PopoverTrigger>
-				<Portal >
+				<Portal  >
 					<PopoverContent>
 						<PopoverArrow />
 						<PopoverCloseButton />
-						<PopoverBody>
-							<Text color={answerStatus.status ? "whatsapp.400" : "red.400"}><Text fontWeight={"bold"} as="span">Submission</Text>  - {inputState}</Text>
-							<Text color={"whatsapp.400"}> <Text as="span" fontWeight={"bold"}>Correct answer</Text> - {props.leaf.text.trim()}</Text>
-							{answerStatus.differences.length > 0 && <Text color="yellow.400"><Text as="span" fontWeight={"bold"} >Differences</Text> - {answerStatus.differences}</Text>}
+						<PopoverBody   >
+							<Text color={answerStatus.status ? "whatsapp.400" : "red.400"}><Text fontSize={"sm"} fontWeight={"bold"} as="span">Submission</Text>  - {inputState}</Text>
+							<Text color={"whatsapp.400"} fontSize={"sm"}>
+								<Text as="span" fontSize={"sm"} fontWeight={"bold"}>Correct answer</Text>
+								- {props.leaf.text.trim()}
+							</Text>
+							{answerStatus.differences.length > 0 && <Text fontSize={"sm"} color="yellow.400"><Text as="span" fontWeight={"bold"} >Differences</Text> - {answerStatus.differences}</Text>}
 						</PopoverBody>
 					</PopoverContent>
 				</Portal>

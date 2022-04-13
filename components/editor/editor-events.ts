@@ -155,7 +155,6 @@ export const onCardSave = async function (
   let cardId;
   try {
     const isNewCard = !newCard.id;
-    console.log({ db, userData, newCard });
     const updateDocREf = doc(db, 'users', userData.NO_ID_FIELD);
 
     if (isNewCard) {
