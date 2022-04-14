@@ -135,30 +135,19 @@ export const insertLink = function (editor: Editor, url: string | null) {
     // Remove the Link node if we're inserting a new link node inside of another
     // link.
     if (parentNode.type === "link") {
-      removeLink(editor);
-    }
-
-    if (editor.isVoid(parentNode as any)) {
-      // Insert the new link after the void node
-      Transforms.insertNodes(editor, { type: "block", text: url }, {
-        at: Path.next(parentPath),
-        select: true
-      });
-    } else if (Range.isCollapsed(selection)) {
-      // Insert the new link in our last known locatio
-      Transforms.insertNodes(editor, link, { select: true });
-    } else {
-
+      console.log("removing link")
       Transforms.delete(editor, { at: selection })
-      // Wrap the currently selected range of text into a Link
-      Transforms.insertNodes(editor, link);
-      Transforms.collapse(editor, { edge: "end" });
     }
-  } else {
-    // Insert the new link node at the bottom of the Editor when selection
-    // is falsey
-    Transforms.insertNodes(editor, { type: "block", text: url });
+
+    Transforms.delete(editor, { at: selection })
+    // Wrap the currently selected range of text into a Link
+    Transforms.insertNodes(editor, link);
+    setTimeout(() => {
+      Transforms.collapse(editor, { edge: "end" });
+    }, 0);
   }
+
+
 
 }
 

@@ -4,7 +4,6 @@ import {
 	BreadcrumbItem,
 	BreadcrumbLink,
 } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
 import React from 'react';
 import Editor from '../../components/editor';
 import PrivateRoute from '../../components/PrivateRoute';

@@ -1,5 +1,5 @@
 import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Progress, useDisclosure, VStack } from "@chakra-ui/react";
-import { ReactEditor, useSlate } from "slate-react";
+import { ReactEditor, useSlate, useSlateStatic } from "slate-react";
 import EditorPortal from "./EditorPotral";
 import { createCodeBlock, createHeading } from "./editor-events"
 import { CustomFormats, findCurrentNodeAtSelection, getCurrentSelectedText } from "./editor-utils";
@@ -31,7 +31,7 @@ const uploadImage = function (e: any, setProg: any, setImageToEditor: any) {
 // TODO: after you enter / remove it.
 
 const EditorOptions = function (props: any) {
-	const editor = useSlate();
+	const editor = useSlateStatic();
 
 	const [currentNode] = findCurrentNodeAtSelection(editor);
 	const [toShow, setToShow] = React.useState(false)
@@ -43,13 +43,16 @@ const EditorOptions = function (props: any) {
 	const handelCloseOptionsWhenOutOfFocus = (e: KeyboardEvent) => {
 		if (e.key === "Tab" || e.key === "Enter") return
 		setToShow(false)
-		ReactEditor.focus(editor)
+		setTimeout(() => {
+			ReactEditor.focus(editor)
+		}, 0);
 	}
+
 	React.useLayoutEffect(() => {
 		if (!toShow) return
-		setTimeout(() => {
-			ref.current?.focus?.()
-		}, 0);
+		const firstOptions = document.querySelector("#EDITOR_OPTIONS button") as HTMLButtonElement
+		firstOptions?.focus({ preventScroll: true })
+
 		window.addEventListener("keydown", handelCloseOptionsWhenOutOfFocus)
 		return () => { window.removeEventListener("keydown", handelCloseOptionsWhenOutOfFocus) }
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,15 +68,15 @@ const EditorOptions = function (props: any) {
 		return <Button ref={btnRef} size={"xs"} onClick={operation}
 			colorScheme="black" _focus={{ background: "blue.200" }} _hover={{ background: "white", color: "black" }} border={"1px solid white"} cursor="pointer">{text}</Button>
 	}
-	return <EditorPortal toShow={toShow}>
-		<VStack rounded="base" minWidth={"200px"} alignItems={"flex-start"} bgColor={"black"} color="white" p={2} >
+	return <EditorPortal toShow={toShow} offsets={{ x: 20 }}>
+		<VStack id="EDITOR_OPTIONS" rounded="base" minWidth={"200px"} alignItems={"flex-start"} bgColor={"black"} color="white" p={2} >
 			{Option("Create code", () => { createCodeBlock(props.editor) }, ref)}
 			{Option("Add Image Link", () => { InsertImageButton(props.editor) })}
 			{Option("Upload Image", onOpen)}
 			{Option("Heading", () => { createHeading(props.editor) })}
 		</VStack>
 
-		<Modal isOpen={isOpen} onClose={onClose}>
+		<Modal isOpen={isOpen && toShow} onClose={onClose}>
 			<ModalOverlay />
 			<ModalContent>
 				<ModalHeader>Upload Image</ModalHeader>

@@ -49,13 +49,12 @@ const CurrentCardInformation = function (props: { card?: Types.CardType | null }
 
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const router = useRouter()
-  const [editor] = React.useState(withLinks(withLinks(withImages(withHistory(withReact(createEditor()))))))
+  const [editor] = React.useState(withLinks(withImages(withHistory(withReact(createEditor())))))
   const isMobileView = isMobile();
   const [editorCodeLang, setLanguage] = React.useState<
     Utils.CodeLanguages[] | null
   >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
 
-  console.log(props);
   const [editorValue, setEditorValue] = React.useState(
     props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
   );

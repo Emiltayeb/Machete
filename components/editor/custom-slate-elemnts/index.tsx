@@ -316,23 +316,19 @@ export const Image = ({ attributes, children, element }: { attributes: any, chil
 }
 
 export const Link = ({ attributes, element, children }: any) => {
-	const editor = useSlateStatic();
 	const selected = useSelected();
 	const focused = useFocused();
 
 	return (
-		<div className={classes.link}>
+		<div className={classes.link} >
 			<a {...attributes} href={element.href} rel="noreferrer" target="_blank">
 				{children}
 			</a>
-			{selected && focused && (
+			{focused && selected && (
 				<div className={classes.popup} contentEditable={false}>
 					<a href={element.href} target="_blank" rel="noreferrer">
 						{element.href}
 					</a>
-					<button onClick={() => removeLink(editor)}>
-
-					</button>
 				</div>
 			)}
 		</div>
