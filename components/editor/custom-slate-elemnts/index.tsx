@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { css } from '@emotion/css';
-import { Descendant, Editor, Transforms } from 'slate';
+import { Descendant, Editor, Transforms, Element } from 'slate';
 import { CodeLanguages, EditorMode, selectCurrentNode } from '../editor-utils';
 import {
 	Text, Input,
@@ -14,6 +14,7 @@ import { findDiff } from '../../../utils/getStringDiffrences';
 import classes from "./custom-slate-components.module.scss";
 import { useSlateStatic, ReactEditor, useSelected, useFocused } from 'slate-react';
 import { DeleteIcon } from '@chakra-ui/icons';
+import { removeLink } from '../editor-events';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
@@ -218,10 +219,6 @@ export const TrainingInput = (props: any) => {
 
 	}
 
-	const onOpenPopOver = function () {
-		console.log("add event")
-	}
-
 	return (
 		<span
 			{...props.attributes}
@@ -229,7 +226,6 @@ export const TrainingInput = (props: any) => {
 			className={classes.training_card}>
 			<Popover
 				onClose={onClosePopover}
-				onOpen={onOpenPopOver}
 				placement='bottom' isOpen={isOpen} closeOnBlur closeOnEsc returnFocusOnClose={false}>
 				<PopoverTrigger>
 					<InputGroup size={"xs"} display={"inline-flex"} width="auto" marginInline={"1"}>
@@ -275,8 +271,6 @@ export const TrainingInput = (props: any) => {
 	);
 };
 
-
-
 export const Image = ({ attributes, children, element }: { attributes: any, children: any, element: any }) => {
 	const editor = useSlateStatic()
 	const path = ReactEditor.findPath(editor, element)
@@ -295,15 +289,18 @@ export const Image = ({ attributes, children, element }: { attributes: any, chil
 			>
 				<img
 					src={element.url}
+
 					className={css`
             display: block;
             max-width: 100%;
             max-height: 200px;
             box-shadow: ${selected && focused ? '0 0 0 3px #B4D5FF' : 'none'};
+						resize: both;
           `}
 				/>
 
 				<Button
+					size={"xsm"}
 					className={css`
 									display: ${selected && focused ? 'inline' : 'none'};
 									position: absolute;
@@ -311,10 +308,33 @@ export const Image = ({ attributes, children, element }: { attributes: any, chil
 									left: 0.5em;
 								`}
 					aria-label='Remove image'
-					onMouseDown={() => { Transforms.removeNodes(editor, { at: path }); console.log("remove") }} leftIcon={<DeleteIcon />}>
-					Remove
+					onMouseDown={() => { Transforms.removeNodes(editor, { at: path }); }} leftIcon={<DeleteIcon />}>
 				</Button>
 			</div>
 		</div >
 	)
 }
+
+export const Link = ({ attributes, element, children }: any) => {
+	const editor = useSlateStatic();
+	const selected = useSelected();
+	const focused = useFocused();
+
+	return (
+		<div className={classes.link}>
+			<a {...attributes} href={element.href} rel="noreferrer" target="_blank">
+				{children}
+			</a>
+			{selected && focused && (
+				<div className={classes.popup} contentEditable={false}>
+					<a href={element.href} target="_blank" rel="noreferrer">
+						{element.href}
+					</a>
+					<button onClick={() => removeLink(editor)}>
+
+					</button>
+				</div>
+			)}
+		</div>
+	);
+};

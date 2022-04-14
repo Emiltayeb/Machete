@@ -57,3 +57,29 @@
 .defaultElement{
   font-size: 1rem;
 }
+
+.link{
+    display: inline;
+    position: relative;
+    text-decoration: underline;
+   
+    a{
+      color: black;
+    }
+  & .popup {
+    position: absolute;
+    left: 0;
+    align-items: center;
+    background-color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid rgb(36, 36, 36);
+    z-index: 999;
+
+    a{
+      text-decoration: underline;
+    }
+  }
+  
+  
+}

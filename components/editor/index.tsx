@@ -21,6 +21,7 @@ import EditorOptions from './editor-options';
 import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeValue } from '@chakra-ui/react';
 import withImages from './with-image';
 import { isMobile } from '../../utils';
+import withLinks from './with-links';
 
 export const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -48,7 +49,7 @@ const CurrentCardInformation = function (props: { card?: Types.CardType | null }
 
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const router = useRouter()
-  const [editor] = React.useState(withImages(withHistory(withReact(createEditor()))))
+  const [editor] = React.useState(withLinks(withLinks(withImages(withHistory(withReact(createEditor()))))))
   const isMobileView = isMobile();
   const [editorCodeLang, setLanguage] = React.useState<
     Utils.CodeLanguages[] | null
@@ -96,6 +97,8 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         return <h1 {...props.attributes} >{props.children}</h1>;
       case 'image':
         return <CustomComponents.Image {...props} />
+      case 'link':
+        return <CustomComponents.Link {...props} />
       default:
         return <CustomComponents.DefaultElement {...props} />;
     }

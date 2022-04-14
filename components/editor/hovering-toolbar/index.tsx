@@ -3,10 +3,11 @@ import { cx } from '@emotion/css';
 import React, { PropsWithChildren, Ref } from 'react';
 import { useRef } from 'react';
 import { Editor, Text } from 'slate';
-import { useSlate, ReactEditor } from 'slate-react';
+import { useSlate, ReactEditor, useSlateStatic } from 'slate-react';
 import { CustomFormats, toggleFormat } from '../editor-utils';
 import classes from './hovering-toolbar.module.scss';
 import EditorPortal from '../EditorPotral';
+import { insertLink } from '../editor-events';
 
 
 interface BaseProps {
@@ -29,7 +30,6 @@ export const Menu = React.forwardRef(
 export const HoveringToolbar = () => {
   const matchedNodes = useRef<Record<string, any>>({});
   const currNodeRef = useRef<any>();
-
   const editor = useSlate();
 
   React.useEffect(() => {
@@ -50,7 +50,6 @@ export const HoveringToolbar = () => {
     currNodeRef.current = match?.[0];
 
   })
-
 
   // Check if we need to apply format
   const compareFormat = function (format: CustomFormats) {
@@ -123,6 +122,14 @@ export const HoveringToolbar = () => {
           icon='R'
         />
 
+        <FormatButton
+          onClick={() => {
+            const url = prompt("enter link")
+            insertLink(editor, url)
+          }}
+          icon='Link'
+        />
+
       </Menu>
     </EditorPortal>
   );
@@ -136,10 +143,10 @@ export const FormatButton = (props: any) => {
       colorScheme={"black"}
       className={cx(classes.format_button, props.isFormatActive ? classes.active : '')}
       size="sm"
-      disabled={currNode.current?.[disableMarker]}
+      disabled={currNode?.current?.[disableMarker]}
       onMouseDown={(event: any) => {
         event.preventDefault();
-        toggleFormat(editor, format);
+        props?.onClick?.() || toggleFormat(editor, format);
       }}>
 
       <div>{icon}</div>

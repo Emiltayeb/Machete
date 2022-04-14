@@ -1,4 +1,5 @@
-import { Editor, Transforms } from 'slate';
+import { ReactEditor } from 'slate-react';
+import { Editor, Transforms, Element, Range, Path } from 'slate';
 import * as Utils from './editor-utils';
 import { CardType } from './types';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -29,7 +30,7 @@ export const handelKeyDown = function (
       const { parentData } = parent
       event.preventDefault();
       // reset events
-      if (nodeData.type === 'code' || parentData.type === "code") {
+      if (nodeData?.type === 'code' || parentData?.type === "code") {
 
         // in case of code element - simply go down on line when pressing with shift
         if (shiftKey) {
@@ -102,6 +103,64 @@ export const createCodeBlock = function (editor: Editor) {
   Utils.focusCurrentNode(editor)
 }
 
+
+export const removeLink = (editor: Editor, opts = {}) => {
+  Transforms.unwrapNodes(editor, {
+    ...opts,
+    match: (n) =>
+      !Editor.isEditor(n) && Element.isElement(n) && n.type === "link"
+  });
+};
+
+export const insertLink = function (editor: Editor, url: string | null) {
+
+  if (!url) return;
+
+  const { selection } = editor;
+  const link = {
+    type: "link",
+    href: url,
+    children: [{ text: "" }],
+  }
+
+
+  ReactEditor.focus(editor);
+
+  if (!!selection) {
+    const [parentNode, parentPath] = Editor.parent(
+      editor,
+      selection.focus?.path
+    ) as any
+
+    // Remove the Link node if we're inserting a new link node inside of another
+    // link.
+    if (parentNode.type === "link") {
+      removeLink(editor);
+    }
+
+    if (editor.isVoid(parentNode as any)) {
+      // Insert the new link after the void node
+      Transforms.insertNodes(editor, { type: "block", text: url }, {
+        at: Path.next(parentPath),
+        select: true
+      });
+    } else if (Range.isCollapsed(selection)) {
+      // Insert the new link in our last known locatio
+      Transforms.insertNodes(editor, link, { select: true });
+    } else {
+
+      Transforms.delete(editor, { at: selection })
+      // Wrap the currently selected range of text into a Link
+      Transforms.insertNodes(editor, link);
+      Transforms.collapse(editor, { edge: "end" });
+    }
+  } else {
+    // Insert the new link node at the bottom of the Editor when selection
+    // is falsey
+    Transforms.insertNodes(editor, { type: "block", text: url });
+  }
+
+}
 
 export const createHeading = function (editor: Editor) {
   editor.deleteBackward("character")

@@ -51,7 +51,10 @@ export default withImages
 export const insertImage = (editor: Editor, url: any) => {
 	editor.deleteBackward("character")
 	const text = { text: '' }
-	const image: ImageElement = { type: 'image', url, children: [text] }
+	const image = [{ type: 'image', url, children: [text] }, {
+		type: 'paragraph',
+		children: [text],
+	}]
 	Transforms.insertNodes(editor, image)
 }
 

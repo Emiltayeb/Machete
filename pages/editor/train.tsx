@@ -57,18 +57,13 @@ const UserCard = function (props: any) {
 
   const trainingCards = useRecoilValue(trainCardsAtom) as CardType[]
 
-  let editorCards = trainingCards;
+  let editorCards
 
   if (mode === EditorMode.MULTIPLE_TRAIN) {
-    editorCards = editorCards.filter((card: CardType) => card.allowTrain)
+    editorCards = shuffleArray((!trainingCards.length ? props.userDataFromDb.cards : trainingCards).filter((card: CardType) => card.allowTrain))
   }
-
-  if (!trainingCards.length) {
-    if (mode === EditorMode.SINGLE_TRAIN) {
-      editorCards = props.userDataFromDb.cards.find((card: CardType) => card.id === cardId)
-    } else {
-      editorCards = shuffleArray(props.userDataFromDb.cards.filter((card: CardType) => card.allowTrain))
-    }
+  if (mode === EditorMode.SINGLE_TRAIN) {
+    editorCards = props.userDataFromDb.cards.find((card: CardType) => card.id === cardId)
   }
 
 
