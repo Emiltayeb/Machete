@@ -6,15 +6,9 @@ import { GiMachete } from 'react-icons/gi';
 import { useSetRecoilState } from 'recoil';
 import { trainCardsAtom } from '../store';
 import { isMobile } from '../utils';
-import { usePagination } from '../utils/usePagination';
 import { onDeleteCard } from './editor/editor-events';
 import { EditorMode } from './editor/editor-utils';
 import { CardType } from './editor/types';
-
-
-const paginate = function () {
-
-}
 
 
 const CardsByUser = function (props: any) {
