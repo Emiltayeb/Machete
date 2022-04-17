@@ -16,9 +16,8 @@ import { usePagination } from '../utils/usePagination';
 const HomePage = (props: any) => {
   const textColor = useColorModeValue("teal.700", "white")
   const cardsGridBackground = useColorModeValue('gray.200', 'gray.700');
-  const gridTemplateCols = useBreakpointValue({ base: "1fr", md: "repeat(3, minmax(300px, 1fr) )" })
+  const gridTemplateCols = useBreakpointValue({ base: "1fr", md: "repeat(3, minmax(200px, 1fr) )" })
   const userCards: CardType[] = props?.userDataFromDb?.cards;
-
   const categoriesState = useRecoilValue(userCategoriesAtom)
   const setTrainingCards = useSetRecoilState(trainCardsAtom)
   const [currentCategoryFilter, setCurrentCategoryFilter] = React.useState<any>("all");
@@ -31,13 +30,18 @@ const HomePage = (props: any) => {
 
   React.useEffect(() => {
     setTrainingCards(userCards)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const setPaginatedData = function (paginatedCards: CardType[]) {
 
+  React.useEffect(() => {
+    setOriginalData(userCards)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userCards])
+
+  const setPaginatedData = function (paginatedCards: CardType[]) {
     setCurrPage(0)
     setOriginalData(paginatedCards)
-
   }
 
 
@@ -93,7 +97,7 @@ const HomePage = (props: any) => {
         </Flex>
         <Divider />
         <Box
-          p={{ base: 2, sm: 5, md: 10 }}
+          p={{ base: 2, sm: 5 }}
           minHeight={350}
           width={"full"}
           bg={cardsGridBackground}

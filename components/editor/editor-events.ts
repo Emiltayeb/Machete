@@ -103,7 +103,6 @@ export const createCodeBlock = function (editor: Editor) {
   Utils.focusCurrentNode(editor)
 }
 
-
 export const removeLink = (editor: Editor, opts = {}) => {
   Transforms.unwrapNodes(editor, {
     ...opts,
@@ -146,8 +145,6 @@ export const insertLink = function (editor: Editor, url: string | null) {
       Transforms.collapse(editor, { edge: "end" });
     }, 0);
   }
-
-
 
 }
 

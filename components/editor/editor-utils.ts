@@ -57,6 +57,10 @@ export const toggleFormat = (
     ],
     { match: Text.isText, hanging: true }
   );
+
+  setTimeout(() => {
+    Transforms.collapse(editor, { edge: "end" });
+  }, 0);
 };
 
 export const findCurrentNodeAtSelection = function (editor: Editor) {

@@ -277,6 +277,9 @@ export const Image = ({ attributes, children, element }: { attributes: any, chil
 
 	const selected = useSelected()
 	const focused = useFocused()
+
+
+
 	return (
 		<div {...attributes}>
 			{children}
@@ -289,13 +292,13 @@ export const Image = ({ attributes, children, element }: { attributes: any, chil
 			>
 				<img
 					src={element.url}
-
 					className={css`
             display: block;
             max-width: 100%;
             max-height: 200px;
             box-shadow: ${selected && focused ? '0 0 0 3px #B4D5FF' : 'none'};
 						resize: both;
+						pointer-events: none;
           `}
 				/>
 
