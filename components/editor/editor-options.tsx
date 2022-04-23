@@ -109,7 +109,7 @@ const EditorOptions = function (props: any) {
 				<ModalCloseButton />
 				<ModalBody width={"fit-content"}>
 					<form className={classes.uploadImgForm} onSubmit={(e) => uploadImage(e, setImageProgValue, (imageLink: string) => insertImage(editor, imageLink))}>
-						<Input className={classes.uploadImgBtn} type="file" accept="image/png" />
+						<Input className={classes.uploadImgBtn} type="file" accept="image/png, image/jpeg" />
 						<Button size={"sm"} marginBlock={2} type="submit">Upload</Button>
 					</form>
 					<Progress value={imageProgValue} />

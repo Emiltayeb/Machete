@@ -14,7 +14,7 @@ export const handelKeyDown = function (
 ) {
   const { key, shiftKey, ctrlKey, metaKey } = event;
 
-  if (isAllChildrenSelected) {
+  if (isAllChildrenSelected && !ctrlKey && !metaKey) {
     Transforms.delete(editor);
     Transforms.setNodes(editor, {
       text: ' ',

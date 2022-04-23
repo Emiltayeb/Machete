@@ -73,7 +73,7 @@ const EditorActions = (props: ActionsProps) => {
   })
 
   const handelCardSave = async function () {
-    //setIsSubmitting(ActionState.SUBMITTING);
+    setIsSubmitting(ActionState.SUBMITTING);
     const cardData = {
       text: JSON.stringify(props.editor.children),
       codeLanguages: props.codeLanguages,
@@ -81,7 +81,6 @@ const EditorActions = (props: ActionsProps) => {
       ...cardDetailState,
       allowTrain: !!allowTrain.current,
     }
-
     try {
       await onCardSave(cardData, userDataFromDb, db, (id) => {
         if (props.card?.id) return;
@@ -215,10 +214,9 @@ const EditorActions = (props: ActionsProps) => {
           <HStack wrap={{ base: "wrap", md: "nowrap" }} gap={{ base: 2, md: 0 }}>
             {CardDetailsForm()}
             <Button
-              isDisabled={isInvalidForm}
+              isDisabled={isInvalidForm || isSubmitting === ActionState.SUBMITTING}
               size={"xs"}
               colorScheme={'whatsapp'}
-
               leftIcon={<CheckIcon />}
               isLoading={isSubmitting === ActionState.SUBMITTING}
               onClick={handelCardSave}>
