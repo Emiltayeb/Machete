@@ -7,7 +7,7 @@ import {
   DatabaseProvider,
   useInitFirestore,
   AuthProvider,
-  useFirebaseApp,
+
 } from 'reactfire';
 
 

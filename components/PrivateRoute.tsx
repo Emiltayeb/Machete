@@ -11,8 +11,10 @@ const PrivateRoute = (Component: any) => {
   const Auth = (props: any) => {
     const router = useRouter();
     const { user, isLoading, userDataFromDb, db, dataStatus } = useGetLoadingStatus();
-    const setUserCategories = useSetRecoilState<any>(userCategoriesAtom)
 
+    const loading = isLoading || dataStatus === "loading"
+
+    const setUserCategories = useSetRecoilState<any>(userCategoriesAtom)
     React.useEffect(() => {
       if (dataStatus === "loading") return
       const categories = userDataFromDb?.cards?.map((card: CardType) => card.category)
@@ -20,14 +22,18 @@ const PrivateRoute = (Component: any) => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userDataFromDb?.cards])
 
-    if (isLoading || dataStatus === "loading") {
+
+    if (loading) {
       return <Progress size='xs' isIndeterminate />;
     }
-    // If user is not logged in, return login component
     if (!user) {
       router.push('/auth');
+      return <></>
     }
 
+
+
+    // If user is not logged in, return login component
 
 
     // If user is logged in, return original component

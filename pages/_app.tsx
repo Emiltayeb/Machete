@@ -2,7 +2,7 @@ import '../styles/globals.css';
 import * as React from 'react';
 import type { AppProps } from 'next/app';
 // 1. import `ChakraProvider` component
-import { Box, ChakraProvider, extendTheme, useColorModeValue } from '@chakra-ui/react';
+import { Box, ChakraProvider } from '@chakra-ui/react';
 import Footer from '../components/layout/footer/Footer';
 import { firebaseConfig, getApp } from '../services/firebase-config';
 import { FirebaseAppProvider } from 'reactfire';

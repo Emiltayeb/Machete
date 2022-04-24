@@ -133,6 +133,7 @@ const Login = () => {
     );
   };
 
+  // return <></>
   return (
     <Box bgColor={bgColor} h='full'>
       <Container maxW='container.lg'>
@@ -229,6 +230,3 @@ const Login = () => {
 
 export default Login;
 
-{
-  /* <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} /> */
-}
