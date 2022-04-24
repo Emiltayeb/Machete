@@ -9,9 +9,13 @@ import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { userCategoriesAtom, trainCardsAtom } from '../store';
 import { EditorMode } from '../components/editor/editor-utils';
 import { usePagination } from '../utils/usePagination';
+import { appendQueryToUrl } from '../utils';
 
 
 
+const filterCardsByCategory = function (currentCategoryFilter: string, userCards: CardType[]) {
+  return currentCategoryFilter === "all" ? userCards : userCards?.filter(card => card.category === currentCategoryFilter)
+}
 
 const HomePage = (props: any) => {
   const textColor = useColorModeValue("teal.700", "white")
@@ -29,22 +33,32 @@ const HomePage = (props: any) => {
 
 
   React.useEffect(() => {
-    setTrainingCards(userCards)
+
+    const { page, category } = router.query
+    if (page !== undefined && typeof page === "string") {
+      setCurrPage(parseInt(page))
+    }
+    if (category && typeof category === "string") {
+      const updatedCards = filterCardsByCategory(category, userCards)
+      setCurrentCategoryFilter(category)
+      setTrainingCards(updatedCards)
+      setOriginalData(updatedCards)
+    }
+
+    if (!page && !category) {
+      setTrainingCards(userCards)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
-  React.useEffect(() => {
-    setOriginalData(userCards)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userCards])
-
   const setPaginatedData = function (paginatedCards: CardType[]) {
     setCurrPage(0)
+    appendQueryToUrl({ page: 0 })
     setOriginalData(paginatedCards)
   }
 
-
+  const onCardDelete = (updatedCards: CardType[]) => setOriginalData(filterCardsByCategory(currentCategoryFilter, updatedCards))
 
   const onFreeSearchFilter = function (e: React.ChangeEvent<HTMLInputElement>) {
     const filerValue = e.target.value;
@@ -54,11 +68,18 @@ const HomePage = (props: any) => {
     setTrainingCards(filteredCards)
   }
 
-  const onCategoryFilter = function (e: React.ChangeEvent<HTMLSelectElement>) {
-    const updatedCards = e.target.value === "all" ? userCards : userCards?.filter(card => card.category === e.target.value)
-    setCurrentCategoryFilter(e.target.value)
+  const onCategoryFilter = function (value: string) {
+    const updatedCards = filterCardsByCategory(value, userCards)
+    setCurrentCategoryFilter(value)
     setPaginatedData(updatedCards)
     setTrainingCards(updatedCards)
+    appendQueryToUrl({ category: value })
+  }
+
+  const onPagination = function (pageNumber: number) {
+    setCurrPage(pageNumber)
+    appendQueryToUrl({ page: pageNumber })
+
   }
 
   return (
@@ -83,7 +104,7 @@ const HomePage = (props: any) => {
       <VStack marginBlock={14} alignItems='flex-start'>
         <Flex width={"full"} alignItems={{ base: "flex-start", sm: "center" }} direction={{ base: "column", sm: "row" }} wrap={"wrap"} gap={2} >
           <Text fontSize={"sm"}>Category:</Text>
-          <Select onChange={onCategoryFilter} maxW="sm" size={"sm"} flex={1} >
+          <Select onChange={(e) => onCategoryFilter(e.target.value)} maxW="sm" value={currentCategoryFilter} size={"sm"} flex={1} >
             <option value={'all'} >All</option>
             {categoriesState?.map((cat: string) => <option key={cat}>{cat}</option>)}
           </Select>
@@ -107,14 +128,14 @@ const HomePage = (props: any) => {
             gap={5}
 
           >
-            {!!paginatedData?.length ? <CardsByUser {...props} paginatedCards={paginatedData} /> : <Text>No cards..</Text>}
+            {!!paginatedData?.length ? <CardsByUser {...props} onDeleteCard={onCardDelete} paginatedCards={paginatedData} /> : <Text>No cards..</Text>}
           </Grid>
         </Box>
         <HStack marginBlockStart={10}>
           {pagesBtns.map((btn) => <Button
             isActive={btn === currentPage}
             _active={{ backgroundColor: "teal", color: "white" }}
-            onClick={() => setCurrPage(btn)} size={"sm"} key={btn}>{btn + 1}</Button>)}
+            onClick={() => onPagination(btn)} size={"sm"} key={btn}>{btn + 1}</Button>)}
         </HStack>
       </VStack>
 

@@ -246,6 +246,8 @@ export const onDeleteCard = async function (
     await updateDoc(ref, {
       cards: updatedCards,
     });
+
+    return updatedCards
   } catch (error) {
     console.log(error)
   }

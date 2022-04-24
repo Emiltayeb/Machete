@@ -54,7 +54,6 @@ const EditorActions = (props: ActionsProps) => {
   const [isSubmitting, setIsSubmitting] = React.useState(ActionState.READY);
   const [categoryState, setCategoryState] = React.useState(userCategoriesState.length > 0 || card?.category ? CategoryState.EXISTING : CategoryState.NEW);
   const toast = useToast();
-  const router = useRouter()
   const isMobileView = isMobile()
   const [cardDetailState, setCardDetailState] = React.useState({
     title: card?.title ?? '',
@@ -84,7 +83,7 @@ const EditorActions = (props: ActionsProps) => {
     try {
       await onCardSave(cardData, userDataFromDb, db, (id) => {
         if (props.card?.id) return;
-        window.history.pushState(null, "", `/editor/${id}`);
+        window.history.replaceState(null, "", `/editor/${id}`);
       });
       toast({ status: 'success', title: 'Card saved.' });
     } catch (error) {
