@@ -12,7 +12,7 @@ export const appendQueryToUrl = function (query: any) {
 	const queryString = new URLSearchParams(window.location.search);
 	const keys = Object.keys(query)
 	keys.map(key => queryString.set(key, query[key]))
-	window.history.replaceState({}, "", `${window.location.pathname}?${queryString.toString()}`)
+	window.history.pushState({}, "", `${window.location.pathname}?${queryString.toString()}`)
 }
 
 export const shuffleArray = (array: any[]) => array.sort(() => Math.random() - 0.5)

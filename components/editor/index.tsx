@@ -65,6 +65,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const isReadOnly = editorMode === Utils.EditorMode.TRAIN || isMobileView
   const textColor = useColorModeValue("teal.700", "white")
 
+
   // Focus the editor on inita lboot
   React.useEffect(() => {
     if (editorMode === Utils.EditorMode.ADD) return

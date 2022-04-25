@@ -107,22 +107,18 @@ export const decorator = (
 ) => {
   const ranges: any = [];
 
-  let text = node.text
-  if ((!Text.isText(node) as any) || !editorCodeLang) {
+
+  if ((!Text.isText(node) as any) || !editorCodeLang || node.rememberText) {
     return ranges;
   }
 
   const [parent] = SlateEditor.parent(editor, path) as any;
 
-  if (node.rememberText) {
-    text = parent.children?.map?.((n: any) => n.rememberText ? "" : n.text).join("")
-  }
-
   if (parent.type !== 'code') {
     return ranges;
   }
 
-  const tokens = Prism.tokenize(text, Prism.languages[editorCodeLang]);
+  const tokens = Prism.tokenize(node.text, Prism.languages[editorCodeLang]);
 
   let start = 0;
 
