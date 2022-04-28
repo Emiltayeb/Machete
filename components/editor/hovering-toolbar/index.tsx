@@ -148,7 +148,7 @@ export const FormatButton = (props: any) => {
       disabled={currNode?.current?.[disableMarker]}
       onMouseDown={(event: any) => {
         event.preventDefault();
-        props?.onClick?.() || toggleFormat(editor, format);
+        props?.onClick?.() || toggleFormat(editor, format, props.isFormatActive);
       }}>
 
       <div>{icon}</div>

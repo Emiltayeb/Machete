@@ -1,5 +1,5 @@
 import { ReactEditor } from 'slate-react';
-import { Editor, Transforms, Element, Range, Path } from 'slate';
+import { Editor, Transforms, Element, Range, Text } from 'slate';
 import * as Utils from './editor-utils';
 import { CardType } from './types';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -75,7 +75,10 @@ export const handelKeyDown = function (
       break;
     case "b":
       if (ctrlKey || metaKey) {
-        toggleFormat(editor, Utils.CustomFormats.BOLD)
+        // find current  node
+        const { node } = Utils.findClosestBlockAndNode(editor);
+        const text = window.getSelection()?.toString()?.trim();
+        Transforms.insertNodes(editor, { text: isAllChildrenSelected ? text : " ", bold: !node.nodeData?.[0]?.bold });
       }
       break;
     default:
@@ -135,16 +138,11 @@ export const insertLink = function (editor: Editor, url: string | null) {
     // Remove the Link node if we're inserting a new link node inside of another
     // link.
     if (parentNode.type === "link") {
-      console.log("removing link")
       Transforms.delete(editor, { at: selection })
     }
 
-    Transforms.delete(editor, { at: selection })
     // Wrap the currently selected range of text into a Link
-    Transforms.insertNodes(editor, link);
-    setTimeout(() => {
-      Transforms.collapse(editor, { edge: "end" });
-    }, 0);
+    Transforms.insertNodes(editor, [link]);
   }
 
 }
