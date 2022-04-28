@@ -127,6 +127,7 @@ export const HoveringToolbar = () => {
             const url = prompt("enter link")
             insertLink(editor, url)
           }}
+          format={CustomFormats.LINK}
           icon='Link'
         />
 
@@ -140,6 +141,7 @@ export const FormatButton = (props: any) => {
   const editor = useSlate();
   return (
     <Button
+      _hover={{ backgroundColor: '#f5f5f5', color: "black" }}
       colorScheme={"black"}
       className={cx(classes.format_button, props.isFormatActive ? classes.active : '')}
       size="sm"

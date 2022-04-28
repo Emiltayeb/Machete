@@ -62,9 +62,10 @@
     display: inline;
     position: relative;
     text-decoration: underline;
-   
+
     a{
       color: black;
+      text-decoration-color: rgb(30, 174, 241)
     }
   & .popup {
     position: absolute;
@@ -76,9 +77,7 @@
     border: 1px solid rgb(36, 36, 36);
     z-index: 999;
 
-    a{
-      text-decoration: underline;
-    }
+   
   }
   
   

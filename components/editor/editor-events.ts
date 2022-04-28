@@ -12,7 +12,7 @@ export const handelKeyDown = function (
   event: React.KeyboardEvent<HTMLDivElement>,
   editor: Editor
 ) {
-  const { key, shiftKey, ctrlKey, metaKey } = event;
+  const { key, shiftKey, ctrlKey, metaKey, code } = event;
 
   if (isAllChildrenSelected && !ctrlKey && !metaKey) {
     Transforms.delete(editor);
@@ -72,15 +72,16 @@ export const handelKeyDown = function (
         isAllChildrenSelected = true;
       }
 
+      break;
     case "b":
       if (ctrlKey || metaKey) {
-
         toggleFormat(editor, Utils.CustomFormats.BOLD)
       }
       break;
     default:
       break;
   }
+
 };
 
 export const handelPasteToEditor = function (e: React.ClipboardEvent<HTMLDivElement>, editor: Editor) {

@@ -32,6 +32,7 @@ export enum CustomFormats {
   MARKER = 'marker',
   BOLD = 'bold',
   REMEMBER_TEXT = 'rememberText',
+  LINK = "link"
 }
 export const getEditorText = (nodes: any): string => {
   return nodes.map((n: any) => Node.string(n)).join('\n');
@@ -43,24 +44,28 @@ export const toggleFormat = (
 ) => {
   const { node } = findClosestBlockAndNode(editor)
   const { text, ...restFormats } = node.nodeData[0];
-  const [nodeData] = findCurrentNodeAtSelection(editor);
-  const isActive = !!nodeData[0][format]
+  const isActive = !!node.nodeData[0][format]
 
+  console.log({ format, isActive });
+
+  const nodes = [
+    {
+      ...restFormats,
+      [format]: !isActive,
+      text: window.getSelection()?.toString()?.trim(),
+    }
+  ]
+
+  if (!isActive) {
+    nodes.push({
+      text: " "
+    })
+  }
   Transforms.insertNodes(
-    editor,
-    [
-      {
-        ...restFormats,
-        [format]: !isActive,
-        text: window.getSelection()?.toString()?.trim(),
-      },
-    ],
-    { match: Text.isText, hanging: true }
+    editor, nodes,
+    { match: Text.isText },
   );
 
-  setTimeout(() => {
-    Transforms.collapse(editor, { edge: "end" });
-  }, 0);
 };
 
 export const findCurrentNodeAtSelection = function (editor: Editor) {
@@ -148,11 +153,10 @@ export const focusCurrentNode = function (editor: Editor) {
   Transforms.collapse(editor, currentNode[1])
 }
 
-export const moveCursorToEndOfCurrentBlock = function (editor: Editor) {
+export const moveCursorToEndOfCurrentBlock = function (editor: Editor, path?: any[]) {
   ReactEditor.focus(editor);
-  const { node } = findClosestBlockAndNode(editor)
-  ReactEditor.focus(editor);
-  Transforms.select(editor, SlateEditor.end(editor, []));
+  console.log(path);
+  Transforms.select(editor, SlateEditor.end(editor, path || []));
 }
 export const getCurrentSelectedText = function () {
   return window.getSelection()?.toString()
