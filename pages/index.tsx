@@ -54,7 +54,7 @@ const HomePage = (props: any) => {
 
   const setPaginatedData = function (paginatedCards: CardType[]) {
     setCurrPage(0)
-    appendQueryToUrl({ page: 0 })
+    router.push(appendQueryToUrl({ page: 0 }), undefined, { shallow: true })
     setOriginalData(paginatedCards)
   }
 
@@ -73,13 +73,12 @@ const HomePage = (props: any) => {
     setCurrentCategoryFilter(value)
     setPaginatedData(updatedCards)
     setTrainingCards(updatedCards)
-    appendQueryToUrl({ category: value })
+    router.push(appendQueryToUrl({ category: value }), undefined, { shallow: true })
   }
 
   const onPagination = function (pageNumber: number) {
     setCurrPage(pageNumber)
-    appendQueryToUrl({ page: pageNumber })
-
+    router.push(appendQueryToUrl({ page: pageNumber }), undefined, { shallow: true })
   }
 
   return (
