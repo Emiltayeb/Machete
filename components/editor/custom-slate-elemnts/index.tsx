@@ -332,6 +332,7 @@ export const Link = ({ attributes, element, children }: any) => {
 					<a href={element.href} target="_blank" rel="noreferrer">
 						{element.href}
 					</a>
+					{/* <button onClick={() => console.log('edit link')}>Edit</button> */}
 				</div>
 			)}
 		</div>

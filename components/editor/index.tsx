@@ -108,7 +108,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   return (
     <div ref={editorRef} data-editor>
       <Heading color={textColor}>{editorMode} Card</Heading>
-      {editorMode === Utils.EditorMode.TRAIN && <CurrentCardInformation card={props.card} />}
+      <CurrentCardInformation card={props.card} />
 
 
       <Slate editor={editor} value={editorValue} onChange={(value) => setEditorValue(value)}>

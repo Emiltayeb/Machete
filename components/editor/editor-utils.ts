@@ -62,7 +62,6 @@ export const toggleFormat = (
     })
   }
 
-  console.log(nodes);
   Transforms.insertNodes(
     editor, nodes,
     { match: Text.isText },
