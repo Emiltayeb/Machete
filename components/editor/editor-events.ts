@@ -78,6 +78,7 @@ export const handelKeyDown = function (
         // find current  node
         const { node } = Utils.findClosestBlockAndNode(editor);
         const text = window.getSelection()?.toString()?.trim();
+        //@ts-ignore
         Transforms.insertNodes(editor, { text: isAllChildrenSelected ? text : " ", bold: !node.nodeData?.[0]?.bold });
       }
       break;
