@@ -11,9 +11,7 @@ import NextLink from 'next/link';
 import { EditorMode } from '../../components/editor/editor-utils';
 
 const NewCard = function (props: any) {
-
 	const textColor = useColorModeValue("teal.700", "white");
-
 	return (
 		<Container maxW={"container.xl"}>
 			<Breadcrumb separator={"-"} marginBlockStart={3}>
@@ -27,6 +25,7 @@ const NewCard = function (props: any) {
 					<BreadcrumbLink>New card</BreadcrumbLink>
 				</BreadcrumbItem>
 			</Breadcrumb>
+
 
 			<Container maxW={'container.lg'} p={4}>
 				<VStack alignItems={'stretch'} spacing={0}>

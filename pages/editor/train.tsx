@@ -23,7 +23,7 @@ const MultipleTrainCards = function (props: any) {
 
   React.useEffect(() => {
     setCurrCard(props.trainingCards[currentCardIndex])
-  }, [currentCardIndex])
+  }, [currentCardIndex, props.trainingCards])
 
   const handelNextCard = () => {
     setCurrentCardIndex((c) => c + 1)

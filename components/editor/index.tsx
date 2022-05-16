@@ -89,6 +89,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     [editorCodeLang]
   );
 
+
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
