@@ -111,7 +111,7 @@ const HomePage = (props: any) => {
 
           <Input flex={1} variant="flushed" onChange={onFreeSearchFilter} />
           <Button disabled={paginatedData?.length === 0}
-            onClick={() => router.push(`editor/train?mode=${EditorMode.MULTIPLE_TRAIN}`)}
+            onClick={() => router.push(`editor/train?mode=${EditorMode.MULTIPLE_TRAIN}${currentCategoryFilter !== "all" ? `&category=${currentCategoryFilter}` : ""}`)}
             colorScheme="teal" size={"sm"}>
             Train {currentCategoryFilter || "all"} Cards</Button>
         </Flex>

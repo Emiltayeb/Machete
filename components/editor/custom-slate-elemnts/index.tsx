@@ -210,7 +210,7 @@ export const TrainingInput = (props: any) => {
 
 	const focusNextElement = function () {
 		const nextElement = document.querySelector(`input[data-answered *= 'false']`) as HTMLElement;
-		nextElement ? nextElement.focus() : (document.querySelector("#NEXT_TRAIN_CARD") as HTMLElement).focus()
+		nextElement ? nextElement.focus() : (document.querySelector("#NEXT_TRAIN_CARD") as HTMLElement)?.focus()
 	}
 
 	const onClosePopover = function () {
