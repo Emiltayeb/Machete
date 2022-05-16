@@ -18,16 +18,18 @@ import { useRecoilValue } from 'recoil';
 
 const MultipleTrainCards = function (props: any) {
 
-  const currentCardIndex = React.useRef(0);
+  const [currentCardIndex, setCurrentCardIndex] = React.useState(0);
   const [currCard, setCurrCard] = React.useState(props.trainingCards[0])
 
+  React.useEffect(() => {
+    setCurrCard(props.trainingCards[currentCardIndex])
+  }, [currentCardIndex])
+
   const handelNextCard = () => {
-    currentCardIndex.current += 1
-    setCurrCard(props.trainingCards[currentCardIndex.current])
+    setCurrentCardIndex((c) => c + 1)
   }
   const handelCardBack = () => {
-    currentCardIndex.current -= 1
-    setCurrCard(props.trainingCards[currentCardIndex.current])
+    setCurrentCardIndex((c) => c - 1)
   }
 
   return props.trainingCards.length === 0 ? <Text>No cards..</Text> : <Box >
@@ -35,13 +37,13 @@ const MultipleTrainCards = function (props: any) {
     <Divider marginBlockStart={3} />
     <HStack marginBlockStart={2} justifyContent="space-between">
       <HStack>
-        <Button onClick={handelNextCard} id="NEXT_TRAIN_CARD" disabled={currentCardIndex.current + 1 === props.trainingCards.length} >
+        <Button onClick={handelNextCard} id="NEXT_TRAIN_CARD" disabled={currentCardIndex + 1 === props.trainingCards.length} >
           Next</Button>
 
-        <Button id="BACK_TRAIN_CARD" onClick={handelCardBack} disabled={currentCardIndex.current === 0} >
+        <Button id="BACK_TRAIN_CARD" onClick={handelCardBack} disabled={currentCardIndex === 0} >
           Back</Button>
       </HStack>
-      <Box backgroundColor={"teal.100"} p={2} rounded={"base"}> {currentCardIndex.current + 1} / {props.trainingCards.length}</Box>
+      <Box backgroundColor={"teal.100"} p={2} rounded={"base"}> {currentCardIndex + 1} / {props.trainingCards.length}</Box>
     </HStack>
   </Box>
 
@@ -53,19 +55,29 @@ const NoCards = function () {
 
 const UserCard = function (props: any) {
   const router = useRouter();
-  const { cardId, mode } = router.query;
 
+  const { cardId, mode, category } = router.query;
   const trainingCards = useRecoilValue(trainCardsAtom) as CardType[]
+  const [editorCards, setEditorCards] = React.useState<CardType | null>(null);
 
-  let editorCards
-
-  if (mode === EditorMode.MULTIPLE_TRAIN) {
-    editorCards = shuffleArray((!trainingCards.length ? props.userDataFromDb.cards : trainingCards).filter((card: CardType) => card.allowTrain))
-  }
-  if (mode === EditorMode.SINGLE_TRAIN) {
-    editorCards = props.userDataFromDb.cards.find((card: CardType) => card.id === cardId)
-  }
-
+  React.useEffect(() => {
+    let editorCards
+    if (mode === EditorMode.MULTIPLE_TRAIN) {
+      let cards = [];
+      if (category) {
+        cards = props.userDataFromDb.cards.filter((card: CardType) => card.category === category)
+      } else if (!trainingCards.length) {
+        cards = props.userDataFromDb.cards
+      } else {
+        cards = trainingCards
+      }
+      editorCards = shuffleArray(cards.filter((card: CardType) => card.allowTrain))
+    }
+    if (mode === EditorMode.SINGLE_TRAIN) {
+      editorCards = props.userDataFromDb.cards.find((card: CardType) => card.id === cardId)
+    }
+    setEditorCards(editorCards)
+  }, [])
 
   const isEmptyCards = !editorCards || props.userDataFromDb.cards.length === 0;
 
