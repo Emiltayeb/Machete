@@ -35,7 +35,6 @@ const EditorOptions = function (props: any) {
 	const { isOpen, onOpen, onClose } = useDisclosure()
 	const [imageProgValue, setImageProgValue] = React.useState(0)
 	const currentFocusedOption = React.useRef(0);
-
 	const options = [
 		{ title: "Creat Code", onClick: () => { createCodeBlock(props.editor) } },
 		{ title: "Upload Image", onClick: onOpen },
@@ -66,7 +65,6 @@ const EditorOptions = function (props: any) {
 		} else if (e.key === "ArrowUp" && currentFocusedOption.current - 1 >= 0) {
 			currentFocusedOption.current = currentFocusedOption.current - 1
 		}
-
 
 		selectOptionsButton(currentFocusedOption.current)?.focus?.()
 	}

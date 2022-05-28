@@ -22,6 +22,7 @@ import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeVal
 import withImages from './with-image';
 import { isMobile } from '../../utils';
 import withLinks from './with-links';
+import { Transform } from 'stream';
 
 export const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -51,9 +52,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const router = useRouter()
   const [editor] = React.useState(withLinks(withImages(withHistory(withReact(createEditor())))))
   const isMobileView = isMobile();
-  const [editorCodeLang, setLanguage] = React.useState<
-    Utils.CodeLanguages[] | null
-  >(props?.card?.codeLanguages || [Utils.CodeLanguages.PLAIN_TEXT]);
+
 
   const [editorValue, setEditorValue] = React.useState(
     props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
@@ -65,7 +64,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const isReadOnly = editorMode === Utils.EditorMode.TRAIN || isMobileView
   const textColor = useColorModeValue("teal.700", "white")
 
-
+  const [newSelectedCodeLang, setNewSelectedCodeLang] = React.useState<any>()
   // Focus the editor on inita lboot
   React.useEffect(() => {
     if (editorMode === Utils.EditorMode.ADD) return
@@ -77,23 +76,22 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   // for every lang we have in the editor - paint it.
   const decorate = React.useCallback(
     ([node, path]) => {
-      if (!editorCodeLang) return;
-      let finalDecorator: any = [];
-      editorCodeLang?.forEach((lang) => {
-        const dec = Utils.decorator([node, path], lang, editor);
-        finalDecorator.push(...dec);
-      });
+      let finalDecorator = []
+
+      if (node.type !== "code") return []
+      const dec = Utils.decorator([node, path], editor);
+      finalDecorator.push(...dec);
       return finalDecorator;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editorCodeLang]
+    [newSelectedCodeLang]
   );
 
 
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
-        return <CustomComponents.CodeElement {...props} mode={editorMode} editorCodeLang={editorCodeLang} setLanguage={setLanguage} />;
+        return <CustomComponents.CodeElement {...props} editor={editor} mode={editorMode} setNewSelectedCodeLang={setNewSelectedCodeLang} />;
       case "heading":
         return <h1 {...props.attributes} >{props.children}</h1>;
       case 'image':
@@ -111,7 +109,6 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
       <Heading color={textColor}>{editorMode} Card</Heading>
       <CurrentCardInformation card={props.card} />
 
-
       <Slate editor={editor} value={editorValue} onChange={(value) => setEditorValue(value)}>
 
         {!isReadOnly && <>
@@ -121,8 +118,9 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         }
 
         <Editable
+          decorate={decorate}
           autoFocus readOnly={isReadOnly} style={{ color: 'black' }}
-          placeholder='Enter some text (type "/" for more options)' decorate={decorate} id={SLATE_EDITOR_ID}
+          placeholder='Enter some text (type "/" for more options)' id={SLATE_EDITOR_ID}
           className={classes.editor} renderElement={renderElement}
           onPaste={(event) => Events.handelPasteToEditor(event, editor)}
           onKeyDown={(event) => editorMode === Utils.EditorMode.ADD && Events.handelKeyDown(event, editor)}
@@ -130,7 +128,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
         />
       </Slate>
 
-      < EditorActions editorMode={editorMode} editor={editor} codeLanguages={editorCodeLang}
+      < EditorActions editorMode={editorMode} editor={editor}
         setEditorMode={setEditorMode} cardText={Utils.getEditorText(editor.children)} card={props.card} userCards={props.userDataFromDb.cards}
       />
     </div>

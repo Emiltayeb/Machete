@@ -3,18 +3,16 @@
 
 import React from 'react';
 import { css } from '@emotion/css';
-import { Descendant, Editor, Transforms, Element } from 'slate';
-import { CodeLanguages, EditorMode, selectCurrentNode } from '../editor-utils';
+import { Descendant, Transforms, Element } from 'slate';
+import { CodeLanguages, EditorMode, findClosestBlockAndNode, findCurrentNodeAtSelection, selectCurrentNode } from '../editor-utils';
 import {
 	Text, Input,
-	Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent,
-	PopoverHeader, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon, Icon, IconButton
+	Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon, Icon, IconButton
 } from '@chakra-ui/react';
 import { findDiff } from '../../../utils/getStringDiffrences';
 import classes from "./custom-slate-components.module.scss";
 import { useSlateStatic, ReactEditor, useSelected, useFocused } from 'slate-react';
 import { DeleteIcon } from '@chakra-ui/icons';
-import { removeLink } from '../editor-events';
 
 // initial editor values (new user - no cards)
 export const initialValue: Descendant[] = [
@@ -95,35 +93,16 @@ const CodeCss = (leaf: any) =>
 
 // Elements - basically a block
 export const CodeElement = (props: any) => {
-	const [selectedLang, setSelectedLag] = React.useState(CodeLanguages.HTML)
-
-	// when changing the code lang - it currently adds the lang to our statep
-	//  and then the decorate paints it all.
-	// so the select is a little misleading after changing it a few times
-	React.useEffect(() => {
-		props.setLanguage?.((prev: Array<keyof typeof CodeLanguages>) => {
-			if (
-				prev.includes(
-					selectedLang.toLocaleLowerCase() as keyof typeof CodeLanguages
-				)
-			) {
-				return prev;
-			}
-			return [
-				...prev,
-				selectedLang || CodeLanguages.PLAIN_TEXT,
-			];
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedLang])
-
-
 
 	return <pre {...props.attributes} className={classes.codeElement} >
 		{props.mode !== EditorMode.TRAIN && <span contentEditable={false}>
-			<select name="code-lang" onChange={(e) => setSelectedLag(CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages])}
+			<select name="code-lang" onChange={(e) => {
+				const codeLang = CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages];
+				Transforms.setNodes(props.editor, { codeLang } as any, { at: findClosestBlockAndNode(props.editor).parent.parentPath })
+				props.setNewSelectedCodeLang(codeLang)
+			}}
 				className={classes.codeLangs}
-			>	{Object.keys(CodeLanguages).map((lang) => <option key={lang}>{lang.toLowerCase()}</option>)}
+			>	{Object.keys(CodeLanguages).map((lang) => <option selected={lang.toLowerCase() === props.element?.children[0]?.codeLang} key={lang}>{lang.toLowerCase()}</option>)}
 			</select>
 		</span>}
 		{props.children}

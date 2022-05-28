@@ -9,7 +9,6 @@ export type CardType = {
   exec?: string;
   category: string;
   allowTrain: boolean;
-  codeLanguages: CodeLanguages[] | null;
 
 };
 export interface EditorProps {

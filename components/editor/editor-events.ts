@@ -158,8 +158,7 @@ export const createHeading = function (editor: Editor) {
 }
 
 export const handelCreatCodeBlock = function (
-  editor: Editor,
-  setLanguage: any
+  editor: Editor
 ) {
 
   const [currentNode] = Utils.findCurrentNodeAtSelection(editor);
@@ -175,19 +174,6 @@ export const handelCreatCodeBlock = function (
       { type: 'code', children: [{ text: '' }] },
     ]);
 
-    setLanguage((prev: Array<keyof typeof Utils.CodeLanguages>) => {
-      if (
-        prev.includes(
-          lang.toLocaleLowerCase() as keyof typeof Utils.CodeLanguages
-        )
-      ) {
-        return prev;
-      }
-      return [
-        ...prev,
-        Utils.CodeLanguages?.[lang] || Utils.CodeLanguages.PLAIN_TEXT,
-      ];
-    });
   }
 };
 
@@ -211,7 +197,6 @@ export const onCardSave = async function (
         {
           text: newCard.text,
           id: cardId,
-          codeLanguages: newCard.codeLanguages,
           category: newCard.category,
           title: newCard.title,
           exec: newCard.exec,

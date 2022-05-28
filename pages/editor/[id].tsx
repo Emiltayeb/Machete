@@ -25,8 +25,10 @@ const EditCard = function (props: any) {
 	const [cardIndex, setCardIndex] = React.useState<number>(() => props.userDataFromDb?.cards.findIndex((card: CardType) => card.id === params.id) || 0)
 
 	React.useEffect(() => {
-		setCard(props.userDataFromDb.cards[cardIndex])
-	}, [cardIndex])
+		const card = props.userDataFromDb.cards[cardIndex]
+		setCard(card)
+		window.history.replaceState(null, "", `/editor/${card.id}`);
+	}, [cardIndex, props.userDataFromDb.cards])
 
 	const CardDisplay = () => {
 		return <VStack alignItems={'stretch'} spacing={0}>

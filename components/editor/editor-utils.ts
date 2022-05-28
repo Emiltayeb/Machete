@@ -108,23 +108,22 @@ const getLength = (token: any) => {
 // get the code block and set custom css for 
 export const decorator = (
   [node, path]: any,
-  editorCodeLang: any,
   editor: Editor
 ) => {
   const ranges: any = [];
 
 
-  if ((!Text.isText(node) as any) || !editorCodeLang || node.rememberText) {
+  console.log(node);
+  if ((!Text.isText(node.children[0]) as any)) {
     return ranges;
   }
 
-  const [parent] = SlateEditor.parent(editor, path) as any;
 
-  if (parent.type !== 'code') {
-    return ranges;
-  }
 
-  const tokens = Prism.tokenize(node.text, Prism.languages[editorCodeLang]);
+  const codeLang = node.codeLang || CodeLanguages.HTML.toLowerCase()
+
+  const tokens = Prism.tokenize(node.children[0].text, Prism.languages[codeLang]);
+
 
   let start = 0;
 
@@ -143,7 +142,7 @@ export const decorator = (
     start = end;
   }
 
-
+  console.log({ tokens, ranges, node });
   return ranges;
 };
 

@@ -25,6 +25,7 @@ import { onCardSave, onCardCategoryChange } from "../editor-events"
 import { Editor } from 'slate';
 import { useRouter } from 'next/router';
 import { SLATE_EDITOR_ID } from '..';
+import { createGlobalStyle } from 'styled-components';
 
 type ActionsProps = {
   cardText: string;
@@ -75,15 +76,14 @@ const EditorActions = (props: ActionsProps) => {
     setIsSubmitting(ActionState.SUBMITTING);
     const cardData = {
       text: JSON.stringify(props.editor.children),
-      codeLanguages: props.codeLanguages,
       id: props?.card?.id,
       ...cardDetailState,
       allowTrain: !!allowTrain.current,
     }
+
     try {
       await onCardSave(cardData, userDataFromDb, db, (id) => {
         if (props.card?.id) return;
-        window.history.replaceState(null, "", `/editor/${id}`);
       });
       toast({ status: 'success', title: 'Card saved.' });
     } catch (error) {
