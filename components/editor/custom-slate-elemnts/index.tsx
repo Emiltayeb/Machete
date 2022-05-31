@@ -94,15 +94,18 @@ const CodeCss = (leaf: any) =>
 // Elements - basically a block
 export const CodeElement = (props: any) => {
 
+	// console.log(props);
+	const onChangeSelect = function (e: React.ChangeEvent<HTMLSelectElement>) {
+		const codeLang = CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages];
+		Transforms.setNodes(props.editor, { codeLang } as any, { at: findClosestBlockAndNode(props.editor).parent.parentPath })
+		props.setNewSelectedCodeLang(codeLang)
+	}
 	return <pre {...props.attributes} className={classes.codeElement} >
 		{props.mode !== EditorMode.TRAIN && <span contentEditable={false}>
-			<select name="code-lang" onChange={(e) => {
-				const codeLang = CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages];
-				Transforms.setNodes(props.editor, { codeLang } as any, { at: findClosestBlockAndNode(props.editor).parent.parentPath })
-				props.setNewSelectedCodeLang(codeLang)
-			}}
-				className={classes.codeLangs}
-			>	{Object.keys(CodeLanguages).map((lang) => <option selected={lang.toLowerCase() === props.element?.children[0]?.codeLang} key={lang}>{lang.toLowerCase()}</option>)}
+			<select name="code-lang" onChange={onChangeSelect} className={classes.codeLangs}>
+				{Object.keys(CodeLanguages).map((lang) =>
+					<option selected={lang.toLowerCase() === props.element?.codeLang} key={lang}>{lang.toLowerCase()}
+					</option>)}
 			</select>
 		</span>}
 		{props.children}

@@ -79,7 +79,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
       let finalDecorator = []
 
       if (node.type !== "code") return []
-      const dec = Utils.decorator([node, path], editor);
+      const dec = Utils.decorator([node, path]);
       finalDecorator.push(...dec);
       return finalDecorator;
     },

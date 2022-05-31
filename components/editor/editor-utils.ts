@@ -1,3 +1,4 @@
+
 import {
   BaseEditor,
   Editor as SlateEditor,
@@ -38,15 +39,25 @@ export const getEditorText = (nodes: any): string => {
   return nodes.map((n: any) => Node.string(n)).join('\n');
 };
 
-export const toggleFormat = (
-  editor: Editor,
-  format: CustomFormats,
-  isActive?: boolean
-) => {
-  const { node } = findClosestBlockAndNode(editor)
+export const toggleFormat = (editor: Editor, format: CustomFormats, isActive?: boolean) => {
+  const { node, parent } = findClosestBlockAndNode(editor)
   const { text, ...restFormats } = node.nodeData[0];
 
-  console.log({ format, isActive });
+  const currentRememberMe = parent.parentData.children.filter((n: any) => Boolean(n[CustomFormats.REMEMBER_TEXT])).length;
+  // if parent of current block is code && were existing from remember me text
+  if (parent.parentData.type === "code" && isActive && currentRememberMe == 1) {
+    // unwrap children - make all children be one
+    Transforms.delete(editor, { at: parent.parentPath, unit: "block", hanging: false })
+    const codeText = parent.parentData.children.map((n: any) => n.text).join("")
+    const node = {
+      type: 'code',
+      children: [{ text: codeText }],
+      codeLang: parent.parentData.codeLang
+    }
+    Transforms.insertNodes(editor, node, { at: parent.parentPath });
+    Transforms.select(editor, SlateEditor.start(editor, parent.parentPath));
+    return
+  }
 
   const nodes = [
     {
@@ -93,7 +104,6 @@ export const selectCurrentNode = function (editor: Editor) {
 };
 
 
-
 const getLength = (token: any) => {
   if (typeof token === 'string') {
     return token.length;
@@ -106,27 +116,17 @@ const getLength = (token: any) => {
 
 
 // get the code block and set custom css for 
-export const decorator = (
-  [node, path]: any,
-  editor: Editor
-) => {
+export const decorator = ([node, path]: any) => {
   const ranges: any = [];
 
-
-  console.log(node);
-  if ((!Text.isText(node.children[0]) as any)) {
+  if ((!Text.isText(node.children[0]) as any) || node.children.some((n: any) => n[CustomFormats.REMEMBER_TEXT])) {
     return ranges;
   }
 
-
-
   const codeLang = node.codeLang || CodeLanguages.HTML.toLowerCase()
-
   const tokens = Prism.tokenize(node.children[0].text, Prism.languages[codeLang]);
 
-
   let start = 0;
-
   for (const token of tokens) {
     const length = getLength(token);
     const end = start + length;
@@ -142,7 +142,6 @@ export const decorator = (
     start = end;
   }
 
-  console.log({ tokens, ranges, node });
   return ranges;
 };
 
@@ -155,7 +154,6 @@ export const focusCurrentNode = function (editor: Editor) {
 
 export const moveCursorToEndOfCurrentBlock = function (editor: Editor, path?: any[]) {
   ReactEditor.focus(editor);
-  console.log(path);
   Transforms.select(editor, SlateEditor.end(editor, path || []));
 }
 export const getCurrentSelectedText = function () {

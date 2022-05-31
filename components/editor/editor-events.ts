@@ -41,6 +41,7 @@ export const handelKeyDown = function (
         Transforms.insertNodes(editor, {
           type: 'block',
           children: [{ text: '' }],
+
         });
       }
       else {

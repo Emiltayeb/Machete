@@ -135,7 +135,7 @@ const Login = () => {
 
   // return <></>
   return (
-    <Box bgColor={bgColor} h='full'>
+    <Box h='full'>
       <Container maxW='container.lg'>
         <VStack spacing={10} alignItems='flex-start'>
           <VStack spacing={2} alignItems='flex-start'>
