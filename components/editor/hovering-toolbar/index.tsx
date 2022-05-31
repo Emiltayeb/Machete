@@ -102,6 +102,7 @@ export const HoveringToolbar = () => {
           isFormatActive={compareFormat(CustomFormats.BOLD)}
           format='bold'
           icon='B'
+          disableMarkers={CustomFormats.REMEMBER_TEXT}
           currNode={currNodeRef}
         />
 
@@ -109,7 +110,7 @@ export const HoveringToolbar = () => {
           currNode={currNodeRef}
           isFormatActive={compareFormat(CustomFormats.MARKER)}
           format={CustomFormats.MARKER}
-          disableMarker={CustomFormats.REMEMBER_TEXT}
+          disableMarkers={CustomFormats.REMEMBER_TEXT}
           icon='H'
         />
 
@@ -117,7 +118,7 @@ export const HoveringToolbar = () => {
         <FormatButton
           isFormatActive={compareFormat(CustomFormats.REMEMBER_TEXT)}
           format={CustomFormats.REMEMBER_TEXT}
-          disableMarker={CustomFormats.MARKER}
+          disableMarkers={[CustomFormats.MARKER, CustomFormats.BOLD]}
           currNode={currNodeRef}
           icon='R'
         />
@@ -137,15 +138,17 @@ export const HoveringToolbar = () => {
 };
 
 export const FormatButton = (props: any) => {
-  const { format, icon, currNode, disableMarker } = props;
+  const { format, icon, currNode, disableMarkers } = props;
   const editor = useSlate();
+  // disable format when were in code block  but allow to remember me text
+  const disabled = format !== CustomFormats.REMEMBER_TEXT || (currNode?.current.codeLang || Object.keys(currNode?.current || {}).some((key) => disableMarkers.includes(key)))
   return (
     <Button
       _hover={{ backgroundColor: '#f5f5f5', color: "black" }}
       colorScheme={"black"}
       className={cx(classes.format_button, props.isFormatActive ? classes.active : '')}
       size="sm"
-      disabled={currNode?.current?.[disableMarker]}
+      disabled={disabled}
       onMouseDown={(event: any) => {
         event.preventDefault();
         props?.onClick?.() || toggleFormat(editor, format, props.isFormatActive);

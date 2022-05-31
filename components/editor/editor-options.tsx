@@ -2,7 +2,7 @@ import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalH
 import { ReactEditor, useSlate, useSlateStatic } from "slate-react";
 import EditorPortal from "./EditorPotral";
 import { createCodeBlock, createHeading } from "./editor-events"
-import { CustomFormats, findCurrentNodeAtSelection, getCurrentSelectedText } from "./editor-utils";
+import { CustomFormats, findClosestBlockAndNode, findCurrentNodeAtSelection, getCurrentSelectedText } from "./editor-utils";
 import * as React from 'react';
 import { InsertImageButton, insertImage } from "./with-image";
 import { storage } from "../../services/firebase-config";
@@ -84,7 +84,13 @@ const EditorOptions = function (props: any) {
 
 	React.useEffect((() => {
 		const isTextMath = currentNode?.[0].text?.match(/\/$/)
-		setToShow(!!isTextMath && !getCurrentSelectedText()?.length && currentNode.type !== CustomFormats.REMEMBER_TEXT)
+		// never show in case of code / remember me text
+		// TODO: Make it generic
+		if (findClosestBlockAndNode(editor).parent.parentData?.type === "code" || currentNode?.type !== CustomFormats.REMEMBER_TEXT) {
+			setToShow(false)
+			return
+		}
+		setToShow(!!isTextMath && !getCurrentSelectedText()?.length)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}), [currentNode?.[0].text, currentNode?.type])
 

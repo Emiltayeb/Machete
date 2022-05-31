@@ -4,10 +4,11 @@ import * as Utils from './editor-utils';
 import { CardType } from './types';
 import { doc, updateDoc } from 'firebase/firestore';
 import { v4 } from 'uuid';
-import { toggleFormat } from './editor-utils';
+
 
 let isAllChildrenSelected = false;
 
+// TODO:  selecting everything in code block - select only there
 export const handelKeyDown = function (
   event: React.KeyboardEvent<HTMLDivElement>,
   editor: Editor
@@ -79,8 +80,9 @@ export const handelKeyDown = function (
         // find current  node
         const { node } = Utils.findClosestBlockAndNode(editor);
         const text = window.getSelection()?.toString()?.trim();
+        Transforms.delete(editor)
         //@ts-ignore
-        Transforms.insertNodes(editor, { text: isAllChildrenSelected ? text : " ", bold: !node.nodeData?.[0]?.bold });
+        Transforms.insertNodes(editor, { text, bold: !node.nodeData?.[0]?.bold });
       }
       break;
     default:

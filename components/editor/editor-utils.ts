@@ -45,7 +45,7 @@ export const toggleFormat = (editor: Editor, format: CustomFormats, isActive?: b
 
   const currentRememberMe = parent.parentData.children.filter((n: any) => Boolean(n[CustomFormats.REMEMBER_TEXT])).length;
   // if parent of current block is code && were existing from remember me text
-  if (parent.parentData.type === "code" && isActive && currentRememberMe == 1) {
+  if (format === CustomFormats.REMEMBER_TEXT && parent.parentData.type === "code" && isActive && currentRememberMe == 1) {
     // unwrap children - make all children be one
     Transforms.delete(editor, { at: parent.parentPath, unit: "block", hanging: false })
     const codeText = parent.parentData.children.map((n: any) => n.text).join("")
@@ -67,6 +67,7 @@ export const toggleFormat = (editor: Editor, format: CustomFormats, isActive?: b
     }
   ]
 
+  console.log(nodes);
   if (!isActive) {
     nodes.push({
       text: " "
