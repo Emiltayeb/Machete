@@ -140,8 +140,9 @@ export const HoveringToolbar = () => {
 export const FormatButton = (props: any) => {
   const { format, icon, currNode, disableMarkers } = props;
   const editor = useSlate();
+  // TODO: fix this
   // disable format when were in code block  but allow to remember me text
-  const disabled = format !== CustomFormats.REMEMBER_TEXT || (currNode?.current.codeLang || Object.keys(currNode?.current || {}).some((key) => disableMarkers.includes(key)))
+  const disabled = format === CustomFormats.REMEMBER_TEXT ? false : (currNode?.current.codeLang || Object.keys(currNode?.current || {}).some((key) => disableMarkers.includes(key)))
   return (
     <Button
       _hover={{ backgroundColor: '#f5f5f5', color: "black" }}

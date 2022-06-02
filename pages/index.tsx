@@ -73,7 +73,7 @@ const HomePage = (props: any) => {
     setCurrentCategoryFilter(value)
     setPaginatedData(updatedCards)
     setTrainingCards(updatedCards)
-    router.push(appendQueryToUrl({ category: value }), undefined, { shallow: true })
+    router.push(appendQueryToUrl({ category: value, page: 0 }), undefined, { shallow: true })
   }
 
   const onPagination = function (pageNumber: number) {

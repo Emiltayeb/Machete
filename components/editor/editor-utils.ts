@@ -67,7 +67,6 @@ export const toggleFormat = (editor: Editor, format: CustomFormats, isActive?: b
     }
   ]
 
-  console.log(nodes);
   if (!isActive) {
     nodes.push({
       text: " "

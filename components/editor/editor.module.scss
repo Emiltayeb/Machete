@@ -2,12 +2,14 @@
   // margin-block-start: var(--size-3);
   background: var(--gray-1);
   padding: var(--size-3);
+  color: black;
   min-height: 200px !important;
   caret-color: var(--blue-5);
   position: relative;
   font-size: var(--font-size-3);
   overflow-x: hidden;
   cursor: auto;
+
 
   [data-slate-custom-leaf='true'] {
     cursor: pointer;

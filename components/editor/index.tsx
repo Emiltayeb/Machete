@@ -7,7 +7,7 @@ import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
 import classes from './editor.module.scss';
-import { BaseEditor, createEditor, Descendant } from 'slate';
+import { BaseEditor, createEditor, Descendant, Node, Path, Transforms } from 'slate';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import * as Types from './types';
 import * as Utils from './editor-utils';
@@ -18,11 +18,10 @@ import * as Events from './editor-events';
 import EditorActions from './editor-actions';
 import { useRouter } from 'next/router';
 import EditorOptions from './editor-options';
-import { Badge, Box, Heading, HStack, Modal, Text as ChakraText, useColorModeValue } from '@chakra-ui/react';
+import { Badge, Box, Heading, HStack, Text as ChakraText, useColorModeValue } from '@chakra-ui/react';
 import withImages from './with-image';
 import { isMobile } from '../../utils';
 import withLinks from './with-links';
-import { Transform } from 'stream';
 
 export const SLATE_EDITOR_ID = 'SLATE_EDITOR';
 declare module 'slate' {
@@ -51,8 +50,6 @@ const CurrentCardInformation = function (props: { card?: Types.CardType | null }
 const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const router = useRouter()
   const [editor] = React.useState(withLinks(withImages(withHistory(withReact(createEditor())))))
-  const isMobileView = isMobile();
-
 
   const [editorValue, setEditorValue] = React.useState(
     props.card ? JSON.parse(props.card?.text) : CustomComponents.initialValue
@@ -61,7 +58,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   const [editorMode, setEditorMode] = React.useState<Utils.EditorMode>(
     router.query.mode === Utils.EditorMode.TRAIN || props.mode === Utils.EditorMode.TRAIN ? Utils.EditorMode.TRAIN : Utils.EditorMode.ADD
   );
-  const isReadOnly = editorMode === Utils.EditorMode.TRAIN || isMobileView
+  const isReadOnly = editorMode === Utils.EditorMode.TRAIN || isMobile()
   const textColor = useColorModeValue("teal.700", "white")
 
   const [newSelectedCodeLang, setNewSelectedCodeLang] = React.useState<any>()
@@ -73,25 +70,31 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   }, [])
 
 
+
   // for every lang we have in the editor - paint it.
   const decorate = React.useCallback(
     ([node, path]) => {
-      let finalDecorator = []
+      let finalDecorator: any = []
 
+      // if(isReadOnly){
+      //   const editorChildren = editor.children.map((c) => ({ ...c, text: c.children.map(c => c.text).join("") }))
+
+      // }
       if (node.type !== "code") return []
       const dec = Utils.decorator([node, path]);
       finalDecorator.push(...dec);
       return finalDecorator;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [newSelectedCodeLang]
+    [newSelectedCodeLang, isReadOnly]
   );
 
 
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {
       case 'code':
-        return <CustomComponents.CodeElement {...props} editor={editor} mode={editorMode} setNewSelectedCodeLang={setNewSelectedCodeLang} />;
+        return <CustomComponents.CodeElement {...props} editor={editor} mode={editorMode}
+          isReadOnly={isReadOnly} setNewSelectedCodeLang={setNewSelectedCodeLang} />;
       case "heading":
         return <h1 {...props.attributes} >{props.children}</h1>;
       case 'image':
@@ -119,7 +122,7 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
 
         <Editable
           decorate={decorate}
-          autoFocus readOnly={isReadOnly} style={{ color: 'black' }}
+          autoFocus readOnly={isReadOnly}
           placeholder='Enter some text (type "/" for more options)' id={SLATE_EDITOR_ID}
           className={classes.editor} renderElement={renderElement}
           onPaste={(event) => Events.handelPasteToEditor(event, editor)}
