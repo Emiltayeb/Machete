@@ -137,9 +137,7 @@ const EditorActions = (props: ActionsProps) => {
         <InputGroup size={"xs"}>
           <InputLeftAddon>Title</InputLeftAddon>
           <Input
-
             required
-            autoFocus
             type={'text'}
             value={cardDetailState.title}
             name='title'
