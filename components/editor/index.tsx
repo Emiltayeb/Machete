@@ -60,8 +60,8 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
   );
   const isReadOnly = editorMode === Utils.EditorMode.TRAIN || isMobile()
   const textColor = useColorModeValue("teal.700", "white")
-
   const [newSelectedCodeLang, setNewSelectedCodeLang] = React.useState<any>()
+
   // Focus the editor on inita lboot
   React.useEffect(() => {
     if (editorMode === Utils.EditorMode.ADD) return
@@ -69,26 +69,17 @@ const SlateEditor: React.FC<Types.EditorProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-
-
   // for every lang we have in the editor - paint it.
   const decorate = React.useCallback(
-    ([node, path]) => {
+    (data) => {
+      const [node, path] = data
       let finalDecorator: any = []
-
-      // if(isReadOnly){
-      //   const editorChildren = editor.children.map((c) => ({ ...c, text: c.children.map(c => c.text).join("") }))
-
-      // }
-      if (node.type !== "code") return []
-      const dec = Utils.decorator([node, path]);
-      finalDecorator.push(...dec);
-      return finalDecorator;
+      Utils.decoratorHelper(editor, node, path, finalDecorator)
+      return finalDecorator
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [newSelectedCodeLang, isReadOnly]
   );
-
 
   const renderElement = React.useCallback((props) => {
     switch (props.element.type) {

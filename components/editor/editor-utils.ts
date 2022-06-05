@@ -115,6 +115,25 @@ const getLength = (token: any) => {
 };
 
 
+
+export const decoratorHelper = function (editor: any, node: any, path: any, finalDec: any[]) {
+
+  // for some reason, 
+  if (!node.children) {
+    editor.children.forEach((c: any) => {
+      const originalCodeNode = c?.children.find((n: any) => n.text === node.text)
+      if (originalCodeNode && c?.type == 'code') {
+        node = c
+      }
+    })
+  }
+
+
+  if (node.type !== "code") return []
+  const dec = decorator([node, path]);
+  finalDec.push(...dec);
+  return finalDec;
+}
 // get the code block and set custom css for 
 export const decorator = ([node, path]: any) => {
   const ranges: any = [];
