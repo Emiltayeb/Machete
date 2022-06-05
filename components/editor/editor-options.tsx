@@ -86,7 +86,7 @@ const EditorOptions = function (props: any) {
 		const isTextMath = currentNode?.[0].text?.match(/\/$/)
 		// never show in case of code / remember me text
 		// TODO: Make it generic
-		if (findClosestBlockAndNode(editor).parent.parentData?.type === "code" || currentNode?.type !== CustomFormats.REMEMBER_TEXT) {
+		if (findClosestBlockAndNode(editor).parent.parentData?.type === "code" || currentNode?.type === CustomFormats.REMEMBER_TEXT) {
 			setToShow(false)
 			return
 		}
