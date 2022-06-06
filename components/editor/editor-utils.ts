@@ -27,6 +27,8 @@ export enum CodeLanguages {
   PLAIN_TEXT = 'plaintext',
   C = 'c',
   JAVA = 'java',
+  JSON = "json",
+  SQL = "sql",
 }
 
 export enum CustomFormats {

@@ -6,6 +6,8 @@ import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-json';
 import classes from './editor.module.scss';
 import { BaseEditor, createEditor, Descendant, Node, Path, Transforms } from 'slate';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';

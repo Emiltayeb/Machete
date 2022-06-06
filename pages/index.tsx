@@ -5,12 +5,11 @@ import PrivateRoute from '../components/PrivateRoute';
 import CreateCard from '../components/layout/navigation/CreateCard';
 import CardsByUser from '../components/CardsByUser';
 import { CardType } from '../components/editor/types';
-import { useSetRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { userCategoriesAtom, trainCardsAtom } from '../store';
 import { EditorMode } from '../components/editor/editor-utils';
 import { usePagination } from '../utils/usePagination';
 import { appendQueryToUrl } from '../utils';
-
 
 
 const filterCardsByCategory = function (currentCategoryFilter: string, userCards: CardType[]) {
@@ -23,9 +22,10 @@ const HomePage = (props: any) => {
   const gridTemplateCols = useBreakpointValue({ base: "1fr", md: "repeat(3, minmax(200px, 1fr) )" })
   const userCards: CardType[] = props?.userDataFromDb?.cards;
   const categoriesState = useRecoilValue(userCategoriesAtom)
-  const setTrainingCards = useSetRecoilState(trainCardsAtom)
+  const [trainingCards, setTrainingCards] = useRecoilState(trainCardsAtom)
   const [currentCategoryFilter, setCurrentCategoryFilter] = React.useState<any>("all");
 
+  console.log(trainingCards);
   const { pagesBtns, paginatedData, currentPage, setCurrPage, setOriginalData } = usePagination({
     initialData: userCards, initialPage: 0, itemsPerPage: 6
   })
@@ -33,7 +33,6 @@ const HomePage = (props: any) => {
 
 
   React.useEffect(() => {
-
     const { page, category } = router.query
     if (page !== undefined && typeof page === "string") {
       setCurrPage(parseInt(page))
@@ -41,16 +40,17 @@ const HomePage = (props: any) => {
     if (category && typeof category === "string") {
       const updatedCards = filterCardsByCategory(category, userCards)
       setCurrentCategoryFilter(category)
-      setTrainingCards(updatedCards)
       setOriginalData(updatedCards)
     }
 
-    if (!page && !category) {
-      setTrainingCards(userCards)
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  React.useEffect(() => {
+    // everytime the current category filter changes, we need to update the training cards cards
+    const trainingCards = userCards.filter(card => card.allowTrain && (currentCategoryFilter === "all" ? true : card.category === currentCategoryFilter))
+    setTrainingCards(trainingCards)
+  }, [currentCategoryFilter])
 
   const setPaginatedData = function (paginatedCards: CardType[]) {
     setCurrPage(0)
@@ -65,14 +65,12 @@ const HomePage = (props: any) => {
     const filteredCards = userCards.filter(card => card.title.toLowerCase().indexOf(filerValue.toLowerCase()) > -1 || card.exec?.toLowerCase().includes(filerValue.toLowerCase()))
     const updatedCards = currentCategoryFilter !== "all" ? filteredCards.filter(card => card.category === currentCategoryFilter) : filteredCards
     setPaginatedData(updatedCards)
-    setTrainingCards(filteredCards)
   }
 
   const onCategoryFilter = function (value: string) {
     const updatedCards = filterCardsByCategory(value, userCards)
     setCurrentCategoryFilter(value)
     setPaginatedData(updatedCards)
-    setTrainingCards(updatedCards)
     router.push(appendQueryToUrl({ category: value, page: 0 }), undefined, { shallow: true })
   }
 
@@ -110,7 +108,7 @@ const HomePage = (props: any) => {
           <Text fontSize={"sm"}>Free search:</Text>
 
           <Input flex={1} variant="flushed" onChange={onFreeSearchFilter} />
-          <Button disabled={paginatedData?.length === 0}
+          <Button disabled={trainingCards?.length == 0}
             onClick={() => router.push(`editor/train?mode=${EditorMode.MULTIPLE_TRAIN}${currentCategoryFilter !== "all" ? `&category=${currentCategoryFilter}` : ""}`)}
             colorScheme="teal" size={"sm"}>
             Train {currentCategoryFilter || "all"} Cards</Button>
