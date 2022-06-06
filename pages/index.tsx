@@ -108,7 +108,7 @@ const HomePage = (props: any) => {
           <Text fontSize={"sm"}>Free search:</Text>
 
           <Input flex={1} variant="flushed" onChange={onFreeSearchFilter} />
-          <Button disabled={trainingCards?.length == 0}
+          <Button disabled={Array.isArray(trainingCards) && trainingCards?.length == 0}
             onClick={() => router.push(`editor/train?mode=${EditorMode.MULTIPLE_TRAIN}${currentCategoryFilter !== "all" ? `&category=${currentCategoryFilter}` : ""}`)}
             colorScheme="teal" size={"sm"}>
             Train {currentCategoryFilter || "all"} Cards</Button>
