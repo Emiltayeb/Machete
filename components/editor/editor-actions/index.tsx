@@ -84,6 +84,7 @@ const EditorActions = (props: ActionsProps) => {
     try {
       await onCardSave(cardData, userDataFromDb, db, (id) => {
         if (props.card?.id) return;
+        window.history.replaceState(null, "", `/editor/${id}`)
       });
       toast({ status: 'success', title: 'Card saved.' });
     } catch (error) {

@@ -101,6 +101,7 @@ export const CodeElement = (props: any) => {
 		props.setNewSelectedCodeLang(codeLang)
 	}
 
+
 	const SelectLang = <span contentEditable={false}>
 		<select name="code-lang" onChange={onChangeSelect} className={classes.codeLangs}>
 			{Object.keys(CodeLanguages).map((lang) =>

@@ -24,7 +24,7 @@ export enum CodeLanguages {
   JAVASCRIPT = 'javascript',
   TYPESCRIPT = 'typescript',
   CSS = 'css',
-  PLAIN_TEXT = 'plaintext',
+  PLAINTEXT = 'plaintext',
   C = 'c',
   JAVA = 'java',
   JSON = "json",

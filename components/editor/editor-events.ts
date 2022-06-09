@@ -15,6 +15,7 @@ export const handelKeyDown = function (
 ) {
   const { key, shiftKey, ctrlKey, metaKey, code } = event;
 
+  console.log({ key, shiftKey, ctrlKey, metaKey, code });
   if (isAllChildrenSelected && !ctrlKey && !metaKey) {
     Transforms.delete(editor);
     Transforms.setNodes(editor, {
@@ -85,6 +86,16 @@ export const handelKeyDown = function (
         Transforms.insertNodes(editor, { text, bold: !node.nodeData?.[0]?.bold });
       }
       break;
+    case "m":
+      if (ctrlKey || metaKey) {
+        const text = window.getSelection()?.toString()?.trim();
+        Transforms.delete(editor)
+        //@ts-ignore
+        Transforms.insertFragment(editor, [
+          { type: 'code', children: [{ text }] },
+        ]);
+        Utils.focusCurrentNode(editor)
+      }
     default:
       break;
   }
