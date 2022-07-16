@@ -9,7 +9,14 @@
   text-overflow: ellipsis;
 }
 
-.chakra-popover__popper{
+.chakra-popover__popper {
   min-width: unset !important;
 }
-.focusRing___1airF.carousel__slide-focus-ring { outline: none !important; }
+
+.focusRing___1airF.carousel__slide-focus-ring {
+  outline: none !important;
+}
+
+:where(p) {
+  max-inline-size: none;
+}

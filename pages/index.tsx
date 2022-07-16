@@ -47,9 +47,10 @@ const HomePage = (props: any) => {
   }, [])
 
   React.useEffect(() => {
-    // everytime the current category filter changes, we need to update the training cards cards
+    // every time the current category filter changes, we need to update the training cards cards
     const trainingCards = userCards.filter(card => card.allowTrain && (currentCategoryFilter === "all" ? true : card.category === currentCategoryFilter))
     setTrainingCards(trainingCards)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCategoryFilter])
 
   const setPaginatedData = function (paginatedCards: CardType[]) {

@@ -3,11 +3,11 @@
 
 import React from 'react';
 import { css } from '@emotion/css';
-import { Descendant, Transforms, Element } from 'slate';
-import { CodeLanguages, EditorMode, findClosestBlockAndNode, findCurrentNodeAtSelection, selectCurrentNode } from '../editor-utils';
+import { Descendant, Transforms } from 'slate';
+import { CodeLanguages, EditorMode, findClosestBlockAndNode, selectCurrentNode } from '../editor-utils';
 import {
 	Text, Input,
-	Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon, Icon, IconButton
+	Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverTrigger, Box, Portal, useDisclosure, Button, InputGroup, InputRightAddon, Icon, IconButton, useColorModeValue, Select
 } from '@chakra-ui/react';
 import { findDiff } from '../../../utils/getStringDiffrences';
 import classes from "./custom-slate-components.module.scss";
@@ -94,6 +94,8 @@ const CodeCss = (leaf: any) =>
 // Elements - basically a block
 export const CodeElement = (props: any) => {
 
+	const selectBgColor = useColorModeValue('gray.500', 'black');
+
 
 	const onChangeSelect = function (e: React.ChangeEvent<HTMLSelectElement>) {
 		const codeLang = CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages];
@@ -103,11 +105,11 @@ export const CodeElement = (props: any) => {
 
 
 	const SelectLang = <span contentEditable={false}>
-		<select name="code-lang" onChange={onChangeSelect} className={classes.codeLangs}>
+		<Select size={'xs'} iconColor={'white'} backgroundColor={selectBgColor} name="code-lang" onChange={onChangeSelect} className={classes.codeLangs}>
 			{Object.keys(CodeLanguages).map((lang) =>
 				<option selected={lang.toLowerCase() === props.element?.codeLang} key={lang}>{lang.toLowerCase()}
 				</option>)}
-		</select>
+		</Select>
 	</span>
 
 	return <pre {...props.attributes} className={classes.codeElement} >
