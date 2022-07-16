@@ -94,9 +94,6 @@ const CodeCss = (leaf: any) =>
 // Elements - basically a block
 export const CodeElement = (props: any) => {
 
-	const selectBgColor = useColorModeValue('gray.500', 'black');
-
-
 	const onChangeSelect = function (e: React.ChangeEvent<HTMLSelectElement>) {
 		const codeLang = CodeLanguages[e.target.value.toLocaleUpperCase() as keyof typeof CodeLanguages];
 		Transforms.setNodes(props.editor, { codeLang } as any, { at: findClosestBlockAndNode(props.editor).parent.parentPath })
@@ -105,7 +102,7 @@ export const CodeElement = (props: any) => {
 
 
 	const SelectLang = <span contentEditable={false}>
-		<Select size={'xs'} iconColor={'white'} backgroundColor={selectBgColor} name="code-lang" onChange={onChangeSelect} className={classes.codeLangs}>
+		<Select size={'xs'} iconColor={'white'} backgroundColor={"gray.500"} name="code-lang" onChange={onChangeSelect} className={classes.codeLangs}>
 			{Object.keys(CodeLanguages).map((lang) =>
 				<option selected={lang.toLowerCase() === props.element?.codeLang} key={lang}>{lang.toLowerCase()}
 				</option>)}

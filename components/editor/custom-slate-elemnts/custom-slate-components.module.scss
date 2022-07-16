@@ -24,13 +24,16 @@
   .codeLangs {
     position: absolute;
     right: 5px;
-    top: 5px;
     color: white;
     width: 20vw;
     max-width: 100px;
 
+    option {
+      background-color: gray !important;
+    }
+
     &+div {
-      top: 16px
+      top: 12px
     }
   }
 
